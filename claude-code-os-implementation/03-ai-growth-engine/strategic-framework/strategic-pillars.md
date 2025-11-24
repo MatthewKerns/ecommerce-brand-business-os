@@ -341,4 +341,58 @@ When pillar health drops below 5/10:
 
 ---
 
+## Integration: 5 Core Pillars of E-commerce Success
+
+### The Holistic View
+
+While OBG Pillars 1 & 2 provide focused execution guidance, the **5 Core Pillars framework** provides a more holistic diagnostic for the entire e-commerce business. Conduct this assessment quarterly to identify bottlenecks.
+
+> 📁 See: `knowledge-files/frameworks/5-core-pillars.md`
+> 📁 Assessment: `quarterly-5-pillars-assessment.md`
+
+### How OBG Pillars Map to 5 Core Pillars
+
+```
+5 CORE PILLARS                    OBG PILLARS
+═══════════════                   ═══════════
+1. New Product Development   →    Pillar 2: Product R&D
+2. Launching New Products    →    Pillar 2: Product R&D
+3. SKU Optimization          →    Pillar 1: Asset Optimization
+4. Amazon Advertising (PPC)  →    Pillar 1: Asset Optimization
+5. Audience Utilization      →    Supports Both (future capability)
+```
+
+### The 5 Core Pillars (Quick Reference)
+
+| Pillar | Focus | Score 1 | Score 5 |
+|--------|-------|---------|---------|
+| 1. New Product Dev | Pipeline | No 12-month roadmap | Pipeline + production + ideas |
+| 2. Launching Products | Launch system | Not launching | Predictable rank/sales/reviews |
+| 3. SKU Optimization | Current catalog | Stock-outs, losing money | Routine analysis, dominating |
+| 4. Amazon PPC | Paid traffic | Missing targets | TACoS at target, all placements |
+| 5. Audience | Owned list | No list or cold | Growing + ideas + launches + re-sells |
+
+### Quarterly Assessment Cadence
+
+| Quarter | Assessment Date | Focus |
+|---------|-----------------|-------|
+| Q4 2025 | December 2025 | First assessment |
+| Q1 2026 | March 2026 | Post-launch review |
+| Q2 2026 | June 2026 | Mid-year check |
+| Q3 2026 | September 2026 | Pre-Q4 planning |
+| Q4 2026 | December 2026 | Year-end review |
+
+### Focus Selection Rule
+
+When multiple pillars score low:
+1. Focus on the **lowest scoring** pillar
+2. If tied, prioritize earlier in sequence: 1 → 2 → 3 → 4 → 5
+3. Build the **system** that keeps the score high
+
+> "You're not just fixing a problem—you're building the machine that prevents the problem from happening again."
+
+---
+
 *"Two pillars. One goal. Execute in parallel, measure relentlessly, iterate constantly."*
+
+*"For holistic business health: Assess all 5 Core Pillars quarterly."*
