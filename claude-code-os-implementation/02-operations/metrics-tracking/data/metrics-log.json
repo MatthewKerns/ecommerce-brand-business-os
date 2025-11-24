@@ -1,0 +1,128 @@
+{
+  "metadata": {
+    "created": "2025-11-24",
+    "lastUpdated": "2025-11-24",
+    "version": "1.0",
+    "description": "Daily metrics log for Infinity Vault Claude Code OS"
+  },
+  "metrics": {
+    "daily": [],
+    "weekly": [],
+    "monthly": []
+  },
+  "schema": {
+    "daily": {
+      "date": "YYYY-MM-DD",
+      "productivity": {
+        "score": "number (1-10)",
+        "completion": "number (1-10)",
+        "alignment": "number (1-10)",
+        "efficiency": "number (1-10)",
+        "focus": "number (1-10)"
+      },
+      "tasks": {
+        "tier1_planned": "number",
+        "tier1_completed": "number",
+        "tier2_planned": "number",
+        "tier2_completed": "number",
+        "tier3_completed": "number"
+      },
+      "time": {
+        "rd_hours": "number",
+        "pillar1_hours": "number",
+        "admin_hours": "number",
+        "unplanned_hours": "number",
+        "total_hours": "number"
+      },
+      "business": {
+        "units_sold": "number",
+        "revenue": "number",
+        "bsr": "number",
+        "sessions": "number"
+      },
+      "notes": "string"
+    },
+    "weekly": {
+      "week": "YYYY-WW",
+      "startDate": "YYYY-MM-DD",
+      "endDate": "YYYY-MM-DD",
+      "avgProductivity": "number",
+      "totalRdHours": "number",
+      "tier1CompletionRate": "number (percentage)",
+      "alignmentRate": "number (percentage)",
+      "totalUnits": "number",
+      "totalRevenue": "number",
+      "bsrChange": "number",
+      "highlights": ["string"],
+      "challenges": ["string"]
+    },
+    "monthly": {
+      "month": "YYYY-MM",
+      "avgProductivity": "number",
+      "totalRdHours": "number",
+      "tier1CompletionRate": "number",
+      "alignmentRate": "number",
+      "pipelineProgress": {
+        "ideasGenerated": "number",
+        "ideasScreened": "number",
+        "inValidation": "number",
+        "launchReady": "number"
+      },
+      "businessMetrics": {
+        "totalUnits": "number",
+        "totalRevenue": "number",
+        "avgBsr": "number",
+        "ctrChange": "number",
+        "cvrChange": "number"
+      }
+    }
+  },
+  "targets": {
+    "productivity": {
+      "daily": 7.0,
+      "weekly": 7.0,
+      "monthly": 7.0
+    },
+    "rdHours": {
+      "daily": 3,
+      "weekly": 21,
+      "monthly": 84
+    },
+    "tier1Completion": 90,
+    "alignment": 90,
+    "timeAccuracy": 20
+  },
+  "example": {
+    "daily": {
+      "date": "2025-11-24",
+      "productivity": {
+        "score": 7.2,
+        "completion": 8,
+        "alignment": 8,
+        "efficiency": 6,
+        "focus": 4
+      },
+      "tasks": {
+        "tier1_planned": 3,
+        "tier1_completed": 3,
+        "tier2_planned": 2,
+        "tier2_completed": 1,
+        "tier3_completed": 0
+      },
+      "time": {
+        "rd_hours": 2.5,
+        "pillar1_hours": 3,
+        "admin_hours": 1,
+        "unplanned_hours": 0.5,
+        "total_hours": 7
+      },
+      "business": {
+        "units_sold": 5,
+        "revenue": 75.95,
+        "bsr": 45000,
+        "sessions": 150
+      },
+      "notes": "BFCM launch day. Good execution but focus impacted by monitoring anxiety."
+    }
+  }
+}
