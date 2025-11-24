@@ -47,8 +47,41 @@
 | Initial screening (5-10 concepts) | Owner | Dec 31 |
 | Validation test prep (2-3 ready) | Owner | Dec 31 |
 | Supplier outreach for top concepts | Owner | Dec 21 |
+| Research DesignForce for branding visuals | Owner | Dec 21 |
 
 **Time Commitment**: Minimum 15 hours/week (60+ hours for month)
+
+### Brand Visual Development
+
+| Priority | Owner | Target Date |
+|----------|-------|-------------|
+| Review DesignForce scaleup offering | Owner | Dec 21 |
+| Evaluate fit for "Battle-Ready" visual identity | Owner | Dec 28 |
+| Compare plans and create decision brief | Owner | Dec 31 |
+
+**Link**: https://designforce.co/solutions/for-scaleups/
+
+**Purpose**: Build out brand visuals aligned with new "Battle-Ready Equipment" positioning (main images, A+ content, brand assets)
+
+**DesignForce Overview**:
+- **Model**: Subscription-based unlimited design service
+- **Pricing**: Plans start at $1,950/month (flat rate)
+- **Plans**:
+  - Marketing Force: Marketing collateral and branding (likely best fit)
+  - Pro Force: UI/UX focused
+  - Full Force: All creative design work
+- **Turnaround**: 1-2 business days for most projects
+- **Team**: Dedicated project manager, art director, and designer
+- **Clients**: TikTok, HubSpot, UFC GYMs
+
+**Evaluation Criteria**:
+1. Can they deliver Amazon-optimized main images?
+2. Experience with "Battle-Ready"/gaming aesthetic?
+3. A+ Content and brand asset capabilities?
+4. Cost vs. freelancer/agency alternatives?
+5. Scalability for future product launches?
+
+**Decision**: January - determine if budget allows for Q1 trial
 
 ---
 
@@ -118,6 +151,7 @@
 - [ ] Screening started (10-15 candidates identified)
 - [ ] Supplier outreach initiated
 - [ ] First test results reviewed
+- [ ] DesignForce reviewed (pricing, services, fit)
 
 ---
 
@@ -156,6 +190,7 @@
 | 50+ R&D ideas documented | Dec 15 | Ideas in pipeline system |
 | First team-led test complete | Dec 21 | One test with actionable data |
 | Supplier outreach started | Dec 21 | Top concepts sent to suppliers |
+| DesignForce evaluation complete | Dec 28 | Decision brief for January |
 | 5-10 concepts screened | Dec 31 | Ready for January validation |
 
 ---
