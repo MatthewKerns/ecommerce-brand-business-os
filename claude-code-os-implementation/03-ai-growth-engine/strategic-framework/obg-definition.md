@@ -44,9 +44,9 @@ This means achieving consistent positive contribution margin (CM3%) across all p
 ### Milestones
 | Milestone | Target Date | Status |
 |-----------|-------------|--------|
-| Break-even price test complete | Week 2 | Pending |
-| Reference price established | October 20, 2025 | Pending |
-| Black Friday execution | November 2025 | Pending |
+| Break-even price test complete | Week 2 | ✅ Complete |
+| Reference price established | October 20, 2025 | ✅ Complete |
+| **BFCM No-Ads Breakeven Execution** | **Nov 24 - Dec 2, 2025** | **🔥 IN PROGRESS** |
 | Q4 Profitability achieved | December 2025 | Pending |
 | New product launched | Q1 2026 | In R&D |
 
@@ -173,11 +173,13 @@ Next Week Priority:
 > Execute both strategic pillars with discipline to resolve cash flow challenges and validate the path to profitability.
 
 ### Critical Deadlines
-| Action | Deadline | Reason |
+| Action | Deadline | Status |
 |--------|----------|--------|
-| Price raised for reference point | October 20, 2025 | Black Friday prep |
-| Image/title tests complete | November 1, 2025 | Pre-holiday optimization |
-| Black Friday pricing live | November 22, 2025 | Holiday sales |
+| Price raised for reference point | October 20, 2025 | ✅ Complete |
+| Image/title tests complete | November 1, 2025 | ✅ Complete |
+| **No-Ads Breakeven Pricing Live** | **November 24, 2025** | **🔥 EXECUTING NOW** |
+| Cyber Monday end | December 2, 2025 | Upcoming |
+| Return to premium pricing | December 3, 2025 | Post-BFCM |
 | New product supplier confirmed | December 15, 2025 | Q1 launch prep |
 
 ### Daily Non-Negotiables
