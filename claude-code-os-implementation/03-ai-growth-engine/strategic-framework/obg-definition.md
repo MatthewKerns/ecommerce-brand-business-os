@@ -36,19 +36,24 @@ This means achieving consistent positive contribution margin (CM3%) across all p
 ### Supporting Metrics
 | Metric | Current | Target | Progress |
 |--------|---------|--------|----------|
-| Click-Through Rate (CTR%) | Baseline | +30% improvement | |
-| Conversion Rate (CVR%) | Baseline | +20% improvement | |
-| Advertising Cost of Sales (ACoS) | TBD | <25% | |
-| Best Seller Rank (BSR) | Current | Top 50 in category | |
+| Click-Through Rate (CTR%) | Category targeting getting clicks | +30% improvement | 🔄 Testing |
+| Conversion Rate (CVR%) | Low on root keyword (multi-month trend) | +20% improvement | ⚠️ Needs work |
+| Advertising Cost of Sales (ACoS) | High (negative margin) | <25% | ⚠️ Needs work |
+| Best Seller Rank (BSR) | 60k-100k | Top 50 in category | ⚠️ Declining |
 
 ### Milestones
 | Milestone | Target Date | Status |
 |-----------|-------------|--------|
-| Break-even price test complete | Week 2 | ✅ Complete |
-| Reference price established | October 20, 2025 | ✅ Complete |
-| **BFCM No-Ads Breakeven Execution** | **Nov 24 - Dec 2, 2025** | **🔥 IN PROGRESS** |
-| Q4 Profitability achieved | December 2025 | Pending |
-| New product launched | Q1 2026 | In R&D |
+| Title optimization (1-Pack/2-Pack/Scratch Resistant front-loaded) | October 2025 | ✅ Complete |
+| Main image updates live | October 17, 2025 | ✅ Complete |
+| Break-even price test | October 25, 2025 | ✅ Complete (prices dropped low) |
+| Reference price attempt | October 30, 2025 | ⚠️ Strikethrough lost |
+| Premium price testing ($35 1-pack / $60 2-pack) | November 1, 2025 | 🔄 In Progress |
+| Team onboarding (listing/ads management) | November 2025 | 🔄 In Progress |
+| Brand website launch | November 2025 | 🔄 Almost Ready |
+| BFCM pricing strategy finalized | November 2025 | ⏳ Pending |
+| Q4 Profitability achieved | December 2025 | ⏳ Pending |
+| New product launched | Q1 2026 | ⏳ Not Started |
 
 ---
 
