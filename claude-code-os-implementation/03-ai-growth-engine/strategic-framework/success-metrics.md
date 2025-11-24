@@ -47,10 +47,14 @@ A positive CM3% means the business is self-sustaining.
 
 | Metric | Definition | Current | Target | Status |
 |--------|------------|---------|--------|--------|
-| CTR% | Clicks / Impressions | Baseline | +30% | |
-| CVR% | Orders / Sessions | Baseline | +20% | |
-| CM3% | Contribution Margin 3 | Break-even | Positive | |
-| BSR | Best Seller Rank | Current | Top 50 | |
+| CTR% | Clicks / Impressions | Category targeting getting clicks | +30% | 🔄 Testing |
+| CVR% | Orders / Sessions | Low on root keyword (multi-month) | +20% | ⚠️ Needs work |
+| CM3% | Contribution Margin 3 | Negative (high ACoS) | Positive | ⚠️ Needs work |
+| BSR | Best Seller Rank | 60k-100k (declining) | Top 50 | ⚠️ Declining |
+
+**Binders vs Box Products**:
+- Binders: Struggling (metrics above)
+- Box products: Performing well, Titan Ignite managing ads, minimal intervention needed
 
 #### CTR% Deep Dive
 - **Why It Matters**: Measures how well images/titles earn the click
@@ -139,26 +143,32 @@ A positive CM3% means the business is self-sustaining.
 
 ---
 
-## 90-Day KPI Dashboard
+## 90-Day KPI Dashboard (Updated November 2025)
 
 ### Pillar 1 Success Criteria
 | KPI | Target | Status | Notes |
 |-----|--------|--------|-------|
-| CTR% Improvement | +30% | | From listing optimization |
-| CVR% Improvement | +20% | | From listing optimization |
-| CM3% | Positive | | Must achieve by Q4 end |
-| BSR | Top 50 | | Ranking improvement |
-| Price Test Complete | Yes | | All 3 phases |
-| SBV Ad Live | Yes | | By Week 10 |
+| Title Optimization | Complete | ✅ Done | 1-Pack/2-Pack/Scratch Resistant front-loaded |
+| Main Image Update | Complete | ✅ Done | Updated Oct 17, more planned with team |
+| Break-Even Test | Complete | ✅ Done | Oct 25 - low results |
+| Reference Price | Established | ⚠️ Partial | Strikethrough lost Oct 30 |
+| Premium Price Test | $35/$60 | 🔄 In Progress | Testing top-of-market positioning |
+| Team Onboarding | Complete | 🔄 In Progress | $500/mo for listing/ads management |
+| CTR% Improvement | +30% | ⏳ Pending | Team to help with imagery |
+| CVR% Improvement | +20% | ⚠️ At Risk | Low on root keyword |
+| CM3% | Positive | ⚠️ At Risk | Currently negative |
+| BSR | Top 50 | ⚠️ At Risk | Currently 60k-100k |
 
 ### Pillar 2 Success Criteria
 | KPI | Target | Status | Notes |
 |-----|--------|--------|-------|
-| Ideas Generated | 100+ | | By Week 3 |
-| Ideas Shortlisted | 5-10 | | By Week 5 |
-| Concepts Validated | 2-3 | | By Week 7 |
-| Supplier Confirmed | 1 | | By Week 11 |
-| Launch-Ready Product | 1 | | By Week 12 |
+| Ideas Generated | 100+ | ⏳ Not Started | Time competing with job search |
+| Ideas Shortlisted | 5-10 | ⏳ Not Started | |
+| Concepts Validated | 2-3 | ⏳ Not Started | |
+| Supplier Confirmed | 1 | ⏳ Not Started | |
+| Launch-Ready Product | 1 | ⏳ Not Started | Target Q1 2026 |
+
+**Reality Check**: R&D has not progressed as planned. Priority is stabilizing binders and securing employment first. Once team is managing binders and job is secured, R&D time will increase.
 
 ---
 

@@ -177,20 +177,40 @@ Next Week Priority:
 ### North Star for This Quarter
 > Execute both strategic pillars with discipline to resolve cash flow challenges and validate the path to profitability.
 
+### Current Phase: Price Stabilization + Team Onboarding
+**Status as of November 2025:**
+- Binders struggling (BSR 60k-100k, low CVR, strikethrough issues)
+- Box products performing well (Titan Ignite managing, hands-off approach working)
+- Testing premium positioning ($35 1-pack / $60 2-pack)
+- Team onboarding in progress ($500/mo for listing/ads management)
+- Brand website almost ready to launch
+
 ### Critical Deadlines
 | Action | Deadline | Status |
 |--------|----------|--------|
-| Price raised for reference point | October 20, 2025 | ✅ Complete |
-| Image/title tests complete | November 1, 2025 | ✅ Complete |
-| **No-Ads Breakeven Pricing Live** | **November 24, 2025** | **🔥 EXECUTING NOW** |
-| Cyber Monday end | December 2, 2025 | Upcoming |
-| Return to premium pricing | December 3, 2025 | Post-BFCM |
-| New product supplier confirmed | December 15, 2025 | Q1 launch prep |
+| Title optimization (1-Pack/2-Pack/Scratch Resistant) | October 2025 | ✅ Complete |
+| Main image updates | October 17, 2025 | ✅ Complete |
+| Break-even price test | October 25, 2025 | ✅ Complete |
+| Reference price attempt | October 30, 2025 | ⚠️ Strikethrough lost |
+| Premium price testing ($35/$60) | November 1, 2025 | 🔄 In Progress |
+| Team onboarding (listing/ads) | November 2025 | 🔄 In Progress |
+| Brand website launch | November 2025 | 🔄 Almost Ready |
+| BFCM pricing strategy finalized | November 2025 | ⏳ Pending |
+| Watch pricing video + strategy replay | November 2025 | ⏳ Pending |
+| Q4 Profitability achieved | December 2025 | ⏳ Pending |
+| New product supplier confirmed | December 15, 2025 | ⏳ Not Started |
+
+### Key Learnings (as of Nov 4)
+1. **Changing too many variables at once** - pricing AND bids simultaneously makes it impossible to know what's working
+2. **Scarcity mindset drives reactive decisions** - need scheduled testing cadence, not panic changes
+3. **Hands-off approach works for box products** - Titan Ignite managing ads, minimal intervention
+4. **Binders may need relaunch** - per Launch training recommendation
 
 ### Daily Non-Negotiables
-1. 3 hours dedicated R&D time
+1. 3 hours dedicated R&D time (when capacity allows)
 2. Check listing metrics (CTR, CVR, BSR)
 3. Review PPC performance
+4. **NEW: Resist urge to make reactive changes** - follow scheduled plan
 
 ---
 

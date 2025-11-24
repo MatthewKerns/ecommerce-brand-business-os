@@ -29,10 +29,21 @@ Infinity Vault's path to profitability is built on two strategic pillars execute
 ### Definition
 > Convert existing inventory into working capital by maximizing CTR, CVR, and CM3% through rigorous testing of main image, title, and price.
 
-### Current State
-- **Strength Level**: 4/10
-- **Key Assets**: Existing inventory, product reviews, established listings
-- **Main Gaps**: Pricing in "no man's land," images not scroll-stopping, titles not optimized
+### Current State (Updated November 2025)
+- **Strength Level**: 5/10 (improved from 4/10)
+- **Key Assets**: Existing inventory, product reviews, established listings, updated images/titles
+- **Progress Made**:
+  - ✅ Titles optimized (1-Pack/2-Pack/Scratch Resistant front-loaded)
+  - ✅ Main images updated (October 17)
+  - ✅ Competitor research updated in Titan tools
+  - ✅ SQP report analyzed
+  - 🔄 Testing premium positioning ($35 1-pack / $60 2-pack)
+- **Remaining Gaps**:
+  - Strikethrough pricing lost (Oct 30), intermittent recovery
+  - CVR low on root keyword (multi-month trend)
+  - BSR declining (60k-100k range)
+  - Category targeting getting clicks (45/week) but no conversions
+- **Team Support**: Onboarding listing/ads management team ($500/mo for up to 6 ASINs)
 
 ### Strategic Principle
 > "Win the sale from the search results page." — Roger Vi
@@ -44,9 +55,11 @@ Infinity Vault's path to profitability is built on two strategic pillars execute
 
 | Test | Description | Status |
 |------|-------------|--------|
-| Lifetime Warranty Badge | Bold tag across binder front (Zulay Kitchen style) | Planned |
-| Render Variations | 2-3 new compositions showcasing material quality | Planned |
-| Creative Compositions | Unique angles/arrangements to differentiate | Planned |
+| Initial Image Update | New main images for binders | ✅ Live (Oct 17) |
+| Lifetime Warranty Badge | Bold tag across binder front (Zulay Kitchen style) | ⏳ Planned (team to help) |
+| Render Variations | 2-3 new compositions showcasing material quality | ⏳ Planned (team to help) |
+| Creative Compositions | Unique angles/arrangements to differentiate | ⏳ Planned (team to help) |
+| Firecrawl + AWS Rekognition Analysis | AI-powered competitive image analysis | ⏳ Planned (self) |
 
 **Testing Protocol**:
 - Single variable tests only
@@ -57,63 +70,85 @@ Infinity Vault's path to profitability is built on two strategic pillars execute
 #### Lever 2: Title Optimization
 **Goal**: Capture high-value keywords and communicate key differentiators
 
-| Test | Description | Rationale |
-|------|-------------|-----------|
-| "Two Pack" Front-Loaded | Move to beginning of title | Immediately communicates value |
-| "Scratch-Resistant" Addition | High-value keyword identified | Customer pain point |
-| "Lifetime Warranty" Addition | If warranty implemented | Trust signal |
+| Test | Description | Status |
+|------|-------------|--------|
+| "1-Pack" / "2-Pack" Front-Loaded | Move to beginning of title | ✅ Complete |
+| "Scratch-Resistant" Front-Loaded | Move to front of title | ✅ Complete |
+| "Lifetime Warranty" Addition | If warranty implemented | ⏳ Pending (requires warranty program) |
 
 **Testing Protocol**:
 - Test one element at a time
 - Track CTR and CVR
 - Preserve backend keyword coverage
+- Use ProductPinion and Manage Your Experiments tool for structured testing
 
 #### Lever 3: Strategic Pricing
 **Goal**: Exit "no man's land" - become either clear value leader OR justified premium
 
-**Phase 1: Ranking Boost Test (Weeks 1-2)**
-- Drop to break-even price: $15.19
-- Goal: Determine if aggressive pricing improves organic ranking
-- Metric: BSR change, keyword position improvements
-- PPC: 1-2 day kickstart, then disable to measure organic lift
+**Phase 1: Break-Even Test (October 25)** ✅ Complete
+- Dropped to break-even price: $15.19
+- Result: Low clicks and sales
+- Learning: Aggressive pricing alone didn't drive organic ranking
 
-**Phase 2: Reference Price Establishment (Deadline: October 20)**
-- Raise prices to establish higher reference point
-- Critical for Black Friday discount perception
-- No exceptions on this deadline
+**Phase 2: Reference Price Establishment (October 30)** ⚠️ Partial
+- Raised prices to establish higher reference point
+- Increased ad spend to get more clicks
+- Result: Main variation lost strikethrough
+- Some sales at list price, strikethrough appeared briefly then disappeared
 
-**Phase 3: Premium Price Validation (Post-Black Friday)**
-- Test prices matching/undercutting Topdeck and premium competitors
-- Validate ability to capture premium segment
-- Requires image/title improvements to justify
+**Phase 3: Premium Price Testing (November 1)** 🔄 In Progress
+- Testing $35 for 1-packs, $60 for 2-packs
+- Strategy: Stay at top of market instead of blending into middle
+- Waiting for strikethrough to return on variations that made sales
+
+**Key Learning**:
+> "I keep changing prices and things because of low sales numbers... I need to be more patient and make changes on a set schedule according to a well thought out pricing strategy."
+
+**Current Challenge**: Balancing between:
+- Risk of rank dropping further (BSR 60k-100k) → storage fees
+- "Better no sale than negative margin sale with no ranking benefit" principle
+- Need to watch pricing video for guidance
 
 ### PPC Strategy
 **Principle**: "Better no sale than negative margin sale with no ranking benefit"
 
-| Campaign Type | Purpose | Priority |
-|---------------|---------|----------|
-| Sponsor Brand Video (SBV) | Differentiation, attention, premium justification | HIGH |
-| Product Targeting - Expensive | Attack higher-priced competitors | HIGH |
-| Product Targeting - Low Rated | Attack lower-rated competitors | MEDIUM |
-| Product Targeting - Cheaper | Defend against budget options | MEDIUM |
+| Campaign Type | Purpose | Status |
+|---------------|---------|--------|
+| Category Targeting | Broad visibility | 🔄 Active (45 clicks/0 sales last 7 days) |
+| Sponsor Brand Video (SBV) | Differentiation, attention, premium justification | ⏳ Planned |
+| Product Targeting - Expensive | Attack higher-priced competitors | ⚠️ Not getting clicks (may need bid increase) |
+| Product Targeting - Low Rated | Attack lower-rated competitors | ⚠️ Not getting clicks (may need bid increase) |
+| Product Targeting - Cheaper | Defend against budget options | ⚠️ Not getting clicks (may need bid increase) |
 
-### Development Plan (90 Days)
-| Week | Focus | Deliverable |
-|------|-------|-------------|
-| 1-2 | Break-even price test | BSR/ranking data |
-| 3-4 | Main image testing begins | 2+ image variants |
-| 5-6 | Title optimization | Optimized title live |
-| 7-8 | Premium price testing | Price validation data |
-| 9-10 | SBV campaign launch | Video ad live |
-| 11-12 | Full optimization integration | All winners implemented |
+**Current Reality**:
+- Category targeting driving clicks but no conversions
+- Product targeting campaigns need bid adjustments
+- Team will take over ads management to allow focus on other priorities
+- Box products: Titan Ignite managing ads successfully (hands-off approach working)
+
+### Development Plan (90 Days) - Updated November 2025
+| Week | Focus | Deliverable | Status |
+|------|-------|-------------|--------|
+| 1-2 (Oct) | Break-even price test | BSR/ranking data | ✅ Complete - low results |
+| 3-4 (Oct) | Main image + title updates | Updated images live | ✅ Complete (Oct 17) |
+| 5-6 (Nov) | Premium price testing | Price validation data | 🔄 In Progress ($35/$60) |
+| 7-8 (Nov) | Team onboarding | Ads/listing management delegated | 🔄 In Progress |
+| 9-10 (Nov) | BFCM execution | Holiday pricing finalized | ⏳ Pending |
+| 11-12 (Dec) | SBV + full optimization | Video ad live, all winners implemented | ⏳ Pending |
+
+**Revised Approach**:
+- Delegate binder ads/listing to team ($500/mo)
+- Focus personal time on R&D and strategic oversight
+- Use ProductPinion + Manage Your Experiments for structured testing
+- Attend Launch workparty (binders may need relaunch) + PPC workparty
 
 ### Success Metrics
 | Metric | Current | Target | Tracking |
 |--------|---------|--------|----------|
-| CTR% | Baseline | +30% | Weekly |
-| CVR% | Baseline | +20% | Weekly |
-| CM3% | Break-even | Positive | Weekly |
-| BSR | Current | Top 50 | Daily |
+| CTR% | Getting clicks via category targeting | +30% | Weekly |
+| CVR% | Low on root keyword | +20% | Weekly |
+| CM3% | Negative (high ACoS) | Positive | Weekly |
+| BSR | 60k-100k | Top 50 | Daily |
 
 ---
 
@@ -122,10 +157,13 @@ Infinity Vault's path to profitability is built on two strategic pillars execute
 ### Definition
 > Build a disciplined R&D engine that predictably generates validated, launch-ready products through rigorous research and market testing.
 
-### Current State
+### Current State (Updated November 2025)
 - **Strength Level**: 2/10 (process being established)
 - **Key Assets**: Market knowledge, supplier relationships, category experience
 - **Main Gaps**: No systematic process, idea validation missing, pipeline empty
+- **Time Challenge**: Software projects and job search competing for R&D time
+- **Planned Focus**: Once job secured + team managing binders, more time for R&D
+- **Note**: Binder keyword analysis started (partial process completion)
 
 ### Strategic Principles
 > "Always be Launching (ABL) is the most predictable way to grow consistently." — Roger Vi
