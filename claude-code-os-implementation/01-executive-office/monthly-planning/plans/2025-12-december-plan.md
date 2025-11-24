@@ -87,6 +87,11 @@
 
 ## Week-by-Week Structure
 
+**Weekly Recurring (All Weeks)**:
+- **Huddles**: Attend weekly huddle session (day/time TBD)
+- **Work Parties**: Attend weekly work party (day/time TBD)
+- **Team Check-in**: Wednesday, 30 min
+
 ### Week 1: December 1-7 | BFCM Close + Team Transition
 
 **Theme**: Hand off and step back
@@ -255,6 +260,12 @@
 2. **No reactive changes**: If urge arises, write it down for weekly review
 3. **Team trust**: Do not log into ad console outside scheduled reviews
 4. **Documentation**: Log R&D hours and ideas daily
+
+## Weekly Non-Negotiables
+
+1. **Huddles**: Attend weekly huddle sessions
+2. **Work Parties**: Attend weekly work parties
+3. **Team Check-in**: Wednesdays, 30 min
 
 ---
 
