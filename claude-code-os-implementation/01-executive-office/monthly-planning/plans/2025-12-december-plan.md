@@ -124,12 +124,13 @@
 | Mon (8) | R&D | Idea generation (target: 20 cumulative) |
 | Tue (9) | R&D | Continue ideas, research competitors |
 | Wed (10) | Weekly Review | Team check-in (30 min max), R&D continues |
-| Thu (11) | R&D | Idea generation sprint |
-| Fri (12) | R&D + Website | Finalize brand website for launch |
+| Thu (11) | R&D + Inventory | Finalize inventory calculations for CNY order |
+| Fri (12) | **🚨 ORDER DEADLINE** | **Place inventory order (CNY cutoff)**, R&D + Website |
 | Sat (13) | R&D | Deep session (3 hrs) |
 | Sun (14) | Launch | Brand website goes live |
 
 **Week 2 Deliverables**:
+- [ ] **🚨 Inventory order placed by Dec 12** (CNY production deadline)
 - [ ] 25+ R&D ideas cumulative
 - [ ] Brand website launched
 - [ ] First team-led test launched
@@ -191,12 +192,17 @@
 | BFCM complete | Dec 2 | Data captured, learnings documented |
 | Team fully operational | Dec 7 | Managing ads/listing independently |
 | Educational content complete | Dec 5 | Pricing video + strategy replay watched |
+| **🚨 INVENTORY ORDER DEADLINE** | **Dec 12** | **Order placed for CNY production (60-day lead time)** |
 | Brand website live | Dec 14 | Launched with signup + rewards |
 | 50+ R&D ideas documented | Dec 15 | Ideas in pipeline system |
 | First team-led test complete | Dec 21 | One test with actionable data |
 | Supplier outreach started | Dec 21 | Top concepts sent to suppliers |
 | DesignForce evaluation complete | Dec 28 | Decision brief for January |
 | 5-10 concepts screened | Dec 31 | Ready for January validation |
+
+### Critical Supply Chain Deadline
+
+> **⚠️ December 12, 2025**: Last day to place inventory orders for units to be produced and shipped from China before Chinese New Year (Feb 10, 2026). This accounts for 60-day production + shipping lead time.
 
 ---
 
@@ -232,6 +238,7 @@
 
 | Risk | Probability | Mitigation |
 |------|-------------|------------|
+| **Miss CNY inventory deadline (Dec 12)** | **Medium** | **Start inventory calc by Dec 10; buffer days built in** |
 | Job interview doesn't convert | Medium | Continue search, adjust cash expectations |
 | Team underperforms | Medium | Weekly check-ins, clear success criteria, escalation path |
 | Scarcity mindset returns | High | No ad console access except scheduled; accountability |
