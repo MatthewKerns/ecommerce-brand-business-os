@@ -24,67 +24,39 @@
 
 ---
 
-## 💰 Immediate Action Plan: Get $1K in Bank (24-48 Hours)
+## 💰 Immediate Action Plan: Get $1K in Bank (TODAY)
 
-### Option 1: BFCM Revenue (Most Likely)
-**Timeline**: Immediate (if already in account) or 2-3 days (Amazon payout)
+### ✅ YOU HAVE THE CASH - DEPOSIT IT TODAY
 
-**Actions**:
-- [ ] Log into Amazon Seller Central
-- [ ] Check available balance in Payments dashboard
-- [ ] If balance > $1k available: Request immediate transfer to bank
-- [ ] If waiting on payout: Note payout date and amount
+**Status**: You have $1,000 cash on hand
+**Action**: Deposit into bank to cover negative checking balance
 
-**Estimated**: Check today (Dec 4), should have BFCM revenue available or incoming
+**STEPS**:
+- [ ] Go to bank branch (or ATM if deposit limit allows)
+- [ ] Deposit $1,000 cash
+- [ ] Get receipt/confirmation
+- [ ] Verify negative balance is covered
+- [ ] Process Uncapped payment once deposit clears
 
----
+**Timeline**: Complete TODAY - this unblocks everything else
 
-### Option 2: External Income/Freelance Work
-**Timeline**: 1-7 days depending on source
-
-**Actions**:
-- [ ] Check for any pending invoice payments
-- [ ] Reach out to recent clients for quick turnaround work
-- [ ] Consider advance on any ongoing projects
-
-**Estimated**: Depends on current pipeline
-
----
-
-### Option 3: Personal Bridge/Credit
-**Timeline**: Immediate to 3 days
-
-**Actions**:
-- [ ] Personal savings transfer (if available)
-- [ ] Credit card cash advance (last resort - high interest)
-- [ ] Personal credit card application (mentioned in Nov 26 plan)
-
-**Estimated**: Immediate if using existing resources
-
----
-
-### Option 4: Quick Funding Source
-**Timeline**: 3-7 days
-
-**Actions**:
-- [ ] Apply for Payability (fast Amazon seller funding)
-- [ ] Check if SellersFi has quick advance options
-- [ ] Explore OnRamp instant funding products
-
-**Estimated**: 3-5 business days
+**Why this matters**:
+- Covers negative checking balance
+- Enables Uncapped payment to stay current
+- Frees you up to focus on Dec 12 order funding
+- Shows good faith to existing lender (Uncapped)
 
 ---
 
 ## 🏦 Funding Source Follow-Up (Dec 12 Order + Long-Term)
 
-### Priority 1: SellersFi
-**Type**: Amazon seller financing
-**Status**: Email blocker resolved (Nov 30) - should be contacted by now
-**Website**: https://www.sellersfi.com/
+### Priority 1: Capec
+**Type**: Business financing / Revenue-based financing
+**Status**: NEEDS TO BE CONTACTED TODAY
 
 **IMMEDIATE ACTIONS**:
-- [ ] **TODAY (Dec 4)**: Confirm email was sent to SellersFi
-- [ ] If NOT sent: Send email TODAY with subject "Urgent: Inventory Funding for Dec 12 Order"
+- [ ] **TODAY (Dec 4)**: Message Capec with urgent funding request
+- [ ] Send via email/WhatsApp/portal (whichever contact method you use)
 - [ ] **Dec 5**: Follow up via phone if no response
 - [ ] **Dec 6**: Escalate - request expedited review
 - [ ] Ask about:
@@ -93,11 +65,13 @@
   - Funding speed (can they fund by Dec 10-11?)
   - Application requirements
 
-**Key Questions for SellersFi**:
+**Key Questions for Capec**:
 1. What's your fastest approval-to-funding timeline?
-2. Can you support a Dec 12 inventory order?
-3. What's the maximum advance based on our Amazon history?
-4. Do you need BFCM sales data for approval?
+2. Can you support a Dec 12 inventory order (funding by Dec 10-11)?
+3. What's the maximum advance available?
+4. What information do you need from me to expedite approval?
+
+**Message Template** (see URGENT-ACTION-CHECKLIST-DEC4.md for full template)
 
 ---
 
@@ -121,36 +95,30 @@
 
 ---
 
-### Priority 3: "Uncapped" - Clearco/Uncapped Capital
+### Priority 3: Uncapped Capital (Existing Relationship)
 **Type**: Revenue-based financing for e-commerce
-**Status**: Needs clarification - may refer to Clearco (formerly Uncapped) or Uncapped Capital
-**Websites**:
-- https://clear.co/ (Clearco - formerly known for "uncapped" funding model)
-- https://www.uncapped.com/ (Uncapped Capital - revenue-based financing)
+**Status**: EXISTING CUSTOMER - Currently owe payment
+**Website**: https://www.uncapped.com/ (or Clearco https://clear.co/)
 
 **IMMEDIATE ACTIONS**:
-- [ ] **TODAY (Dec 4)**: Clarify which "uncapped" product this refers to
-- [ ] If Clearco: Check if account exists, apply if not
-- [ ] If Uncapped Capital: Check eligibility and apply
-- [ ] Both offer quick funding - typically 24-48 hours after approval
+- [ ] **TODAY (Dec 4)**: Process payment owed to Uncapped (once $1k deposited)
+- [ ] Contact Uncapped about additional funding for Dec 12 order
+- [ ] Since you're an existing customer, approval should be faster
+- [ ] Ask about increasing existing funding limit
 
-**Clearco Details**:
-- Funding up to $10M for e-commerce brands
-- Based on ad spend and revenue
-- Fast approval (often same day)
-- Flat fee model (not equity)
+**Existing Customer Advantage**:
+- Already in their system ✅
+- Faster approval process
+- May qualify for higher amounts
+- Established repayment history
 
-**Uncapped Capital Details**:
-- £10K - £5M for UK/EU companies (check US availability)
-- Revenue-based repayment
-- 24-48 hour approval
-- No equity dilution
+**Key Questions for Uncapped**:
+1. Can we get additional funding on top of current obligation?
+2. What's the maximum additional advance available?
+3. What's the timeline for approval (existing customer)?
+4. Can funding arrive by Dec 10-11?
 
-**Key Questions**:
-1. Are we already in their system?
-2. What's the fastest path to funding?
-3. What's the maximum advance we qualify for?
-4. What's the fee structure?
+**Note**: Make sure existing payment is current before requesting more funding
 
 ---
 
@@ -355,13 +323,13 @@ As actions are completed and information is gathered, update:
 ## 🎯 Bottom Line
 
 **Next 4 hours (TODAY)**:
-1. Get $1K into bank (check Amazon balance, transfer if available)
-2. Verify SellersFi/OnRamp were contacted
-3. Apply to Clearco/Uncapped
-4. Contact supplier
-5. Pull BFCM sales data
+1. **Deposit $1K cash** at bank (cover negative balance + Uncapped payment)
+2. **Message Capec** - urgent funding request for Dec 12 order
+3. **Message OnRamp** - urgent funding request for Dec 12 order
+4. **Contact supplier** - get quote and confirm Feb 10 timeline
+5. **Pull BFCM data** - need for inventory calculations (if not already done)
 
-**This cannot wait.**
+**This cannot wait. You have 8 days.**
 
 ---
 

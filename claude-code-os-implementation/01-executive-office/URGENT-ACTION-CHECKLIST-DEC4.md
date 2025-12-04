@@ -6,73 +6,116 @@
 
 ---
 
-## ✅ PRIORITY 1: Get $1K into Bank (Next 4 Hours)
+## ✅ PRIORITY 1: Get $1K into Bank (ASAP)
 
-### Action 1: Check Amazon Balance
-- [ ] Log into Amazon Seller Central
-- [ ] Navigate to: Reports > Payments > Account Balance
-- [ ] Check available balance: $_______
-- [ ] If balance > $1,000: Request immediate transfer to bank
-  - Go to: Payments > Transfer to Bank
-  - Enter amount
-  - Confirm transfer
-- [ ] If waiting on payout: Note next payout date: _______
+### Action 1: Deposit $1K Cash
+**You have**: $1,000 cash on hand ✅
+**Need to do**: Deposit into bank to cover negative checking balance
 
-**Expected outcome**: BFCM revenue should be available or pending
+- [ ] Go to bank branch (or use ATM if deposit limit allows)
+- [ ] Deposit $1,000 cash into checking account
+- [ ] Get receipt/confirmation
+- [ ] Check that negative balance is covered
+- [ ] Confirm available balance after deposit: $_______
 
----
-
-### Action 2: Personal Bridge (If Needed)
-If Amazon funds not immediately available:
-- [ ] Check personal savings - can you bridge $1K temporarily?
-- [ ] Check existing credit cards - available credit: $_______
-- [ ] Transfer funds if available
+**Timeline**: Do this TODAY to ensure account is positive
 
 ---
 
-## ✅ PRIORITY 2: Verify Funding Outreach (Next 2 Hours)
+### Action 2: Follow Up on Uncapped Payment
+- [ ] Follow up to ensure Uncapped gets paid properly
+- [ ] Clarify:
+  - Amount owed to Uncapped: $_______
+  - Payment due date: _______
+  - Payment method/account: _______
+- [ ] Ensure $1k deposit covers this obligation
+- [ ] Once deposit clears, process Uncapped payment
 
-### SellersFi Status
-- [ ] Check email: Did you send email to SellersFi after Nov 30?
-  - [ ] YES - When? _______
-  - [ ] NO - **SEND NOW** (use template below)
-- [ ] Check for response from SellersFi
-- [ ] If no response: **Call them** (don't wait for email)
+**Note**: This is likely a repayment to Uncapped Capital for previous funding
 
-**SellersFi Email Template** (if not sent):
+---
+
+## ✅ PRIORITY 2: Contact Funding Sources (Next 2 Hours)
+
+### Capec Status
+- [ ] **MESSAGE CAPEC TODAY**
+- [ ] Draft message (use template below)
+- [ ] Send via email/WhatsApp/portal (whichever you use)
+- [ ] Note time sent: _______
+- [ ] Follow up tomorrow if no response
+
+**Capec Message Template**:
 ```
-Subject: Urgent: Inventory Funding Request for Dec 12 Order
+Subject: Urgent: Inventory Funding Needed by Dec 10 for Dec 12 Order
 
-Hi [Contact Name / SellersFi Team],
+Hi [Capec Contact],
 
-I'm reaching out regarding inventory financing for an urgent order that must be placed by December 12, 2025.
+I need to request funding for an urgent inventory order that must be placed by December 12, 2025.
 
-Context:
-- Amazon FBA seller
-- Need to order inventory before Chinese New Year factory closure (Feb 10)
+Situation:
+- Need to order inventory before Chinese New Year factory closure (Feb 10, 2026)
 - 60-day production lead time requires Dec 12 order placement
+- Looking for funding to arrive by Dec 10-11
 
 Questions:
 1. What's your fastest approval-to-funding timeline?
 2. Can you support funding by Dec 10-11?
-3. What information do you need from me to start the process?
-4. What advance amounts might I qualify for based on my Amazon sales history?
+3. What information do you need from me?
+4. What's the maximum advance available based on my account/sales?
 
-Can we schedule a call TODAY or TOMORROW to discuss?
+Can we connect TODAY or TOMORROW to expedite this?
 
-Best,
+Thanks,
 [Your Name]
 [Your Phone]
 ```
 
+**Capec Contact Info** (fill in):
+- Contact name: _______
+- Email: _______
+- Phone: _______
+- Portal/platform: _______
+
 ---
 
 ### OnRamp Status
-- [ ] Check email: Did you send email to OnRamp after Nov 30?
-  - [ ] YES - When? _______
-  - [ ] NO - **SEND NOW** (use similar template as above)
-- [ ] Check for response from OnRamp
-- [ ] Clarify: Is this Stripe OnRamp or another OnRamp product? _______
+- [ ] **MESSAGE ONRAMP TODAY**
+- [ ] Draft message (use template below - similar to Capec)
+- [ ] Send via email/WhatsApp/portal
+- [ ] Note time sent: _______
+- [ ] Follow up tomorrow if no response
+
+**OnRamp Message Template**:
+```
+Subject: Urgent: Inventory Funding Needed by Dec 10 for Dec 12 Order
+
+Hi [OnRamp Contact],
+
+I need funding for an urgent inventory order that must be placed by December 12, 2025.
+
+Situation:
+- Need to order inventory before Chinese New Year factory closure (Feb 10, 2026)
+- 60-day production lead time requires Dec 12 order placement
+- Looking for funding to arrive by Dec 10-11
+
+Questions:
+1. What's your fastest approval-to-funding timeline?
+2. Can you support funding by Dec 10-11?
+3. What information do you need from me?
+4. What's the maximum funding available?
+
+Can we connect TODAY or TOMORROW?
+
+Thanks,
+[Your Name]
+[Your Phone]
+```
+
+**OnRamp Contact Info** (fill in):
+- Contact name: _______
+- Email: _______
+- Phone: _______
+- Platform: _______
 
 ---
 
@@ -182,14 +225,14 @@ Complete at end of day:
 ## 🎯 Success Criteria for Today
 
 **TODAY IS A WIN IF**:
-1. ✅ $1K is in bank OR transfer initiated
-2. ✅ SellersFi contacted (or status confirmed)
-3. ✅ OnRamp contacted (or status confirmed)
-4. ✅ Clearco application submitted
+1. ✅ $1K cash deposited in bank (negative balance covered)
+2. ✅ Uncapped payment follow-up completed
+3. ✅ **Capec messaged** with funding request
+4. ✅ **OnRamp messaged** with funding request
 5. ✅ Supplier contacted for quote
-6. ✅ BFCM data pulled
+6. ✅ BFCM data pulled (if needed for calculations)
 
-**If you complete these 6 items, you're on track for Dec 12 deadline.**
+**Core priorities**: Items 1, 3, 4, and 5 are critical for Dec 12 deadline.
 
 ---
 
