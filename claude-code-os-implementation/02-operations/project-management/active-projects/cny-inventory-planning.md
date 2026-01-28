@@ -4,12 +4,28 @@
 
 | Field | Value |
 |-------|-------|
-| **Status** | ACTIVE |
-| **Priority** | P2 (Important - becomes P1 in January) |
+| **Status** | 🔴 CRITICAL - URGENT |
+| **Priority** | **P0 - IMMEDIATE ACTION REQUIRED** |
 | **Pillar** | 1 (Asset Optimization) |
 | **Start Date** | November 24, 2025 |
+| **ORDER DEADLINE** | **December 12, 2025 (8 DAYS)** |
 | **Target Completion** | February 9, 2026 |
 | **Owner** | Matthew |
+
+---
+
+## 🚨 URGENT UPDATE - December 4, 2025
+
+**STATUS**: **CRITICAL - ORDER MUST BE PLACED BY DEC 12**
+
+### Why This Is Urgent NOW
+- **TODAY**: December 4, 2025
+- **DEADLINE**: December 12, 2025 (**8 DAYS**)
+- **Production lead time**: 60 days required before Feb 10 CNY closure
+- **If missed**: Stock outs in Q1/Q2 2026 = lost sales + BSR drop + cash flow crisis
+
+### Immediate Actions Required (Dec 4-12)
+See detailed action plan in: `/01-executive-office/cash-flow-solution-dec-2025.md`
 
 ---
 
@@ -45,15 +61,22 @@ CNY causes 2-4 week factory shutdown + shipping delays = potential 6-8 week gap 
 
 | Date | Milestone | Status |
 |------|-----------|--------|
-| Nov 24 | Project initiated | |
-| Dec 3-15 | Analyze BFCM data for demand forecasting | |
-| Dec 15 | Calculate reorder quantity | |
-| Jan 1 | Finalize order quantity | |
-| Jan 15 | **LATEST**: Place order with supplier | |
+| Nov 24 | Project initiated | ✅ |
+| **Dec 4 (TODAY)** | **🚨 Pull BFCM data + contact supplier** | **IN PROGRESS** |
+| **Dec 5** | **Calculate reorder quantity + get quote** | **PENDING** |
+| **Dec 6** | **Finalize order amount + secure funding** | **PENDING** |
+| **Dec 9-10** | **Funding received in account** | **PENDING** |
+| **Dec 12** | **🚨 PLACE ORDER (ABSOLUTE DEADLINE)** | **PENDING** |
+| Jan 15 | Production in progress | |
 | Feb 1 | Confirm shipment in transit | |
 | Feb 10 | **DEADLINE**: Must ship before CNY | |
 | Feb 10-24 | CNY holiday (factories closed) | |
 | Mar 1 | Inventory arrives at Amazon | |
+
+### ⚠️ TIMELINE CHANGE
+**ORIGINAL**: Plan was to order in January
+**CURRENT**: Must order by Dec 12 due to 60-day production lead time
+**REASON**: Feb 10 CNY deadline - (60 days lead time) = Dec 12 latest order date
 
 ---
 
@@ -137,15 +160,35 @@ Feb 10 - ___ = ___
 
 ## Next Actions
 
-1. [ ] Review current inventory levels in Seller Central
-2. [ ] Analyze last year's Q1-Q2 sales velocity
-3. [ ] Calculate demand forecast based on BFCM data
-4. [ ] Contact supplier for current pricing and lead times
-5. [ ] Determine order quantity
-6. [ ] Secure funding for order
-7. [ ] Place order (by Jan 15 latest)
-8. [ ] Confirm production start
-9. [ ] Confirm shipment date
+### 🚨 URGENT - Dec 4 (TODAY)
+1. [ ] **Pull BFCM sales data** (Nov 24 - Dec 2) from Seller Central
+2. [ ] **Check current inventory levels** in Seller Central
+3. [ ] **Contact supplier** for quote + confirm they can meet Feb 10 deadline
+4. [ ] **Verify funding outreach** - Were SellersFi/OnRamp emails sent?
+5. [ ] **Apply to Clearco/Uncapped** for fast funding approval
+
+### Dec 5 (Thursday)
+6. [ ] **Calculate Q1-Q2 demand forecast** using BFCM velocity
+7. [ ] **Determine reorder quantity** (demand + safety stock - current inventory)
+8. [ ] **Receive supplier quote** and confirm lead time
+9. [ ] **Follow up with SellersFi/OnRamp** via phone if no response
+
+### Dec 6 (Friday) - DECISION DAY
+10. [ ] **Finalize total order cost** (product + shipping + duties + fees)
+11. [ ] **Calculate funding gap** (total cost - available cash)
+12. [ ] **Select funding source** and confirm approval
+13. [ ] **Prepare purchase order** for Dec 12 placement
+
+### Dec 9-10 (Monday-Tuesday)
+14. [ ] **Confirm funding received** in bank account
+15. [ ] **Final order review** with supplier
+16. [ ] **Prepare payment** method
+
+### Dec 12 (Thursday) - DEADLINE
+17. [ ] **PLACE ORDER** with supplier
+18. [ ] **Confirm order accepted** and production start date
+19. [ ] **Confirm shipment timeline** (must ship before Feb 10)
+20. [ ] **Update project status** to "Order Placed"
 
 ---
 
