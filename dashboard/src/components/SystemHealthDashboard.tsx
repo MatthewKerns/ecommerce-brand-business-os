@@ -6,6 +6,8 @@ import {
   ServiceData,
 } from "@/hooks/useHealthMonitor";
 import { RefreshCw } from "lucide-react";
+import { ActivityLog, Activity } from "@/components/ActivityLog";
+import { useMemo } from "react";
 
 /**
  * SystemHealthDashboard component displays comprehensive system health monitoring
@@ -47,6 +49,57 @@ export function SystemHealthDashboard({
   // Calculate overall health
   const allOperational = services.every((s) => s.status === "up");
   const hasWarnings = services.some((s) => s.status === "degraded");
+
+  // Generate activity log from service data
+  const activities = useMemo<Activity[]>(() => {
+    const now = new Date();
+    const logs: Activity[] = [];
+
+    // Add activities based on service status
+    services.forEach((service, index) => {
+      if (service.status === "up") {
+        logs.push({
+          id: `${service.name}-up`,
+          eventType: "success",
+          description: `${service.name} health check passed`,
+          service: service.name,
+          timestamp: new Date(now.getTime() - index * 2 * 60000), // Stagger by 2 minutes
+        });
+      } else if (service.status === "degraded") {
+        logs.push({
+          id: `${service.name}-degraded`,
+          eventType: "warning",
+          description: `${service.name} is experiencing degraded performance`,
+          service: service.name,
+          timestamp: new Date(now.getTime() - index * 2 * 60000),
+        });
+      } else if (service.status === "down") {
+        logs.push({
+          id: `${service.name}-down`,
+          eventType: "error",
+          description: service.lastError || `${service.name} is currently down`,
+          service: service.name,
+          timestamp: new Date(now.getTime() - index * 2 * 60000),
+        });
+      }
+    });
+
+    // Add system-level events
+    if (allOperational && services.length > 0) {
+      logs.push({
+        id: "system-healthy",
+        eventType: "info",
+        description: "All systems operational",
+        timestamp: new Date(now.getTime() - services.length * 2 * 60000 - 60000),
+      });
+    }
+
+    // Sort by timestamp (most recent first)
+    return logs.sort(
+      (a, b) =>
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+  }, [services, allOperational]);
 
   // Show error state if health check fails
   if (error) {
@@ -166,21 +219,7 @@ export function SystemHealthDashboard({
         <h2 className="mb-4 text-lg font-semibold text-slate-900">
           Recent Activity
         </h2>
-        <div className="space-y-3">
-          {[1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              className="flex items-center gap-4 border-b border-slate-100 pb-3 last:border-0"
-            >
-              <div className="h-2 w-2 rounded-full bg-slate-400"></div>
-              <div className="flex-1">
-                <div className="mb-1 h-3 w-48 animate-pulse rounded bg-slate-200"></div>
-                <div className="h-2 w-32 animate-pulse rounded bg-slate-200"></div>
-              </div>
-              <div className="h-3 w-16 animate-pulse rounded bg-slate-200"></div>
-            </div>
-          ))}
-        </div>
+        <ActivityLog activities={activities} isLoading={isLoading} maxItems={8} />
       </div>
     </div>
   );
