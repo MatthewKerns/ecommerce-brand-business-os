@@ -11,6 +11,8 @@ import {
   LucideIcon,
 } from "lucide-react";
 import { ServiceStatus } from "@/components/ServiceStatusCard";
+import { apiClient } from "@/lib/api-client";
+import type { SystemHealth, HealthStatus } from "@/lib/health-checker";
 
 /**
  * Service data structure for health monitoring
@@ -45,93 +47,50 @@ export interface UseHealthMonitorReturn {
 }
 
 /**
- * Initial service configurations - used as baseline data
+ * Icon mapping for service names
  */
-const INITIAL_SERVICES: Omit<ServiceData, "lastCheck">[] = [
-  {
-    name: "TikTok API",
-    status: "up",
-    uptime: 99.9,
-    icon: Video,
-  },
-  {
-    name: "Blog Engine",
-    status: "up",
-    uptime: 99.8,
-    icon: FileText,
-  },
-  {
-    name: "Email Automation",
-    status: "up",
-    uptime: 98.5,
-    icon: Mail,
-  },
-  {
-    name: "Python Agents",
-    status: "up",
-    uptime: 99.95,
-    icon: Bot,
-  },
-  {
-    name: "Database",
-    status: "up",
-    uptime: 99.99,
-    icon: Database,
-  },
-  {
-    name: "Cache",
-    status: "up",
-    uptime: 99.7,
-    icon: Server,
-  },
-];
+const SERVICE_ICONS: Record<string, LucideIcon> = {
+  "TikTok API": Video,
+  "Blog Engine": FileText,
+  "Email Automation": Mail,
+  "Python Agents": Bot,
+  Database: Database,
+  Cache: Server,
+  Environment: Server,
+};
 
 /**
- * Simulates a health check API call
- * In production, this would fetch from /api/health endpoint
+ * Map health status from API to ServiceStatus
+ */
+function mapHealthStatus(status: HealthStatus): ServiceStatus {
+  switch (status) {
+    case "healthy":
+      return "up";
+    case "degraded":
+      return "degraded";
+    case "unhealthy":
+      return "down";
+    default:
+      return "down";
+  }
+}
+
+/**
+ * Fetch health data from /api/health endpoint
  *
- * @returns Promise resolving to updated service data
+ * @returns Promise resolving to service health data
  */
 async function fetchHealthData(): Promise<ServiceData[]> {
-  // Simulate API latency (200-500ms)
-  await new Promise((resolve) =>
-    setTimeout(resolve, 200 + Math.random() * 300)
-  );
+  const health = await apiClient.get<SystemHealth>("/api/health");
 
-  // Simulate health check with occasional status changes
-  return INITIAL_SERVICES.map((service) => {
-    // 5% chance of status change to demonstrate real-time updates
-    const random = Math.random();
-    let status: ServiceStatus = service.status;
-    let lastError: string | undefined;
-
-    // Occasionally simulate status changes
-    if (random < 0.05) {
-      status = "degraded";
-      lastError = "High response time detected";
-    } else if (random < 0.02) {
-      status = "down";
-      lastError = "Connection timeout";
-    } else {
-      status = "up";
-      lastError = undefined;
-    }
-
-    // Simulate slight uptime fluctuations
-    const uptimeDelta = (Math.random() - 0.5) * 0.1; // ±0.05%
-    const uptime = Math.max(
-      95,
-      Math.min(100, service.uptime + uptimeDelta)
-    );
-
-    return {
-      ...service,
-      status,
-      uptime: parseFloat(uptime.toFixed(2)),
-      lastCheck: new Date(),
-      lastError,
-    };
-  });
+  return health.services.map((service) => ({
+    name: service.name,
+    status: mapHealthStatus(service.status),
+    uptime: service.uptime || 0,
+    lastCheck: new Date(service.lastCheck),
+    lastError: service.status === "unhealthy" ? service.message : undefined,
+    icon: SERVICE_ICONS[service.name] || Server,
+  }));
 }
 
 /**
