@@ -1,6 +1,7 @@
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import { Calendar, Clock, User } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import type { BlogPost as BlogPostType } from '@/lib/types';
 import rehypeHighlight from 'rehype-highlight';
 import rehypeSlug from 'rehype-slug';
@@ -78,6 +79,7 @@ const components = {
   img: (props: any) => (
     <img
       className="my-6 rounded-lg shadow-md"
+      loading="lazy"
       {...props}
     />
   ),
@@ -166,11 +168,14 @@ export async function BlogPost({ post }: BlogPostProps) {
 
       {/* Featured Image */}
       {post.image && (
-        <div className="mb-8 aspect-video w-full overflow-hidden rounded-lg bg-gray-100">
-          <img
+        <div className="relative mb-8 aspect-video w-full overflow-hidden rounded-lg bg-gray-100">
+          <Image
             src={post.image}
             alt={post.title}
-            className="h-full w-full object-cover"
+            fill
+            priority
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
+            className="object-cover"
           />
         </div>
       )}
