@@ -383,3 +383,291 @@ TikTok Shop Features:
             page_number=page_number,
             status=status
         )
+
+    def get_orders(
+        self,
+        order_status: Optional[str] = None,
+        page_size: int = 20,
+        page_number: int = 1,
+        start_time: Optional[int] = None,
+        end_time: Optional[int] = None
+    ) -> Dict[str, Any]:
+        """
+        Get a paginated list of orders from TikTok Shop
+
+        This method retrieves orders with optional filtering by status and time range.
+        Useful for displaying orders in a UI or iterative processing.
+
+        Args:
+            order_status: Filter by order status (e.g., 'UNPAID', 'AWAITING_SHIPMENT',
+                         'AWAITING_COLLECTION', 'IN_TRANSIT', 'DELIVERED', 'COMPLETED', 'CANCELLED')
+            page_size: Number of orders per page (max 100)
+            page_number: Page number to retrieve (starts at 1)
+            start_time: Start time for order query (Unix timestamp in seconds)
+            end_time: End time for order query (Unix timestamp in seconds)
+
+        Returns:
+            Dictionary containing:
+                - orders: List of order objects
+                - total: Total number of orders matching filter
+                - more: Boolean indicating if more pages exist
+
+        Raises:
+            TikTokShopAuthError: If authentication fails
+            TikTokShopAPIError: If API request fails
+
+        Example:
+            >>> agent = TikTokShopAgent(access_token='token')
+            >>> # Get first page of unpaid orders
+            >>> result = agent.get_orders(order_status='UNPAID', page_size=10)
+            >>> orders = result['data']['orders']
+            >>> has_more = result['data']['more']
+        """
+        client = self._get_client()
+        return client.get_orders(
+            order_status=order_status,
+            page_size=page_size,
+            page_number=page_number,
+            start_time=start_time,
+            end_time=end_time
+        )
+
+    def sync_orders(
+        self,
+        order_status: Optional[str] = None,
+        max_orders: Optional[int] = None,
+        start_time: Optional[int] = None,
+        end_time: Optional[int] = None,
+        save_to_file: bool = True
+    ) -> List[Dict[str, Any]]:
+        """
+        Sync orders from TikTok Shop
+
+        This method fetches all orders from TikTok Shop, handling pagination
+        automatically. It can optionally filter by status and time range.
+
+        Args:
+            order_status: Filter by order status (e.g., 'UNPAID', 'AWAITING_SHIPMENT',
+                         'IN_TRANSIT', 'DELIVERED', 'COMPLETED', 'CANCELLED')
+            max_orders: Maximum number of orders to sync (None for all)
+            start_time: Start time for order query (Unix timestamp in seconds)
+            end_time: End time for order query (Unix timestamp in seconds)
+            save_to_file: Whether to save synced orders to a JSON file
+
+        Returns:
+            List of order dictionaries containing order information
+
+        Raises:
+            TikTokShopAuthError: If authentication fails
+            TikTokShopAPIError: If API request fails
+
+        Example:
+            >>> agent = TikTokShopAgent(access_token='token')
+            >>> # Sync all unpaid orders
+            >>> orders = agent.sync_orders(order_status='UNPAID')
+            >>> print(f"Synced {len(orders)} orders")
+            >>>
+            >>> # Sync orders from last 7 days
+            >>> import time
+            >>> end_time = int(time.time())
+            >>> start_time = end_time - (7 * 24 * 60 * 60)
+            >>> orders = agent.sync_orders(start_time=start_time, end_time=end_time)
+        """
+        client = self._get_client()
+
+        all_orders = []
+        page_number = 1
+        page_size = 100  # Maximum allowed by API
+
+        while True:
+            # Fetch page of orders
+            response = client.get_orders(
+                order_status=order_status,
+                page_size=page_size,
+                page_number=page_number,
+                start_time=start_time,
+                end_time=end_time
+            )
+
+            # Extract orders from response
+            orders = response.get('data', {}).get('orders', [])
+
+            if not orders:
+                break
+
+            # Add orders to list
+            all_orders.extend(orders)
+
+            # Check if we've reached the max limit
+            if max_orders and len(all_orders) >= max_orders:
+                all_orders = all_orders[:max_orders]
+                break
+
+            # Check if there are more pages
+            more_pages = response.get('data', {}).get('more', False)
+            if not more_pages:
+                break
+
+            page_number += 1
+
+        # Save to file if requested
+        if save_to_file:
+            import json
+            output_dir = TIKTOK_OUTPUT_DIR / "orders"
+            output_dir.mkdir(parents=True, exist_ok=True)
+
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            status_label = f"_{order_status.lower()}" if order_status else "_all"
+            filename = f"orders_sync{status_label}_{timestamp}.json"
+            filepath = output_dir / filename
+
+            with open(filepath, 'w') as f:
+                json.dump({
+                    'synced_at': datetime.now().isoformat(),
+                    'status_filter': order_status,
+                    'start_time': start_time,
+                    'end_time': end_time,
+                    'total_count': len(all_orders),
+                    'orders': all_orders
+                }, f, indent=2)
+
+        return all_orders
+
+    def get_order_details(self, order_id: str) -> Dict[str, Any]:
+        """
+        Get detailed information for a specific order from TikTok Shop
+
+        Args:
+            order_id: TikTok Shop order ID
+
+        Returns:
+            Dictionary containing detailed order information including:
+                - order_id: Order identifier
+                - status: Order status
+                - buyer_info: Buyer information
+                - items: Ordered items with details
+                - payment: Payment information
+                - shipping: Shipping address and status
+                - timestamps: Creation, payment, shipment times
+
+        Raises:
+            TikTokShopAuthError: If authentication fails
+            TikTokShopNotFoundError: If order not found
+            TikTokShopAPIError: If API request fails
+
+        Example:
+            >>> agent = TikTokShopAgent(access_token='token')
+            >>> order = agent.get_order_details('1234567890')
+            >>> print(f"Order Status: {order['data']['status']}")
+            >>> print(f"Total: ${order['data']['payment']['total_amount']}")
+        """
+        client = self._get_client()
+        return client.get_order(order_id)
+
+    def process_order_data(
+        self,
+        orders: List[Dict[str, Any]]
+    ) -> Dict[str, Any]:
+        """
+        Process and analyze order data to extract insights
+
+        This method takes a list of orders and generates useful analytics
+        such as total revenue, order counts by status, popular products, etc.
+
+        Args:
+            orders: List of order dictionaries (from get_orders or sync_orders)
+
+        Returns:
+            Dictionary containing processed order analytics:
+                - total_orders: Total number of orders
+                - orders_by_status: Count of orders grouped by status
+                - total_revenue: Total revenue from all orders
+                - top_products: Most ordered products
+                - order_value_stats: Min, max, average order values
+
+        Example:
+            >>> agent = TikTokShopAgent(access_token='token')
+            >>> orders = agent.sync_orders()
+            >>> analytics = agent.process_order_data(orders)
+            >>> print(f"Total Revenue: ${analytics['total_revenue']}")
+            >>> print(f"Total Orders: {analytics['total_orders']}")
+        """
+        if not orders:
+            return {
+                'total_orders': 0,
+                'orders_by_status': {},
+                'total_revenue': 0.0,
+                'top_products': [],
+                'order_value_stats': {
+                    'min': 0.0,
+                    'max': 0.0,
+                    'average': 0.0
+                }
+            }
+
+        # Initialize analytics
+        orders_by_status = {}
+        total_revenue = 0.0
+        product_counts = {}
+        order_values = []
+
+        # Process each order
+        for order in orders:
+            # Count orders by status
+            status = order.get('status', 'UNKNOWN')
+            orders_by_status[status] = orders_by_status.get(status, 0) + 1
+
+            # Calculate revenue (only from completed/paid orders)
+            if status not in ['UNPAID', 'CANCELLED']:
+                payment_info = order.get('payment', {})
+                order_total = float(payment_info.get('total_amount', 0))
+                total_revenue += order_total
+                order_values.append(order_total)
+
+            # Count product occurrences
+            items = order.get('items', [])
+            for item in items:
+                product_id = item.get('product_id')
+                product_name = item.get('product_name', 'Unknown')
+                quantity = int(item.get('quantity', 1))
+
+                if product_id:
+                    if product_id not in product_counts:
+                        product_counts[product_id] = {
+                            'product_name': product_name,
+                            'count': 0
+                        }
+                    product_counts[product_id]['count'] += quantity
+
+        # Get top products
+        top_products = sorted(
+            [
+                {
+                    'product_id': pid,
+                    'product_name': info['product_name'],
+                    'total_ordered': info['count']
+                }
+                for pid, info in product_counts.items()
+            ],
+            key=lambda x: x['total_ordered'],
+            reverse=True
+        )[:10]  # Top 10 products
+
+        # Calculate order value statistics
+        order_value_stats = {
+            'min': min(order_values) if order_values else 0.0,
+            'max': max(order_values) if order_values else 0.0,
+            'average': sum(order_values) / len(order_values) if order_values else 0.0
+        }
+
+        return {
+            'total_orders': len(orders),
+            'orders_by_status': orders_by_status,
+            'total_revenue': round(total_revenue, 2),
+            'top_products': top_products,
+            'order_value_stats': {
+                'min': round(order_value_stats['min'], 2),
+                'max': round(order_value_stats['max'], 2),
+                'average': round(order_value_stats['average'], 2)
+            }
+        }
