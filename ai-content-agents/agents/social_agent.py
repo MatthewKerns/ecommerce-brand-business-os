@@ -15,6 +15,8 @@ class SocialAgent(BaseAgent):
     def __init__(self):
         super().__init__(agent_name="social_agent")
 
+        self.logger.debug("Initializing platform specifications")
+
         # Platform-specific parameters
         self.platform_specs = {
             "instagram": {
@@ -55,6 +57,8 @@ class SocialAgent(BaseAgent):
         Returns:
             Tuple of (post_content, file_path)
         """
+        self.logger.info(f"Generating Instagram post: topic='{topic}', pillar={content_pillar}, hashtags={include_hashtags}")
+
         prompt = f"""Create an Instagram post caption:
 
 TOPIC: {topic}
@@ -109,7 +113,7 @@ Hashtag Strategy:
 - TCG-specific: #TCG #PokemonTCG #MagicTheGathering
 - Lifestyle: #TradingCards #CardCollector #GamingGear"""
 
-        return self.generate_and_save(
+        content, path = self.generate_and_save(
             prompt=prompt,
             output_dir=SOCIAL_OUTPUT_DIR / "instagram",
             system_context=system_context,
@@ -120,6 +124,9 @@ Hashtag Strategy:
                 "image_description": image_description
             }
         )
+
+        self.logger.info(f"Successfully generated Instagram post: {path}")
+        return content, path
 
     def generate_reddit_post(
         self,
@@ -140,6 +147,8 @@ Hashtag Strategy:
         Returns:
             Tuple of (post_content, file_path)
         """
+        self.logger.info(f"Generating Reddit post: subreddit=r/{subreddit}, topic='{topic}', type={post_type}")
+
         prompt = f"""Create a Reddit post for r/{subreddit}:
 
 TOPIC: {topic}
@@ -196,7 +205,7 @@ Best Practices:
 - Focus on helping, not selling
 - Upvote and reply to comments"""
 
-        return self.generate_and_save(
+        content, path = self.generate_and_save(
             prompt=prompt,
             output_dir=SOCIAL_OUTPUT_DIR / "reddit",
             system_context=system_context,
@@ -207,6 +216,9 @@ Best Practices:
                 "post_type": post_type
             }
         )
+
+        self.logger.info(f"Successfully generated Reddit post for r/{subreddit}: {path}")
+        return content, path
 
     def generate_content_calendar(
         self,
@@ -225,6 +237,8 @@ Best Practices:
         Returns:
             Tuple of (calendar_content, file_path)
         """
+        self.logger.info(f"Generating {num_days}-day content calendar for {platform}, pillar={content_pillar}")
+
         start_date = datetime.now()
         dates = [(start_date + timedelta(days=i)).strftime("%A, %B %d") for i in range(num_days)]
 
@@ -251,7 +265,7 @@ REQUIREMENTS:
 
 Format as a clear calendar structure."""
 
-        return self.generate_and_save(
+        content, path = self.generate_and_save(
             prompt=prompt,
             output_dir=SOCIAL_OUTPUT_DIR / platform,
             filename=f"content_calendar_{num_days}days.md",
@@ -262,6 +276,9 @@ Format as a clear calendar structure."""
                 "start_date": start_date.isoformat()
             }
         )
+
+        self.logger.info(f"Successfully generated content calendar: {path}")
+        return content, path
 
     def generate_carousel_script(
         self,
@@ -278,6 +295,8 @@ Format as a clear calendar structure."""
         Returns:
             Tuple of (carousel_script, file_path)
         """
+        self.logger.info(f"Generating carousel script: topic='{topic}', num_slides={num_slides}")
+
         prompt = f"""Create an Instagram carousel post script:
 
 TOPIC: {topic}
@@ -313,7 +332,7 @@ REQUIREMENTS:
 
 Write the complete carousel script now."""
 
-        return self.generate_and_save(
+        content, path = self.generate_and_save(
             prompt=prompt,
             output_dir=SOCIAL_OUTPUT_DIR / "instagram",
             filename=f"carousel_{topic.replace(' ', '_')}.md",
@@ -323,6 +342,9 @@ Write the complete carousel script now."""
                 "num_slides": num_slides
             }
         )
+
+        self.logger.info(f"Successfully generated carousel script: {path}")
+        return content, path
 
     def batch_generate_posts(
         self,
@@ -341,6 +363,8 @@ Write the complete carousel script now."""
         Returns:
             List of (content, path) tuples
         """
+        self.logger.info(f"Batch generating {num_posts} posts for {platform}")
+
         if content_mix is None:
             content_mix = CONTENT_PILLARS
 
@@ -351,17 +375,17 @@ Write the complete carousel script now."""
             topic_prompt = f"Suggest a specific post topic for {platform} using the '{pillar}' content pillar. Just provide the topic in 1-2 sentences."
             topic = self.generate_content(topic_prompt, max_tokens=100)
 
-            print(f"\n📱 Generating {platform} post {i+1}/{num_posts}: {topic[:50]}...")
+            self.logger.info(f"Generating {platform} post {i+1}/{num_posts}: {topic[:50]}...")
 
             if platform.lower() == "instagram":
                 result = self.generate_instagram_post(topic, pillar)
             elif platform.lower() == "reddit":
                 result = self.generate_reddit_post("TCG", topic, include_product_mention=(i % 3 == 0))
             else:
-                print(f"Platform {platform} not implemented for batch generation yet.")
+                self.logger.warning(f"Platform {platform} not implemented for batch generation yet.")
                 continue
 
             results.append(result)
 
-        print(f"\n✅ Generated {len(results)} {platform} posts")
+        self.logger.info(f"Successfully generated {len(results)} {platform} posts")
         return results

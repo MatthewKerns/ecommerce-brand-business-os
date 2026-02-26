@@ -1,0 +1,10 @@
+{
+  "product_name": "Card Binder",
+  "features": [
+    {
+      "feature": "F1",
+      "benefit": "B1"
+    }
+  ],
+  "target_audience": "Tournament players"
+}

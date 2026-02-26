@@ -85,6 +85,128 @@ All generated content is automatically infused with the Infinity Vault brand voi
 
 See [`ai-content-agents/README.md`](ai-content-agents/README.md) for full usage instructions.
 
+## Architecture
+
+The system follows a **hybrid monorepo architecture** that separates business knowledge from execution logic:
+
+### Design Principles
+
+1. **Separation of Concerns**: Business knowledge (markdown) is separated from execution logic (Python)
+2. **Inheritance-Based Agent Design**: All specialized agents inherit from a common `BaseAgent` class
+3. **Configuration-Driven**: Brand context and settings are centralized in configuration files
+4. **Path-Based Organization**: Clear directory structure for discoverability and maintenance
+5. **Zero Friction Execution**: Simple CLI interfaces and minimal setup requirements
+
+### Agent Hierarchy
+
+```
+BaseAgent (base_agent.py)
+    │
+    ├── BlogAgent - SEO-optimized long-form content
+    ├── SocialAgent - Platform-specific social media content
+    ├── AmazonAgent - E-commerce listing optimization
+    └── CompetitorAgent - Market analysis and insights
+```
+
+### Data Flow
+
+```
+Brand Knowledge (markdown) → config.py → BaseAgent → Specialized Agent → Anthropic API → Generated Content
+```
+
+All agents automatically load brand voice, strategy, and positioning from the knowledge layer and inject it into their prompts.
+
+**Read more:** [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
+
+## API
+
+The AI Content Agents system provides both CLI and programmatic interfaces:
+
+### Command Line Interface (CLI)
+
+```bash
+# Universal content generation
+python generate_content.py blog post "Your Topic" --pillar "Battle-Ready Lifestyle" --words 1500
+python generate_content.py social instagram "Topic" --image "Image description"
+python generate_content.py amazon title "Product Name" --features "feature1,feature2"
+```
+
+### Python API
+
+```python
+from agents import BlogAgent, SocialAgent, AmazonAgent
+
+# Generate blog post
+blog_agent = BlogAgent()
+content, path = blog_agent.generate_blog_post(
+    topic="10 Tournament Mistakes TCG Players Make",
+    content_pillar="Battle-Ready Lifestyle",
+    word_count=1500
+)
+
+# Generate social content
+social_agent = SocialAgent()
+content, path = social_agent.generate_instagram_post(
+    topic="Pre-tournament ritual",
+    content_pillar="Battle-Ready Lifestyle"
+)
+```
+
+### REST API (Planned)
+
+A FastAPI-based REST API is planned for Phase 2, exposing:
+- `POST /api/content/generate` - Universal content generation
+- `POST /api/blog/generate` - Blog-specific generation
+- `POST /api/social/generate` - Social media generation
+- `POST /api/amazon/generate` - Amazon listing optimization
+
+**Read more:** [`docs/API_DESIGN.md`](docs/API_DESIGN.md)
+
+## Testing
+
+The system maintains **70% minimum test coverage** to ensure reliability and prevent regressions.
+
+### Running Tests
+
+```bash
+cd ai-content-agents
+
+# Run all tests
+pytest
+
+# Run with coverage report
+pytest --cov=ai-content-agents --cov-report=term-missing
+
+# Generate HTML coverage report
+pytest --cov=ai-content-agents --cov-report=html
+open htmlcov/index.html
+
+# Fail if coverage is below 70%
+pytest --cov=ai-content-agents --cov-report=term-missing --cov-fail-under=70
+```
+
+### Test Structure
+
+```
+ai-content-agents/tests/
+├── conftest.py                 # Shared fixtures
+├── fixtures/                   # Mock API responses
+├── test_base_agent.py          # BaseAgent tests
+├── test_blog_agent.py          # BlogAgent tests
+├── test_social_agent.py        # SocialAgent tests
+├── test_amazon_agent.py        # AmazonAgent tests
+└── test_api.py                 # API integration tests
+```
+
+### Testing Philosophy
+
+- **Test First, Fix Later**: Write tests before implementing new features
+- **Isolated Testing**: Tests should not rely on external services (mocked APIs)
+- **Fast Feedback**: Unit tests run in seconds
+- **Real-World Scenarios**: Integration tests mirror actual usage
+
+**Read more:** [`docs/TESTING_GUIDE.md`](docs/TESTING_GUIDE.md)
+
 ## The 13 Foundational Principles
 
 These principles, refined over 20 years, form the backbone of the system:
