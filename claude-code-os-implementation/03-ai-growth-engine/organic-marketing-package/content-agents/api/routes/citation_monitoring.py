@@ -574,11 +574,247 @@ class ComparisonResponse(BaseModel):
 
 
 # ============================================================================
-# Route Handlers (to be implemented in subsequent subtasks)
+# Route Handlers
 # ============================================================================
 
-# Placeholder comment: Route handlers will be implemented in:
-# - subtask-4-2: POST /test-query endpoint
+@router.post(
+    "/test-query",
+    response_model=TestQueryResponse,
+    summary="Test AI assistant query",
+    description="Send a test query to AI assistants and analyze brand citations"
+)
+async def test_query(
+    request: TestQueryRequest,
+    request_id: str = Depends(get_request_id)
+) -> Dict[str, Any]:
+    """
+    Test query against AI assistants and analyze citations.
+
+    Args:
+        request: Test query request with query text and platforms
+        request_id: Unique request identifier
+
+    Returns:
+        Test query response with citation results from each platform
+
+    Raises:
+        HTTPException: If query execution fails
+    """
+    logger.info(
+        f"[{request_id}] Testing query on platforms: {request.platforms}, "
+        f"query='{request.query[:50]}...'"
+    )
+    start_time = time.time()
+
+    try:
+        # Import agent and database dependencies
+        from agents.citation_monitoring_agent import CitationMonitoringAgent
+        from database.models import CitationRecord, CompetitorCitation
+        from database.connection import get_db_session
+
+        # Initialize agent
+        agent = CitationMonitoringAgent()
+
+        # Validate platforms
+        available_platforms = agent.get_available_platforms()
+        invalid_platforms = [p for p in request.platforms if p.lower() not in available_platforms]
+        if invalid_platforms:
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "error": "InvalidPlatformsError",
+                    "message": f"The following platforms are not available: {', '.join(invalid_platforms)}",
+                    "available_platforms": available_platforms,
+                    "request_id": request_id,
+                    "timestamp": datetime.utcnow().isoformat() + "Z"
+                }
+            )
+
+        # Process each platform
+        results = []
+        db_session = get_db_session() if request.save_to_db else None
+
+        try:
+            for platform in request.platforms:
+                platform_lower = platform.lower()
+                logger.info(f"[{request_id}] Querying {platform_lower}...")
+                platform_start_time = time.time()
+
+                try:
+                    # Build query kwargs
+                    query_kwargs = {}
+                    if request.model:
+                        query_kwargs['model'] = request.model
+                    if request.temperature is not None:
+                        query_kwargs['temperature'] = request.temperature
+                    if request.timeout:
+                        query_kwargs['timeout'] = request.timeout
+
+                    # Query the AI assistant
+                    response = agent.query_ai_assistant(
+                        query=request.query,
+                        platform=platform_lower,
+                        **query_kwargs
+                    )
+
+                    # Extract response text based on platform
+                    if platform_lower == "chatgpt" or platform_lower == "perplexity":
+                        response_text = response.get('choices', [{}])[0].get('message', {}).get('content', '')
+                    elif platform_lower == "claude":
+                        content_blocks = response.get('content', [])
+                        response_text = ' '.join([block.get('text', '') for block in content_blocks if block.get('type') == 'text'])
+                    else:
+                        response_text = str(response)
+
+                    # Calculate response time
+                    response_time_ms = int((time.time() - platform_start_time) * 1000)
+
+                    # Analyze citation
+                    analysis = agent.analyze_citation(
+                        query=request.query,
+                        response_text=response_text,
+                        platform=platform_lower,
+                        brand_name=request.brand_name,
+                        competitor_names=request.competitor_names if request.competitor_names else None,
+                        response_metadata=response
+                    )
+
+                    # Build citation result
+                    competitors_mentioned = [
+                        comp['competitor_name']
+                        for comp in analysis.get('competitor_details', [])
+                        if comp.get('mentioned', False)
+                    ]
+
+                    citation_result = CitationResult(
+                        platform=platform_lower,
+                        brand_mentioned=analysis['brand_mentioned'],
+                        citation_context=analysis['citation_context'],
+                        position_in_response=analysis['position_in_response'],
+                        competitors_mentioned=competitors_mentioned,
+                        response_time_ms=response_time_ms,
+                        response_text=response_text
+                    )
+                    results.append(citation_result)
+
+                    # Save to database if requested
+                    if request.save_to_db and db_session:
+                        # Save citation record
+                        citation_record = CitationRecord(
+                            query=request.query,
+                            ai_platform=platform_lower,
+                            response_text=response_text,
+                            brand_mentioned=analysis['brand_mentioned'],
+                            citation_context=analysis['citation_context'],
+                            position_in_response=analysis['position_in_response'],
+                            brand_name=request.brand_name,
+                            competitor_mentioned=analysis['competitor_mentioned'],
+                            response_metadata=None,  # Could serialize response here if needed
+                            query_timestamp=datetime.utcnow(),
+                            response_time_ms=response_time_ms
+                        )
+                        db_session.add(citation_record)
+                        db_session.flush()  # Flush to get the ID
+
+                        # Save competitor citations
+                        for comp_detail in analysis.get('competitor_details', []):
+                            if comp_detail.get('mentioned', False):
+                                competitor_citation = CompetitorCitation(
+                                    query=request.query,
+                                    ai_platform=platform_lower,
+                                    competitor_name=comp_detail['competitor_name'],
+                                    competitor_mentioned=True,
+                                    citation_context=comp_detail.get('citation_context'),
+                                    position_in_response=comp_detail.get('position_in_response'),
+                                    response_text=response_text,
+                                    response_time_ms=response_time_ms,
+                                    citation_record_id=citation_record.id,
+                                    query_timestamp=datetime.utcnow()
+                                )
+                                db_session.add(competitor_citation)
+
+                        logger.debug(f"[{request_id}] Saved citation record for {platform_lower}")
+
+                    logger.info(
+                        f"[{request_id}] {platform_lower} query complete: "
+                        f"brand_mentioned={analysis['brand_mentioned']}, "
+                        f"competitors_found={len(competitors_mentioned)}"
+                    )
+
+                except Exception as e:
+                    logger.error(f"[{request_id}] Error querying {platform_lower}: {e}", exc_info=True)
+                    # Continue with other platforms instead of failing completely
+                    citation_result = CitationResult(
+                        platform=platform_lower,
+                        brand_mentioned=False,
+                        citation_context=None,
+                        position_in_response=None,
+                        competitors_mentioned=[],
+                        response_time_ms=int((time.time() - platform_start_time) * 1000),
+                        response_text=f"Error: {str(e)}"
+                    )
+                    results.append(citation_result)
+
+            # Commit database changes if any
+            if request.save_to_db and db_session:
+                db_session.commit()
+                logger.info(f"[{request_id}] Committed citation records to database")
+
+        finally:
+            # Close database session
+            if db_session:
+                db_session.close()
+
+        # Calculate statistics
+        total_platforms = len(results)
+        citations_found = sum(1 for r in results if r.brand_mentioned)
+        citation_rate = citations_found / total_platforms if total_platforms > 0 else 0.0
+
+        # Calculate total time
+        total_time_ms = int((time.time() - start_time) * 1000)
+
+        # Build response
+        response = {
+            "request_id": request_id,
+            "query": request.query,
+            "results": [r.dict() for r in results],
+            "brand_name": request.brand_name,
+            "total_platforms": total_platforms,
+            "citations_found": citations_found,
+            "citation_rate": citation_rate,
+            "timestamp": datetime.utcnow(),
+            "saved_to_db": request.save_to_db
+        }
+
+        logger.info(
+            f"[{request_id}] Query test complete in {total_time_ms}ms: "
+            f"{citations_found}/{total_platforms} platforms cited brand "
+            f"({citation_rate*100:.1f}% citation rate)"
+        )
+        return response
+
+    except HTTPException:
+        # Re-raise HTTP exceptions
+        raise
+
+    except Exception as e:
+        logger.error(f"[{request_id}] Error testing query: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": "QueryTestError",
+                "message": f"Failed to test query: {str(e)}",
+                "request_id": request_id,
+                "timestamp": datetime.utcnow().isoformat() + "Z"
+            }
+        )
+
+
+# ============================================================================
+# Additional Route Handlers (to be implemented in subsequent subtasks)
+# ============================================================================
+
+# Placeholder comment: Additional route handlers will be implemented in:
 # - subtask-4-3: GET /citations endpoint
 # - subtask-4-4: GET /recommendations endpoint
 # - subtask-6-3: GET /alerts endpoint
