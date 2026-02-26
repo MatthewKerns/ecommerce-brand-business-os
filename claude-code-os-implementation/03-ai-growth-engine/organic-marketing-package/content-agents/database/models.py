@@ -304,8 +304,7 @@ class ScheduledContent(Base):
     published_at = Column(DateTime)
 
     # Relationships
-    # Note: PublishLog relationship will be added in subtask-1-2
-    # publish_logs = relationship("PublishLog", back_populates="scheduled_content", cascade="all, delete-orphan")
+    publish_logs = relationship("PublishLog", back_populates="scheduled_content", cascade="all, delete-orphan")
 
     # Table constraints
     __table_args__ = (
@@ -324,3 +323,65 @@ class ScheduledContent(Base):
 
     def __repr__(self):
         return f"<ScheduledContent(id={self.id}, type='{self.content_type}', status='{self.status}', scheduled_time='{self.scheduled_time}')>"
+
+
+class PublishLog(Base):
+    """
+    Tracks individual publish attempts for scheduled content.
+
+    Attributes:
+        id: Primary key
+        scheduled_content_id: Foreign key to scheduled_content
+        attempt_number: The retry attempt number (1-indexed)
+        status: Status of this publish attempt (pending, success, failed)
+        platform: Publishing platform (tiktok)
+        tiktok_video_id: TikTok video ID if publish succeeded
+        error_type: Type of error if publish failed
+        error_message: Detailed error message if publish failed
+        api_response: Full API response data (JSON stored as text)
+        attempted_at: Timestamp when publish attempt started
+        completed_at: Timestamp when publish attempt completed
+    """
+    __tablename__ = "publish_log"
+
+    # Primary Key
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
+    # Reference to Scheduled Content
+    scheduled_content_id = Column(Integer, ForeignKey("scheduled_content.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    # Attempt Details
+    attempt_number = Column(Integer, nullable=False)
+    status = Column(String(20), nullable=False, default="pending", index=True)
+    platform = Column(String(20), nullable=False, default="tiktok")
+
+    # Publish Results
+    tiktok_video_id = Column(String(100))
+    error_type = Column(String(50))
+    error_message = Column(Text)
+    api_response = Column(Text)  # JSON stored as text
+
+    # Timestamps
+    attempted_at = Column(DateTime, default=datetime.utcnow, index=True)
+    completed_at = Column(DateTime)
+
+    # Relationships
+    scheduled_content = relationship("ScheduledContent", back_populates="publish_logs")
+
+    # Table constraints
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('pending', 'success', 'failed')",
+            name="check_publish_status"
+        ),
+        CheckConstraint(
+            "platform IN ('tiktok')",
+            name="check_publish_platform"
+        ),
+        CheckConstraint("attempt_number > 0", name="check_attempt_number"),
+        Index("idx_publish_log_content_attempt", "scheduled_content_id", "attempt_number"),
+        Index("idx_publish_log_status_time", "status", "attempted_at"),
+    )
+
+    def __repr__(self):
+        return f"<PublishLog(id={self.id}, scheduled_content_id={self.scheduled_content_id}, attempt={self.attempt_number}, status='{self.status}')>"
