@@ -4,6 +4,19 @@ Configuration for AI Content Agents
 import os
 from pathlib import Path
 
+# Load environment-specific configuration
+try:
+    from .environments import load_environment_config
+    # Load configuration from environment-specific .env file
+    # This ensures the correct .env file is loaded based on ENVIRONMENT variable
+    load_environment_config()
+except FileNotFoundError:
+    # If no environment-specific .env file exists, continue with system environment
+    pass
+except ImportError:
+    # If environments module doesn't exist yet, fall back to default behavior
+    pass
+
 # Base paths
 BASE_DIR = Path(__file__).parent.parent.parent
 AGENTS_DIR = Path(__file__).parent.parent / "agents"
