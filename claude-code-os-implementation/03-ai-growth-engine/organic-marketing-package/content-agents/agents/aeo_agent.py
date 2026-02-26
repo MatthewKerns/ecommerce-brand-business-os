@@ -157,75 +157,111 @@ FAQ Content Strategy:
 
     def generate_product_schema(
         self,
-        product_name: str,
-        product_details: Dict[str, Any]
-    ) -> tuple[str, Path]:
+        product_data: Dict[str, Any]
+    ) -> str:
         """
-        Generate product schema markup optimized for AI parsing
+        Generate JSON-LD Product schema markup from product data
 
         Args:
-            product_name: Name of the product
-            product_details: Dictionary with product information (price, description, features, etc.)
+            product_data: Dictionary with product information (name, description, price, etc.)
 
         Returns:
-            Tuple of (schema_content, file_path)
+            JSON-LD Product schema as a string
         """
+        # Extract product name for logging
+        product_name = product_data.get('name', 'Unknown Product')
         self.logger.info(f"Generating product schema: product='{product_name}'")
 
-        prompt = f"""Create comprehensive product schema markup for:
+        # Build the base Product schema
+        schema = {
+            "@context": "https://schema.org",
+            "@type": "Product",
+            "name": product_data.get('name', '')
+        }
 
-PRODUCT NAME: {product_name}
+        # Add optional common properties
+        if 'description' in product_data:
+            schema['description'] = product_data['description']
 
-PRODUCT DETAILS:
-{self._format_product_details(product_details)}
-
-REQUIREMENTS:
-1. Use complete Product schema with all relevant properties
-2. Include aggregateRating if applicable
-3. Add detailed description optimized for AI understanding
-4. Include all technical specifications
-5. Add brand information (Infinity Vault)
-6. Include category and use case information
-7. Make it easy for AI assistants to understand what this product is and who it's for
-
-FORMAT:
-Return as JSON-LD Product schema format with all relevant properties.
-
-Also include recommendations for:
-- Key phrases AI assistants should associate with this product
-- Questions this product answers
-- Use cases to highlight for AI citation
-
-Generate the complete product schema now."""
-
-        system_context = """
-ADDITIONAL CONTEXT FOR PRODUCT SCHEMA:
-
-Product Schema Strategy:
-- Complete schemas help AI assistants understand products deeply
-- Include technical specs AND emotional benefits
-- Category and use case help AI match products to queries
-- Brand information builds authority
-
-AI Assistant Product Discovery:
-- AI assistants look for clear product-problem fit
-- Specifications help AI filter and recommend accurately
-- Reviews and ratings build trust signals
-- Clear categorization helps AI match to user needs"""
-
-        content, path = self.generate_and_save(
-            prompt=prompt,
-            output_dir=AEO_OUTPUT_DIR,
-            system_context=system_context,
-            metadata={
-                "type": "product_schema",
-                "product_name": product_name,
-                "product_details": product_details
+        if 'brand' in product_data:
+            schema['brand'] = {
+                "@type": "Brand",
+                "name": product_data['brand']
             }
-        )
+        elif 'name' in product_data:
+            # Default to Infinity Vault brand if not specified
+            schema['brand'] = {
+                "@type": "Brand",
+                "name": "Infinity Vault"
+            }
 
-        self.logger.info(f"Successfully generated product schema: {path}")
-        return content, path
+        if 'image' in product_data:
+            # Support single image or array of images
+            images = product_data['image']
+            if isinstance(images, str):
+                schema['image'] = images
+            else:
+                schema['image'] = images
+
+        if 'sku' in product_data:
+            schema['sku'] = product_data['sku']
+
+        # Add offers (price) information
+        if 'price' in product_data or 'offers' in product_data:
+            if 'offers' in product_data:
+                schema['offers'] = product_data['offers']
+            else:
+                offer = {
+                    "@type": "Offer",
+                    "price": product_data['price']
+                }
+                if 'priceCurrency' in product_data:
+                    offer['priceCurrency'] = product_data['priceCurrency']
+                else:
+                    offer['priceCurrency'] = "USD"
+
+                if 'availability' in product_data:
+                    offer['availability'] = product_data['availability']
+                else:
+                    offer['availability'] = "https://schema.org/InStock"
+
+                if 'url' in product_data:
+                    offer['url'] = product_data['url']
+
+                schema['offers'] = offer
+
+        # Add aggregate rating if provided
+        if 'aggregateRating' in product_data:
+            schema['aggregateRating'] = product_data['aggregateRating']
+        elif 'rating' in product_data:
+            # Build aggregateRating from simplified rating data
+            rating_data = product_data['rating']
+            schema['aggregateRating'] = {
+                "@type": "AggregateRating",
+                "ratingValue": rating_data.get('value', 5.0),
+                "reviewCount": rating_data.get('count', 1)
+            }
+
+        # Add review if provided
+        if 'review' in product_data:
+            schema['review'] = product_data['review']
+
+        # Add category
+        if 'category' in product_data:
+            schema['category'] = product_data['category']
+
+        # Add additional properties from product_data
+        optional_fields = ['mpn', 'gtin', 'gtin8', 'gtin12', 'gtin13', 'gtin14',
+                          'material', 'color', 'width', 'height', 'depth', 'weight']
+        for field in optional_fields:
+            if field in product_data:
+                schema[field] = product_data[field]
+
+        # Convert to JSON string
+        schema_json = json.dumps(schema, indent=2, ensure_ascii=False)
+
+        self.logger.info(f"Successfully generated product schema for '{product_name}'")
+        return schema_json
 
     def generate_ai_optimized_content(
         self,
