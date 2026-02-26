@@ -499,3 +499,118 @@ class OptimizationRecommendation(Base):
 
     def __repr__(self):
         return f"<OptimizationRecommendation(id={self.id}, type='{self.recommendation_type}', priority='{self.priority}', status='{self.status}')>"
+
+
+class AlertRecord(Base):
+    """
+    Tracks alerts for citation monitoring events such as rate drops or competitor gains.
+
+    Attributes:
+        id: Primary key
+        alert_type: Type of alert (citation_drop, competitor_gain, threshold_breach, other)
+        alert_severity: Severity level (high, medium, low)
+        status: Alert status (active, acknowledged, resolved, dismissed)
+        title: Short title of the alert
+        message: Detailed alert message
+        citation_record_id: Optional foreign key to related citation record
+        competitor_citation_id: Optional foreign key to related competitor citation
+        brand_name: Name of the brand related to alert
+        competitor_name: Optional name of competitor related to alert
+        ai_platform: Optional AI platform this relates to (chatgpt, claude, perplexity, all)
+        metric_name: Name of metric that triggered alert
+        previous_value: Previous metric value before trigger
+        current_value: Current metric value that triggered alert
+        threshold_value: Threshold value that was breached
+        change_percentage: Percentage change in metric
+        alert_metadata: JSON metadata about the alert (maps to 'metadata' column)
+        triggered_at: Timestamp when alert was triggered
+        acknowledged_at: Timestamp when alert was acknowledged
+        acknowledged_by: User who acknowledged the alert
+        resolved_at: Timestamp when alert was resolved
+        resolved_by: User who resolved the alert
+        dismissed_at: Timestamp when alert was dismissed
+        dismissed_by: User who dismissed the alert
+        dismissal_reason: Reason for dismissal if status is dismissed
+        resolution_notes: Notes about resolution if status is resolved
+        created_at: Timestamp when record was created
+        updated_at: Timestamp when record was last updated
+        campaign_id: Optional campaign identifier
+        user_id: Optional user identifier
+    """
+    __tablename__ = "alert_records"
+
+    # Primary Key
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
+    # Alert Classification
+    alert_type = Column(String(20), nullable=False, index=True)
+    alert_severity = Column(String(10), nullable=False, default="medium", index=True)
+    status = Column(String(20), nullable=False, default="active", index=True)
+
+    # Alert Content
+    title = Column(String(255), nullable=False)
+    message = Column(Text, nullable=False)
+
+    # Cross-References
+    citation_record_id = Column(Integer, ForeignKey("citation_records.id", ondelete="SET NULL"))
+    competitor_citation_id = Column(Integer, ForeignKey("competitor_citations.id", ondelete="SET NULL"))
+
+    # Context
+    brand_name = Column(String(100), index=True)
+    competitor_name = Column(String(100), index=True)
+    ai_platform = Column(String(20), index=True)
+
+    # Metrics
+    metric_name = Column(String(100))
+    previous_value = Column(Numeric(10, 2))
+    current_value = Column(Numeric(10, 2))
+    threshold_value = Column(Numeric(10, 2))
+    change_percentage = Column(Numeric(10, 2))
+
+    # Metadata
+    alert_metadata = Column("metadata", Text)  # JSON stored as text, mapped from 'metadata' column
+
+    # Timestamps
+    triggered_at = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
+    acknowledged_at = Column(DateTime)
+    resolved_at = Column(DateTime)
+    dismissed_at = Column(DateTime)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Action Tracking
+    acknowledged_by = Column(String(50))
+    resolved_by = Column(String(50))
+    dismissed_by = Column(String(50))
+    dismissal_reason = Column(Text)
+    resolution_notes = Column(Text)
+
+    # Optional Context
+    campaign_id = Column(String(50), index=True)
+    user_id = Column(String(50), index=True)
+
+    # Table constraints
+    __table_args__ = (
+        CheckConstraint(
+            "alert_type IN ('citation_drop', 'competitor_gain', 'threshold_breach', 'other')",
+            name="check_alert_type"
+        ),
+        CheckConstraint(
+            "alert_severity IN ('high', 'medium', 'low')",
+            name="check_alert_severity"
+        ),
+        CheckConstraint(
+            "status IN ('active', 'acknowledged', 'resolved', 'dismissed')",
+            name="check_alert_status"
+        ),
+        CheckConstraint(
+            "ai_platform IN ('chatgpt', 'claude', 'perplexity', 'all') OR ai_platform IS NULL",
+            name="check_alert_ai_platform"
+        ),
+        Index("idx_alert_type_severity_status", "alert_type", "alert_severity", "status"),
+        Index("idx_alert_triggered_at", "triggered_at"),
+        Index("idx_alert_brand_platform", "brand_name", "ai_platform"),
+    )
+
+    def __repr__(self):
+        return f"<AlertRecord(id={self.id}, type='{self.alert_type}', severity='{self.alert_severity}', status='{self.status}')>"
