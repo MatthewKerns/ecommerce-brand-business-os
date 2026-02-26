@@ -85,3 +85,14 @@ CHANNELS = {
     "youtube": "Brand awareness",
     "blog": "SEO and thought leadership"
 }
+
+# Target queries for AI citation monitoring
+# These queries are tested weekly across AI assistants (ChatGPT, Claude, Perplexity)
+# to track brand citations and optimize AEO (Answer Engine Optimization)
+TARGET_QUERIES = [
+    "Best TCG storage solutions",
+    "Top trading card binders",
+    "Best card sleeves for protection",
+    "How to organize trading card collection",
+    "Best deck boxes for TCG players"
+]
