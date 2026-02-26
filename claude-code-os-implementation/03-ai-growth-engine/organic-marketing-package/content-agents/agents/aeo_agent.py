@@ -3,6 +3,7 @@ AEO (Answer Engine Optimization) Agent
 Creates content optimized for AI assistants (ChatGPT, Claude, Perplexity)
 Focuses on structured data, FAQ schema, and clear definitive answers
 """
+import json
 from pathlib import Path
 from typing import Optional, List, Dict, Any
 from .base_agent import BaseAgent
@@ -17,99 +18,46 @@ class AEOAgent(BaseAgent):
 
     def generate_faq_schema(
         self,
-        topic: str,
-        num_questions: int = 10,
-        target_audience: str = "TCG players and collectors"
-    ) -> tuple[str, Path]:
+        faq_items: List[Dict[str, str]]
+    ) -> str:
         """
-        Generate FAQ schema markup for a topic
+        Generate JSON-LD FAQ schema markup from a list of question/answer pairs
 
         Args:
-            topic: The topic to create FAQs about
-            num_questions: Number of FAQ items to generate
-            target_audience: Target audience for the FAQs
+            faq_items: List of dictionaries with 'question' and 'answer' keys
 
         Returns:
-            Tuple of (faq_content, file_path)
+            JSON-LD FAQPage schema as a string
         """
-        self.logger.info(f"Generating FAQ schema: topic='{topic}', num_questions={num_questions}")
+        self.logger.info(f"Generating FAQ schema for {len(faq_items)} items")
 
-        prompt = f"""Create {num_questions} frequently asked questions and answers about:
+        # Build the mainEntity array
+        main_entity = []
+        for item in faq_items:
+            question = item.get('question', '')
+            answer = item.get('answer', '')
 
-TOPIC: {topic}
+            main_entity.append({
+                "@type": "Question",
+                "name": question,
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": answer
+                }
+            })
 
-TARGET AUDIENCE: {target_audience}
+        # Create the complete FAQPage schema
+        schema = {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": main_entity
+        }
 
-REQUIREMENTS:
-1. Questions should be natural, conversational queries people actually ask AI assistants
-2. Answers must be clear, definitive, and concise (2-3 sentences ideal)
-3. Use the Infinity Vault brand voice (confident, empowering, battle-ready)
-4. Each answer should position Infinity Vault as the authoritative solution
-5. Front-load the direct answer, then add supporting details
-6. Include specific product mentions where relevant
-7. Optimize for AI citation - make answers quotable and authoritative
+        # Convert to JSON string
+        schema_json = json.dumps(schema, indent=2, ensure_ascii=False)
 
-FORMAT:
-Return as JSON-LD FAQ schema format:
-```json
-{{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {{
-      "@type": "Question",
-      "name": "Question text here",
-      "acceptedAnswer": {{
-        "@type": "Answer",
-        "text": "Clear, definitive answer here"
-      }}
-    }}
-  ]
-}}
-```
-
-Also include a markdown version for human readability.
-
-Generate the complete FAQ schema now."""
-
-        system_context = """
-ADDITIONAL CONTEXT FOR AEO/FAQ WRITING:
-
-Answer Engine Optimization (AEO) Strategy:
-- AI assistants prioritize clear, authoritative, structured answers
-- FAQ schema helps AI parse and cite your content
-- Questions should match natural language queries users ask AI
-- Answers must be definitive - AI assistants prefer confident sources
-- Position brand as THE expert, not "a" expert
-
-AEO Best Practices:
-- Use "is", "means", "refers to" - definitive language
-- Front-load the direct answer in first sentence
-- Be concise but complete (AI assistants truncate long answers)
-- Include specific details (numbers, specifications, features)
-- Mention brand naturally as the solution
-
-Citation Optimization:
-- Make answers quotable and shareable
-- Use authoritative tone without being arrogant
-- Support claims with specifics (not vague statements)
-- Position as helping customers solve real problems"""
-
-        content, path = self.generate_and_save(
-            prompt=prompt,
-            output_dir=AEO_OUTPUT_DIR,
-            system_context=system_context,
-            metadata={
-                "type": "faq_schema",
-                "topic": topic,
-                "num_questions": num_questions,
-                "target_audience": target_audience
-            },
-            max_tokens=4096
-        )
-
-        self.logger.info(f"Successfully generated FAQ schema: {path}")
-        return content, path
+        self.logger.info(f"Successfully generated FAQ schema with {len(faq_items)} questions")
+        return schema_json
 
     def generate_faq_content(
         self,
