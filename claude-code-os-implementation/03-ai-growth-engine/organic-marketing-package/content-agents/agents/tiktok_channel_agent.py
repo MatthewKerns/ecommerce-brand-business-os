@@ -1121,3 +1121,105 @@ PRIMARY SUCCESS METRIC: Save rate (saves/views)
         similarity = len(intersection) / len(union)
 
         return similarity
+
+    def batch_generate_weekly_content(
+        self,
+        num_days: int = 7,
+        include_topics: bool = True
+    ) -> Dict[str, Dict[str, Any]]:
+        """
+        Batch generate weekly content for all 4 channels
+
+        This method creates coordinated content across all elemental channels,
+        ensuring each channel maintains its distinct identity while working
+        together as part of the overall TikTok strategy.
+
+        Args:
+            num_days: Number of days to plan content for (default 7)
+            include_topics: Whether to include specific topic suggestions
+
+        Returns:
+            Dictionary with channel elements as keys and content data as values.
+            Each channel's data includes:
+            - element: Channel element identifier
+            - channel_name: Channel display name
+            - calendar_content: Generated calendar content
+            - calendar_path: Path to saved calendar file
+
+        Example:
+            >>> agent = TikTokChannelAgent()
+            >>> result = agent.batch_generate_weekly_content()
+            >>> print(f'Generated content for {len(result)} channels')
+            Generated content for 4 channels
+            >>> for element, data in result.items():
+            ...     print(f"{element}: {data['channel_name']}")
+            air: Infinity Vault - Air
+            water: Infinity Vault - Water
+            fire: Infinity Vault - Fire
+            earth: Infinity Vault - Earth
+        """
+        self.logger.info(
+            f"Batch generating {num_days}-day content for all {len(self.channels)} channels"
+        )
+
+        results = {}
+        required_elements = ["air", "water", "fire", "earth"]
+
+        for element in required_elements:
+            if element not in self.channels:
+                self.logger.warning(
+                    f"Channel '{element}' not found in configuration, skipping"
+                )
+                continue
+
+            try:
+                channel_config = self.channels[element]
+                channel_name = channel_config["channel_name"]
+
+                self.logger.info(
+                    f"Generating {num_days}-day content calendar for {element} channel "
+                    f"({channel_name})"
+                )
+
+                # Generate content calendar for this channel
+                calendar_content, calendar_path = self.generate_channel_content_calendar(
+                    channel_element=element,
+                    num_days=num_days,
+                    include_topics=include_topics
+                )
+
+                results[element] = {
+                    "element": element,
+                    "channel_name": channel_name,
+                    "calendar_content": calendar_content,
+                    "calendar_path": str(calendar_path),
+                    "num_days": num_days,
+                    "status": "success"
+                }
+
+                self.logger.info(
+                    f"Successfully generated content for {element} channel: {calendar_path}"
+                )
+
+            except Exception as e:
+                self.logger.error(
+                    f"Error generating content for {element} channel: {e}",
+                    exc_info=True
+                )
+                results[element] = {
+                    "element": element,
+                    "channel_name": self.channels.get(element, {}).get("channel_name", element),
+                    "status": "error",
+                    "error": str(e)
+                }
+
+        successful_channels = sum(
+            1 for r in results.values() if r.get("status") == "success"
+        )
+
+        self.logger.info(
+            f"Batch generation complete: {successful_channels}/{len(required_elements)} "
+            f"channels generated successfully"
+        )
+
+        return results
