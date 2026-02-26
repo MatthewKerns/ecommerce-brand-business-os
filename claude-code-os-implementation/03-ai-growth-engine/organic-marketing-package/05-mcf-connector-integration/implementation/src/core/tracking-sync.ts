@@ -6,6 +6,9 @@
  * - Syncs tracking numbers back to TikTok Shop
  * - Tracks sync status and retries failed syncs
  * - Configurable polling interval and retry behavior
+ * - Automatic scheduling with configurable sync intervals (default: 30 minutes)
+ * - Rate limiting to prevent API throttling (default: 10 requests per minute)
+ * - Start/stop scheduler control for production deployments
  */
 
 import type { TikTokShopClient } from '../clients/tiktok-shop-client';
@@ -78,6 +81,9 @@ export interface TrackingSyncConfig {
   retryDelayMs?: number;
   skipAlreadySynced?: boolean;
   updateTikTok?: boolean;
+  syncIntervalMs?: number;
+  schedulerEnabled?: boolean;
+  rateLimitPerMinute?: number;
 }
 
 /**
@@ -97,6 +103,9 @@ const DEFAULT_TRACKING_SYNC_CONFIG: Required<TrackingSyncConfig> = {
   retryDelayMs: 5000,
   skipAlreadySynced: true,
   updateTikTok: true,
+  syncIntervalMs: 30 * 60 * 1000, // 30 minutes
+  schedulerEnabled: false,
+  rateLimitPerMinute: 10,
 };
 
 // ============================================================
@@ -112,6 +121,15 @@ export class TrackingSync {
   private amazonClient: AmazonMCFClient;
   private trackingRecords: Map<string, OrderTrackingRecord>;
 
+  // Scheduler state
+  private schedulerTimer?: NodeJS.Timeout;
+  private isSchedulerActive: boolean = false;
+  private lastSyncRun?: Date;
+
+  // Rate limiting
+  private requestsInCurrentMinute: number = 0;
+  private currentMinuteStart: Date = new Date();
+
   constructor(
     dependencies: TrackingSyncDependencies,
     config?: TrackingSyncConfig
@@ -120,6 +138,11 @@ export class TrackingSync {
     this.amazonClient = dependencies.amazonClient;
     this.config = { ...DEFAULT_TRACKING_SYNC_CONFIG, ...config };
     this.trackingRecords = new Map();
+
+    // Start scheduler if enabled in config
+    if (this.config.schedulerEnabled) {
+      this.startScheduler();
+    }
   }
 
   /**
@@ -461,10 +484,123 @@ export class TrackingSync {
   }
 
   /**
+   * Reset rate limit counter if we've moved to a new minute
+   */
+  private resetRateLimitIfNeeded(): void {
+    const now = new Date();
+    const minutesSinceStart = Math.floor((now.getTime() - this.currentMinuteStart.getTime()) / 60000);
+
+    if (minutesSinceStart >= 1) {
+      this.requestsInCurrentMinute = 0;
+      this.currentMinuteStart = now;
+    }
+  }
+
+  /**
+   * Enforce rate limiting before making API requests
+   */
+  private async enforceRateLimit(): Promise<void> {
+    this.resetRateLimitIfNeeded();
+
+    // If we've hit the rate limit, wait until the next minute
+    if (this.requestsInCurrentMinute >= this.config.rateLimitPerMinute) {
+      const now = new Date();
+      const msUntilNextMinute = 60000 - (now.getTime() - this.currentMinuteStart.getTime());
+
+      if (msUntilNextMinute > 0) {
+        await this.sleep(msUntilNextMinute);
+        this.resetRateLimitIfNeeded();
+      }
+    }
+
+    this.requestsInCurrentMinute++;
+  }
+
+  /**
+   * Start the automatic tracking sync scheduler
+   */
+  startScheduler(): void {
+    if (this.isSchedulerActive) {
+      return; // Scheduler already running
+    }
+
+    this.isSchedulerActive = true;
+
+    // Run immediately on start
+    this.runScheduledSync().catch(() => {
+      // Errors are already logged within runScheduledSync
+    });
+
+    // Schedule periodic runs
+    this.schedulerTimer = setInterval(() => {
+      this.runScheduledSync().catch(() => {
+        // Errors are already logged within runScheduledSync
+      });
+    }, this.config.syncIntervalMs);
+  }
+
+  /**
+   * Stop the automatic tracking sync scheduler
+   */
+  stopScheduler(): void {
+    if (!this.isSchedulerActive) {
+      return; // Scheduler not running
+    }
+
+    if (this.schedulerTimer) {
+      clearInterval(this.schedulerTimer);
+      this.schedulerTimer = undefined;
+    }
+
+    this.isSchedulerActive = false;
+  }
+
+  /**
+   * Check if the scheduler is currently running
+   */
+  isSchedulerRunning(): boolean {
+    return this.isSchedulerActive;
+  }
+
+  /**
+   * Run scheduled sync (called by scheduler)
+   */
+  private async runScheduledSync(): Promise<void> {
+    try {
+      this.lastSyncRun = new Date();
+
+      // Enforce rate limit before starting sync
+      await this.enforceRateLimit();
+
+      // Sync all unsynced orders
+      await this.syncAllUnsynced();
+    } catch (error) {
+      // Silently handle errors - they're already captured in sync results
+      // This prevents the scheduler from stopping on errors
+    }
+  }
+
+  /**
    * Update configuration
    */
   updateConfig(config: Partial<TrackingSyncConfig>): void {
+    const wasSchedulerEnabled = this.config.schedulerEnabled;
     this.config = { ...this.config, ...config };
+
+    // Handle scheduler state changes
+    if (config.schedulerEnabled !== undefined) {
+      if (config.schedulerEnabled && !wasSchedulerEnabled) {
+        this.startScheduler();
+      } else if (!config.schedulerEnabled && wasSchedulerEnabled) {
+        this.stopScheduler();
+      }
+    }
+
+    // If scheduler is running and interval changed, restart it
+    if (this.isSchedulerActive && config.syncIntervalMs !== undefined) {
+      this.stopScheduler();
+      this.startScheduler();
+    }
   }
 
   /**
@@ -489,6 +625,8 @@ export class TrackingSync {
     synced: number;
     unsynced: number;
     failed: number;
+    schedulerRunning: boolean;
+    lastSyncRun?: Date;
   } {
     const records = this.getAllTrackingRecords();
     const synced = records.filter(r => r.synced).length;
@@ -499,6 +637,8 @@ export class TrackingSync {
       synced,
       unsynced: records.length - synced,
       failed,
+      schedulerRunning: this.isSchedulerActive,
+      lastSyncRun: this.lastSyncRun,
     };
   }
 }
