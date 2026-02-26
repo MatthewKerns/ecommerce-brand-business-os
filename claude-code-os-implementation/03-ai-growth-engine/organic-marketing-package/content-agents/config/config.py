@@ -32,6 +32,8 @@ TARGET_MARKET_PATH = BRAND_DIR / "03-ai-growth-engine" / "business-definition" /
 
 # API Configuration
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+PERPLEXITY_API_KEY = os.getenv("PERPLEXITY_API_KEY", "")
 DEFAULT_MODEL = "claude-sonnet-4-5-20250929"
 DEFAULT_MAX_TOKENS = 4096
 
