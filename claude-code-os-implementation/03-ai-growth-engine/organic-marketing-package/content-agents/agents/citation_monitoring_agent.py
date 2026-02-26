@@ -459,3 +459,331 @@ class CitationMonitoringAgent(BaseAgent):
             })
 
         return competitor_details
+
+    def compare_competitors(
+        self,
+        competitor_names: List[str],
+        days: int = 30,
+        platform: Optional[str] = None,
+        brand_name: Optional[str] = None,
+        db_session: Optional[Session] = None
+    ) -> Dict[str, Any]:
+        """
+        Compare brand citation rates against competitor citation rates
+
+        This method analyzes citation patterns over a specified time period and
+        provides comparative metrics between the brand and competitors. It calculates
+        citation rates, mention frequencies, and position analytics for both the brand
+        and specified competitors.
+
+        Args:
+            competitor_names: List of competitor names to compare against
+            days: Number of days to look back for citation data (default: 30)
+            platform: Optional AI platform filter (chatgpt, claude, perplexity, or None for all)
+            brand_name: Brand name to compare (defaults to BRAND_NAME from config)
+            db_session: Optional database session (creates new if not provided)
+
+        Returns:
+            Dictionary containing competitor comparison analysis:
+                - brand_name: The brand being analyzed
+                - time_period_days: Number of days analyzed
+                - platforms_analyzed: List of platforms included in analysis
+                - brand_stats: Dict with brand citation statistics
+                    - total_queries: Total queries executed
+                    - citations: Number of times brand was cited
+                    - citation_rate: Percentage of queries where brand was cited
+                    - avg_position: Average position when mentioned
+                    - platforms: Per-platform breakdown
+                - competitor_stats: List of dicts with competitor statistics
+                    - competitor_name: Name of competitor
+                    - total_queries: Total queries executed
+                    - citations: Number of times competitor was cited
+                    - citation_rate: Percentage of queries where competitor was cited
+                    - avg_position: Average position when mentioned
+                    - platforms: Per-platform breakdown
+                - comparison_summary: Summary insights
+                    - brand_rank: Brand's rank among all entities (1 = best)
+                    - leading_competitors: Competitors with higher citation rates
+                    - citation_rate_difference: Percentage point difference vs top competitor
+                    - recommended_actions: List of recommended actions based on comparison
+
+        Raises:
+            ValueError: If competitor_names is empty or days is invalid
+            ContentGenerationError: For unexpected errors during comparison
+
+        Example:
+            >>> agent = CitationMonitoringAgent()
+            >>> comparison = agent.compare_competitors(
+            ...     competitor_names=["UltraGuard", "DeckMaster", "CardSafe"],
+            ...     days=30,
+            ...     platform="chatgpt"
+            ... )
+            >>> print(f"Brand citation rate: {comparison['brand_stats']['citation_rate']}%")
+            >>> print(f"Brand rank: {comparison['comparison_summary']['brand_rank']}")
+        """
+        # Validate parameters
+        if not competitor_names or len(competitor_names) == 0:
+            raise ValueError("competitor_names parameter is required and cannot be empty")
+        if days <= 0:
+            raise ValueError("days parameter must be greater than 0")
+        if platform and platform.lower() not in ["chatgpt", "claude", "perplexity"]:
+            raise ValueError("platform must be one of: chatgpt, claude, perplexity, or None for all")
+
+        # Use configured brand name if not provided
+        if brand_name is None:
+            brand_name = BRAND_NAME
+
+        self.logger.info(
+            f"Comparing brand '{brand_name}' against {len(competitor_names)} competitors "
+            f"over {days} days (platform: {platform or 'all'})"
+        )
+
+        # Create database session if not provided
+        session_provided = db_session is not None
+        if not session_provided:
+            db_session = get_db_session()
+
+        try:
+            # Calculate date range
+            end_date = datetime.utcnow()
+            start_date = end_date - timedelta(days=days)
+
+            # Build base query for citation records
+            brand_query = db_session.query(CitationRecord).filter(
+                CitationRecord.query_timestamp >= start_date,
+                CitationRecord.query_timestamp <= end_date,
+                CitationRecord.brand_name == brand_name
+            )
+
+            # Apply platform filter if specified
+            if platform:
+                brand_query = brand_query.filter(CitationRecord.ai_platform == platform.lower())
+
+            # Get brand citation records
+            brand_records = brand_query.all()
+
+            # Calculate brand statistics
+            brand_stats = self._calculate_citation_stats(
+                brand_records,
+                brand_name,
+                "CitationRecord"
+            )
+
+            # Build base query for competitor citations
+            competitor_query = db_session.query(CompetitorCitation).filter(
+                CompetitorCitation.query_timestamp >= start_date,
+                CompetitorCitation.query_timestamp <= end_date,
+                CompetitorCitation.competitor_name.in_(competitor_names)
+            )
+
+            # Apply platform filter if specified
+            if platform:
+                competitor_query = competitor_query.filter(
+                    CompetitorCitation.ai_platform == platform.lower()
+                )
+
+            # Get competitor citation records
+            competitor_records = competitor_query.all()
+
+            # Calculate competitor statistics (grouped by competitor name)
+            competitor_stats = []
+            for competitor_name in competitor_names:
+                competitor_records_filtered = [
+                    r for r in competitor_records if r.competitor_name == competitor_name
+                ]
+                stats = self._calculate_citation_stats(
+                    competitor_records_filtered,
+                    competitor_name,
+                    "CompetitorCitation"
+                )
+                competitor_stats.append(stats)
+
+            # Determine platforms analyzed
+            platforms_analyzed = []
+            if platform:
+                platforms_analyzed = [platform.lower()]
+            else:
+                platforms_analyzed = ["chatgpt", "claude", "perplexity"]
+
+            # Generate comparison summary
+            comparison_summary = self._generate_comparison_summary(
+                brand_stats,
+                competitor_stats,
+                brand_name
+            )
+
+            # Build result
+            result = {
+                'brand_name': brand_name,
+                'time_period_days': days,
+                'platforms_analyzed': platforms_analyzed,
+                'brand_stats': brand_stats,
+                'competitor_stats': competitor_stats,
+                'comparison_summary': comparison_summary
+            }
+
+            self.logger.info(
+                f"Competitor comparison complete: brand_rank={comparison_summary['brand_rank']}, "
+                f"citation_rate={brand_stats['citation_rate']:.2f}%"
+            )
+
+            return result
+
+        except ValueError as e:
+            # Re-raise validation errors
+            self.logger.error(f"Validation error in competitor comparison: {e}")
+            raise
+
+        except Exception as e:
+            # Catch any unexpected errors
+            error_msg = f"Unexpected error comparing competitors: {str(e)}"
+            self.logger.error(error_msg, exc_info=True)
+            raise ContentGenerationError(error_msg)
+
+        finally:
+            # Close session if we created it
+            if not session_provided and db_session:
+                db_session.close()
+
+    def _calculate_citation_stats(
+        self,
+        records: List[Any],
+        entity_name: str,
+        record_type: str
+    ) -> Dict[str, Any]:
+        """
+        Calculate citation statistics for a brand or competitor
+
+        Args:
+            records: List of CitationRecord or CompetitorCitation objects
+            entity_name: Name of the brand or competitor
+            record_type: Type of record ("CitationRecord" or "CompetitorCitation")
+
+        Returns:
+            Dictionary containing citation statistics
+        """
+        total_queries = len(records)
+
+        # Determine the mentioned field based on record type
+        if record_type == "CitationRecord":
+            citations = sum(1 for r in records if r.brand_mentioned)
+            mentioned_records = [r for r in records if r.brand_mentioned]
+        else:  # CompetitorCitation
+            citations = sum(1 for r in records if r.competitor_mentioned)
+            mentioned_records = [r for r in records if r.competitor_mentioned]
+
+        # Calculate citation rate
+        citation_rate = (citations / total_queries * 100) if total_queries > 0 else 0.0
+
+        # Calculate average position
+        positions = [r.position_in_response for r in mentioned_records if r.position_in_response is not None]
+        avg_position = (sum(positions) / len(positions)) if positions else None
+
+        # Calculate per-platform breakdown
+        platforms = {}
+        for platform_name in ["chatgpt", "claude", "perplexity"]:
+            platform_records = [r for r in records if r.ai_platform == platform_name]
+            platform_total = len(platform_records)
+
+            if record_type == "CitationRecord":
+                platform_citations = sum(1 for r in platform_records if r.brand_mentioned)
+            else:
+                platform_citations = sum(1 for r in platform_records if r.competitor_mentioned)
+
+            platform_rate = (platform_citations / platform_total * 100) if platform_total > 0 else 0.0
+
+            platforms[platform_name] = {
+                'total_queries': platform_total,
+                'citations': platform_citations,
+                'citation_rate': platform_rate
+            }
+
+        return {
+            'entity_name': entity_name,
+            'total_queries': total_queries,
+            'citations': citations,
+            'citation_rate': citation_rate,
+            'avg_position': avg_position,
+            'platforms': platforms
+        }
+
+    def _generate_comparison_summary(
+        self,
+        brand_stats: Dict[str, Any],
+        competitor_stats: List[Dict[str, Any]],
+        brand_name: str
+    ) -> Dict[str, Any]:
+        """
+        Generate comparison summary with insights and recommendations
+
+        Args:
+            brand_stats: Brand citation statistics
+            competitor_stats: List of competitor citation statistics
+            brand_name: Name of the brand
+
+        Returns:
+            Dictionary containing comparison summary
+        """
+        # Create sorted list of all entities by citation rate
+        all_entities = [brand_stats] + competitor_stats
+        sorted_entities = sorted(all_entities, key=lambda x: x['citation_rate'], reverse=True)
+
+        # Find brand rank
+        brand_rank = None
+        for idx, entity in enumerate(sorted_entities):
+            if entity['entity_name'] == brand_name:
+                brand_rank = idx + 1  # 1-based rank
+                break
+
+        # Find leading competitors (those with higher citation rates)
+        leading_competitors = [
+            {
+                'name': entity['entity_name'],
+                'citation_rate': entity['citation_rate'],
+                'difference': entity['citation_rate'] - brand_stats['citation_rate']
+            }
+            for entity in sorted_entities
+            if entity['entity_name'] != brand_name and entity['citation_rate'] > brand_stats['citation_rate']
+        ]
+
+        # Calculate citation rate difference vs top competitor
+        citation_rate_difference = None
+        if leading_competitors:
+            top_competitor = leading_competitors[0]
+            citation_rate_difference = top_competitor['difference']
+
+        # Generate recommended actions based on comparison
+        recommended_actions = []
+        if brand_rank and brand_rank > 1:
+            recommended_actions.append(
+                f"Brand is ranked #{brand_rank} in citation rate - consider optimizing content to improve visibility"
+            )
+        if leading_competitors:
+            recommended_actions.append(
+                f"Top competitor '{leading_competitors[0]['name']}' has {citation_rate_difference:.2f}% higher citation rate - analyze their content strategy"
+            )
+        if brand_stats['citation_rate'] < 50:
+            recommended_actions.append(
+                "Citation rate is below 50% - focus on improving content relevance and authority"
+            )
+        if brand_stats['avg_position'] and brand_stats['avg_position'] > 2:
+            recommended_actions.append(
+                f"Average citation position is {brand_stats['avg_position']:.1f} - work on being mentioned earlier in responses"
+            )
+
+        # Add platform-specific recommendations
+        for platform_name, platform_stats in brand_stats['platforms'].items():
+            if platform_stats['total_queries'] > 0 and platform_stats['citation_rate'] < 30:
+                recommended_actions.append(
+                    f"Low citation rate on {platform_name} ({platform_stats['citation_rate']:.1f}%) - optimize content for this platform"
+                )
+
+        if not recommended_actions:
+            recommended_actions.append("Brand is performing well - maintain current content strategy")
+
+        return {
+            'brand_rank': brand_rank,
+            'leading_competitors': leading_competitors,
+            'citation_rate_difference': citation_rate_difference,
+            'recommended_actions': recommended_actions
+        }
