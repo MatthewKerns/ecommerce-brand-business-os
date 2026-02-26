@@ -4,6 +4,7 @@
  * Features:
  * - Fetches orders from TikTok Shop
  * - Validates orders for MCF fulfillment
+ * - Checks inventory availability
  * - Transforms orders to MCF format
  * - Creates fulfillment orders in Amazon MCF
  * - Tracks routing results and errors
@@ -13,6 +14,7 @@ import type { TikTokShopClient } from '../clients/tiktok-shop-client';
 import type { AmazonMCFClient } from '../clients/amazon-mcf-client';
 import type { OrderValidator } from './order-validator';
 import type { OrderTransformer } from './order-transformer';
+import type { InventorySync } from './inventory-sync';
 import type { TikTokOrder } from '../types/tiktok-order';
 import type { MCFFulfillmentOrder } from '../types/mcf-order';
 import { ErrorCode, TikTokOrderStatus } from '../types/common';
@@ -23,7 +25,7 @@ import { ErrorCode, TikTokOrderStatus } from '../types/common';
 
 export interface OrderRoutingError {
   orderId: string;
-  stage: 'fetch' | 'validate' | 'transform' | 'create_mcf';
+  stage: 'fetch' | 'validate' | 'transform' | 'check_inventory' | 'create_mcf';
   code: ErrorCode;
   message: string;
   details?: unknown;
@@ -31,7 +33,7 @@ export interface OrderRoutingError {
 
 export interface OrderRoutingWarning {
   orderId: string;
-  stage: 'validate' | 'transform';
+  stage: 'validate' | 'transform' | 'check_inventory';
   message: string;
 }
 
@@ -68,6 +70,7 @@ export interface OrderRouterDependencies {
   amazonClient: AmazonMCFClient;
   validator: OrderValidator;
   transformer: OrderTransformer;
+  inventorySync?: InventorySync; // Optional - if not provided, inventory checks are skipped
 }
 
 // ============================================================
@@ -92,6 +95,7 @@ export class OrderRouter {
   private amazonClient: AmazonMCFClient;
   private validator: OrderValidator;
   private transformer: OrderTransformer;
+  private inventorySync?: InventorySync;
 
   constructor(
     dependencies: OrderRouterDependencies,
@@ -101,6 +105,7 @@ export class OrderRouter {
     this.amazonClient = dependencies.amazonClient;
     this.validator = dependencies.validator;
     this.transformer = dependencies.transformer;
+    this.inventorySync = dependencies.inventorySync;
     this.config = { ...DEFAULT_ROUTER_CONFIG, ...config };
   }
 
@@ -112,8 +117,7 @@ export class OrderRouter {
       // Stage 1: Fetch order from TikTok
       let tiktokOrder: TikTokOrder;
       try {
-        const orderDetail = await this.tiktokClient.getOrderDetail(orderId);
-        tiktokOrder = orderDetail.order;
+        tiktokOrder = await this.tiktokClient.getOrderDetail(orderId);
       } catch (error) {
         return {
           success: false,
@@ -137,7 +141,7 @@ export class OrderRouter {
           error: {
             orderId,
             stage: 'validate',
-            code: ErrorCode.VALIDATION_FAILED,
+            code: ErrorCode.INVALID_ORDER_DATA,
             message: `Order validation failed: ${validationResult.errors.map(e => e.message).join(', ')}`,
             details: validationResult.errors,
           },
@@ -187,19 +191,120 @@ export class OrderRouter {
         );
       }
 
+      // Stage 3.5: Check inventory (if inventory sync is enabled)
+      if (this.inventorySync && transformResult.mcfOrderRequest) {
+        try {
+          // Extract SKUs and quantities from MCF order request
+          const skuQuantities = transformResult.mcfOrderRequest.items.map(item => ({
+            sku: item.sellerSku,
+            quantity: item.quantity,
+          }));
+
+          // Check inventory for all SKUs
+          const inventoryResult = await this.inventorySync.checkInventoryBatch(skuQuantities);
+
+          // Check for insufficient inventory
+          const insufficientItems = inventoryResult.results.filter(r => !r.sufficient);
+          if (insufficientItems.length > 0) {
+            const insufficientSkus = insufficientItems.map(item =>
+              `${item.sku} (requested: ${item.requested}, available: ${item.available})`
+            ).join(', ');
+
+            return {
+              success: false,
+              orderId,
+              error: {
+                orderId,
+                stage: 'check_inventory',
+                code: ErrorCode.INSUFFICIENT_INVENTORY,
+                message: `Insufficient inventory for order: ${insufficientSkus}`,
+                details: {
+                  insufficientItems: insufficientItems.map(item => ({
+                    sku: item.sku,
+                    requested: item.requested,
+                    available: item.available,
+                    error: item.error,
+                  })),
+                  inventoryResult,
+                },
+              },
+            };
+          }
+
+          // Collect low stock warnings
+          const lowStockItems = inventoryResult.results.filter(r => r.lowStock && r.sufficient);
+          if (lowStockItems.length > 0) {
+            warnings.push(
+              ...lowStockItems.map(item => ({
+                orderId,
+                stage: 'check_inventory' as const,
+                message: `Low stock for SKU ${item.sku}: ${item.available} available (threshold: ${this.inventorySync!.getConfig().lowStockThreshold})`,
+              }))
+            );
+          }
+
+          // Collect inventory check errors (non-blocking)
+          if (inventoryResult.errorCount > 0) {
+            warnings.push(
+              ...inventoryResult.errors.map(error => ({
+                orderId,
+                stage: 'check_inventory' as const,
+                message: `Inventory check warning for SKU ${error.sku}: ${error.message}`,
+              }))
+            );
+          }
+        } catch (error) {
+          // Inventory check failure - treat as blocking error
+          return {
+            success: false,
+            orderId,
+            error: {
+              orderId,
+              stage: 'check_inventory',
+              code: ErrorCode.INVENTORY_CHECK_FAILED,
+              message: `Failed to check inventory: ${error instanceof Error ? error.message : 'Unknown error'}`,
+              details: error,
+            },
+          };
+        }
+      }
+
       // Stage 4: Create MCF fulfillment order
       let mcfOrder: MCFFulfillmentOrder | undefined;
       let mcfFulfillmentOrderId: string;
 
       try {
-        const createResult = await this.amazonClient.createFulfillmentOrder(
-          transformResult.mcfOrderRequest!
-        );
-        mcfFulfillmentOrderId = transformResult.mcfOrderRequest!.sellerFulfillmentOrderId;
+        const mcfRequest = transformResult.mcfOrderRequest!;
+
+        // Convert MCFFulfillmentOrderRequest to CreateMCFOrderParams
+        const createParams = {
+          orderId: mcfRequest.sellerFulfillmentOrderId,
+          displayableOrderId: mcfRequest.displayableOrderId,
+          orderDate: new Date(mcfRequest.displayableOrderDate),
+          orderComment: mcfRequest.displayableOrderComment,
+          shippingSpeed: mcfRequest.shippingSpeedCategory,
+          destinationAddress: mcfRequest.destinationAddress,
+          items: mcfRequest.items.map(item => ({
+            sku: item.sellerSku,
+            itemId: item.sellerFulfillmentOrderItemId,
+            quantity: item.quantity,
+            price: item.perUnitPrice
+              ? { amount: item.perUnitPrice.value, currency: item.perUnitPrice.currencyCode }
+              : undefined,
+            declaredValue: item.perUnitDeclaredValue
+              ? { amount: item.perUnitDeclaredValue.value, currency: item.perUnitDeclaredValue.currencyCode }
+              : undefined,
+          })),
+        };
+
+        const createResult = await this.amazonClient.createFulfillmentOrder(createParams);
+        mcfFulfillmentOrderId = mcfRequest.sellerFulfillmentOrderId;
 
         // Try to get the created order details (optional - don't fail if this fails)
         try {
-          const orderDetail = await this.amazonClient.getFulfillmentOrder(mcfFulfillmentOrderId);
+          const orderDetail = await this.amazonClient.getFulfillmentOrder({
+            sellerFulfillmentOrderId: mcfFulfillmentOrderId,
+          });
           mcfOrder = orderDetail.fulfillmentOrder;
         } catch (detailError) {
           // Ignore error - order was created successfully, we just couldn't fetch details
@@ -211,7 +316,7 @@ export class OrderRouter {
           error: {
             orderId,
             stage: 'create_mcf',
-            code: ErrorCode.MCF_API_ERROR,
+            code: ErrorCode.AMAZON_API_ERROR,
             message: `Failed to create MCF fulfillment order: ${error instanceof Error ? error.message : 'Unknown error'}`,
             details: error,
           },

@@ -3,7 +3,7 @@
  */
 
 import { OrderRouter, createOrderRouter, type OrderRouterDependencies } from '../order-router';
-import { TikTokOrderStatus, ErrorCode } from '../../types/common';
+import { TikTokOrderStatus, ErrorCode, MCFFulfillmentStatus } from '../../types/common';
 import type { TikTokOrder } from '../../types/tiktok-order';
 import type { Address } from '../../types/common';
 import type { MCFFulfillmentOrderRequest, MCFFulfillmentOrder } from '../../types/mcf-order';
@@ -42,9 +42,48 @@ const createMockTransformer = () => ({
   getConfig: jest.fn(),
 });
 
+const createMockInventorySync = () => ({
+  checkInventory: jest.fn(),
+  checkInventoryBatch: jest.fn(),
+  refreshInventory: jest.fn(),
+  clearCache: jest.fn(),
+  clearExpiredCache: jest.fn(),
+  updateConfig: jest.fn(),
+  getConfig: jest.fn().mockReturnValue({
+    cacheTtlMs: 300000,
+    lowStockThreshold: 10,
+    enableCaching: true,
+    batchSize: 50,
+    safetyStock: 0,
+  }),
+  getCacheStats: jest.fn(),
+  getLowStockSkus: jest.fn(),
+});
+
 // ============================================================
 // Test Data Factories
 // ============================================================
+
+function createSuccessfulInventoryResult() {
+  return {
+    totalSkus: 1,
+    sufficientCount: 1,
+    insufficientCount: 0,
+    lowStockCount: 0,
+    errorCount: 0,
+    results: [
+      {
+        sku: 'AMAZON-SKU-123',
+        available: 100,
+        requested: 2,
+        sufficient: true,
+        lowStock: false,
+        cached: false,
+      },
+    ],
+    errors: [],
+  };
+}
 
 function createValidTikTokOrder(orderId: string = 'TEST123'): TikTokOrder {
   return {
@@ -88,7 +127,7 @@ function createValidTikTokOrder(orderId: string = 'TEST123'): TikTokOrder {
       platform_discount: 0,
     },
 
-    fulfillment_type: 'FULFILLED_BY_SELLER',
+    fulfillment_type: 'FBS',
     shipping_type: 'STANDARD',
     delivery_option_name: 'Standard Shipping',
 
@@ -146,10 +185,14 @@ function createMCFOrderRequest(): MCFFulfillmentOrderRequest {
 function createMCFFulfillmentOrder(): MCFFulfillmentOrder {
   return {
     sellerFulfillmentOrderId: 'TIKTOK-TEST123',
+    marketplaceId: 'ATVPDKIKX0DER',
     displayableOrderId: 'TEST123',
     displayableOrderDate: new Date().toISOString(),
     shippingSpeedCategory: 'Standard',
-    deliveryWindow: undefined,
+    deliveryWindow: {
+      startDate: new Date().toISOString(),
+      endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+    },
     destinationAddress: {
       name: 'John Doe',
       addressLine1: '123 Main St',
@@ -162,18 +205,29 @@ function createMCFFulfillmentOrder(): MCFFulfillmentOrder {
     },
     fulfillmentAction: 'Ship',
     fulfillmentPolicy: 'FillOrKill',
-    fulfillmentOrderStatus: 'Received',
+    fulfillmentOrderStatus: MCFFulfillmentStatus.RECEIVED,
+    codSettings: {
+      isCodRequired: false,
+      codCharge: {
+        currencyCode: 'USD',
+        value: 0,
+      },
+      codChargeTax: {
+        currencyCode: 'USD',
+        value: 0,
+      },
+      shippingCharge: {
+        currencyCode: 'USD',
+        value: 0,
+      },
+      shippingChargeTax: {
+        currencyCode: 'USD',
+        value: 0,
+      },
+    },
+    notificationEmails: [],
     statusUpdatedDate: new Date().toISOString(),
     receivedDate: new Date().toISOString(),
-    items: [
-      {
-        sellerSku: 'AMAZON-SKU-123',
-        sellerFulfillmentOrderItemId: 'item-1',
-        quantity: 2,
-        cancelledQuantity: 0,
-        unfulfillableQuantity: 0,
-      },
-    ],
   };
 }
 
@@ -187,18 +241,21 @@ describe('OrderRouter', () => {
   let mockAmazonClient: ReturnType<typeof createMockAmazonClient>;
   let mockValidator: ReturnType<typeof createMockValidator>;
   let mockTransformer: ReturnType<typeof createMockTransformer>;
+  let mockInventorySync: ReturnType<typeof createMockInventorySync>;
 
   beforeEach(() => {
     mockTikTokClient = createMockTikTokClient();
     mockAmazonClient = createMockAmazonClient();
     mockValidator = createMockValidator();
     mockTransformer = createMockTransformer();
+    mockInventorySync = createMockInventorySync();
 
     const dependencies: OrderRouterDependencies = {
       tiktokClient: mockTikTokClient as any,
       amazonClient: mockAmazonClient as any,
       validator: mockValidator as any,
       transformer: mockTransformer as any,
+      inventorySync: mockInventorySync as any,
     };
 
     router = createOrderRouter(dependencies);
@@ -236,6 +293,24 @@ describe('OrderRouter', () => {
         errors: [],
         mcfOrderRequest: mcfRequest,
       });
+      mockInventorySync.checkInventoryBatch.mockResolvedValue({
+        totalSkus: 1,
+        sufficientCount: 1,
+        insufficientCount: 0,
+        lowStockCount: 0,
+        errorCount: 0,
+        results: [
+          {
+            sku: 'AMAZON-SKU-123',
+            available: 100,
+            requested: 2,
+            sufficient: true,
+            lowStock: false,
+            cached: false,
+          },
+        ],
+        errors: [],
+      });
       mockAmazonClient.createFulfillmentOrder.mockResolvedValue({});
       mockAmazonClient.getFulfillmentOrder.mockResolvedValue({ fulfillmentOrder: mcfOrder });
 
@@ -255,6 +330,9 @@ describe('OrderRouter', () => {
       expect(mockTikTokClient.getOrderDetail).toHaveBeenCalledWith(orderId);
       expect(mockValidator.validateOrder).toHaveBeenCalledWith(tiktokOrder);
       expect(mockTransformer.transformOrder).toHaveBeenCalled();
+      expect(mockInventorySync.checkInventoryBatch).toHaveBeenCalledWith([
+        { sku: 'AMAZON-SKU-123', quantity: 2 },
+      ]);
       expect(mockAmazonClient.createFulfillmentOrder).toHaveBeenCalledWith(mcfRequest);
       expect(mockAmazonClient.getFulfillmentOrder).toHaveBeenCalledWith('TIKTOK-TEST123');
     });
@@ -294,7 +372,7 @@ describe('OrderRouter', () => {
       expect(result.orderId).toBe(orderId);
       expect(result.error).toBeDefined();
       expect(result.error?.stage).toBe('validate');
-      expect(result.error?.code).toBe(ErrorCode.VALIDATION_FAILED);
+      expect(result.error?.code).toBe(ErrorCode.INVALID_ORDER_DATA);
       expect(result.error?.message).toContain('Order validation failed');
       expect(result.successResult).toBeUndefined();
     });
@@ -331,6 +409,7 @@ describe('OrderRouter', () => {
         errors: [],
         mcfOrderRequest: mcfRequest,
       });
+      mockInventorySync.checkInventoryBatch.mockResolvedValue(createSuccessfulInventoryResult());
       mockAmazonClient.createFulfillmentOrder.mockResolvedValue({});
 
       const result = await router.routeOrder(orderId);
@@ -415,6 +494,7 @@ describe('OrderRouter', () => {
         ],
         mcfOrderRequest: mcfRequest,
       });
+      mockInventorySync.checkInventoryBatch.mockResolvedValue(createSuccessfulInventoryResult());
       mockAmazonClient.createFulfillmentOrder.mockResolvedValue({});
 
       const result = await router.routeOrder(orderId);
@@ -464,7 +544,7 @@ describe('OrderRouter', () => {
       expect(result.orderId).toBe(orderId);
       expect(result.error).toBeDefined();
       expect(result.error?.stage).toBe('create_mcf');
-      expect(result.error?.code).toBe(ErrorCode.MCF_API_ERROR);
+      expect(result.error?.code).toBe(ErrorCode.AMAZON_API_ERROR);
       expect(result.error?.message).toContain('Failed to create MCF fulfillment order');
       expect(result.successResult).toBeUndefined();
     });
@@ -498,6 +578,24 @@ describe('OrderRouter', () => {
         errors: [],
         mcfOrderRequest: mcfRequest,
       });
+      mockInventorySync.checkInventoryBatch.mockResolvedValue({
+        totalSkus: 1,
+        sufficientCount: 1,
+        insufficientCount: 0,
+        lowStockCount: 0,
+        errorCount: 0,
+        results: [
+          {
+            sku: 'AMAZON-SKU-123',
+            available: 100,
+            requested: 2,
+            sufficient: true,
+            lowStock: false,
+            cached: false,
+          },
+        ],
+        errors: [],
+      });
       mockAmazonClient.createFulfillmentOrder.mockResolvedValue({});
       mockAmazonClient.getFulfillmentOrder.mockRejectedValue(new Error('Order not found yet'));
 
@@ -506,6 +604,215 @@ describe('OrderRouter', () => {
       expect(result.success).toBe(true);
       expect(result.successResult?.mcfFulfillmentOrderId).toBe('TIKTOK-TEST123');
       expect(result.successResult?.mcfOrder).toBeUndefined();
+    });
+
+    it('should fail when inventory is insufficient', async () => {
+      const orderId = 'TEST123';
+      const tiktokOrder = createValidTikTokOrder(orderId);
+      const normalizedAddress = createNormalizedAddress();
+      const mcfRequest = createMCFOrderRequest();
+
+      mockTikTokClient.getOrderDetail.mockResolvedValue({ order: tiktokOrder });
+      mockValidator.validateOrder.mockReturnValue({
+        valid: true,
+        errors: [],
+        normalizedOrder: {
+          id: orderId,
+          status: TikTokOrderStatus.AWAITING_SHIPMENT,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          customer: { name: 'John Doe', email: 'customer@example.com', phone: '+1-555-0100' },
+          shippingAddress: normalizedAddress,
+          items: [{ id: 'item-1', productId: 'prod-1', productName: 'Test Product', sku: 'SELLER-SKU-123', quantity: 2, price: 29.99, totalPrice: 59.98 }],
+          payment: { currency: 'USD', subtotal: 59.98, shippingFee: 5.00, tax: 5.40, discounts: 0, total: 70.38 },
+          fulfillmentType: 'FULFILLED_BY_SELLER',
+          rawOrder: tiktokOrder,
+        },
+        normalizedAddress,
+      });
+      mockTransformer.transformOrder.mockReturnValue({
+        success: true,
+        errors: [],
+        mcfOrderRequest: mcfRequest,
+      });
+      mockInventorySync.checkInventoryBatch.mockResolvedValue({
+        totalSkus: 1,
+        sufficientCount: 0,
+        insufficientCount: 1,
+        lowStockCount: 1,
+        errorCount: 0,
+        results: [
+          {
+            sku: 'AMAZON-SKU-123',
+            available: 1,
+            requested: 2,
+            sufficient: false,
+            lowStock: true,
+            cached: false,
+          },
+        ],
+        errors: [],
+      });
+
+      const result = await router.routeOrder(orderId);
+
+      expect(result.success).toBe(false);
+      expect(result.orderId).toBe(orderId);
+      expect(result.error).toBeDefined();
+      expect(result.error?.stage).toBe('check_inventory');
+      expect(result.error?.code).toBe(ErrorCode.INSUFFICIENT_INVENTORY);
+      expect(result.error?.message).toContain('Insufficient inventory for order');
+      expect(result.error?.message).toContain('AMAZON-SKU-123');
+      expect(result.error?.message).toContain('requested: 2');
+      expect(result.error?.message).toContain('available: 1');
+      expect(mockAmazonClient.createFulfillmentOrder).not.toHaveBeenCalled();
+    });
+
+    it('should succeed with low stock warning', async () => {
+      const orderId = 'TEST123';
+      const tiktokOrder = createValidTikTokOrder(orderId);
+      const normalizedAddress = createNormalizedAddress();
+      const mcfRequest = createMCFOrderRequest();
+
+      mockTikTokClient.getOrderDetail.mockResolvedValue({ order: tiktokOrder });
+      mockValidator.validateOrder.mockReturnValue({
+        valid: true,
+        errors: [],
+        normalizedOrder: {
+          id: orderId,
+          status: TikTokOrderStatus.AWAITING_SHIPMENT,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          customer: { name: 'John Doe', email: 'customer@example.com', phone: '+1-555-0100' },
+          shippingAddress: normalizedAddress,
+          items: [{ id: 'item-1', productId: 'prod-1', productName: 'Test Product', sku: 'SELLER-SKU-123', quantity: 2, price: 29.99, totalPrice: 59.98 }],
+          payment: { currency: 'USD', subtotal: 59.98, shippingFee: 5.00, tax: 5.40, discounts: 0, total: 70.38 },
+          fulfillmentType: 'FULFILLED_BY_SELLER',
+          rawOrder: tiktokOrder,
+        },
+        normalizedAddress,
+      });
+      mockTransformer.transformOrder.mockReturnValue({
+        success: true,
+        errors: [],
+        mcfOrderRequest: mcfRequest,
+      });
+      mockInventorySync.checkInventoryBatch.mockResolvedValue({
+        totalSkus: 1,
+        sufficientCount: 1,
+        insufficientCount: 0,
+        lowStockCount: 1,
+        errorCount: 0,
+        results: [
+          {
+            sku: 'AMAZON-SKU-123',
+            available: 8,
+            requested: 2,
+            sufficient: true,
+            lowStock: true,
+            cached: false,
+          },
+        ],
+        errors: [],
+      });
+      mockAmazonClient.createFulfillmentOrder.mockResolvedValue({});
+
+      const result = await router.routeOrder(orderId);
+
+      expect(result.success).toBe(true);
+      expect(result.successResult?.warnings).toBeDefined();
+      const inventoryWarnings = result.successResult?.warnings?.filter(w => w.stage === 'check_inventory');
+      expect(inventoryWarnings).toHaveLength(1);
+      expect(inventoryWarnings?.[0].message).toContain('Low stock for SKU AMAZON-SKU-123');
+      expect(inventoryWarnings?.[0].message).toContain('8 available');
+    });
+
+    it('should fail when inventory check throws an error', async () => {
+      const orderId = 'TEST123';
+      const tiktokOrder = createValidTikTokOrder(orderId);
+      const normalizedAddress = createNormalizedAddress();
+      const mcfRequest = createMCFOrderRequest();
+
+      mockTikTokClient.getOrderDetail.mockResolvedValue({ order: tiktokOrder });
+      mockValidator.validateOrder.mockReturnValue({
+        valid: true,
+        errors: [],
+        normalizedOrder: {
+          id: orderId,
+          status: TikTokOrderStatus.AWAITING_SHIPMENT,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          customer: { name: 'John Doe', email: 'customer@example.com', phone: '+1-555-0100' },
+          shippingAddress: normalizedAddress,
+          items: [{ id: 'item-1', productId: 'prod-1', productName: 'Test Product', sku: 'SELLER-SKU-123', quantity: 2, price: 29.99, totalPrice: 59.98 }],
+          payment: { currency: 'USD', subtotal: 59.98, shippingFee: 5.00, tax: 5.40, discounts: 0, total: 70.38 },
+          fulfillmentType: 'FULFILLED_BY_SELLER',
+          rawOrder: tiktokOrder,
+        },
+        normalizedAddress,
+      });
+      mockTransformer.transformOrder.mockReturnValue({
+        success: true,
+        errors: [],
+        mcfOrderRequest: mcfRequest,
+      });
+      mockInventorySync.checkInventoryBatch.mockRejectedValue(new Error('Amazon API timeout'));
+
+      const result = await router.routeOrder(orderId);
+
+      expect(result.success).toBe(false);
+      expect(result.orderId).toBe(orderId);
+      expect(result.error).toBeDefined();
+      expect(result.error?.stage).toBe('check_inventory');
+      expect(result.error?.code).toBe(ErrorCode.INVENTORY_CHECK_FAILED);
+      expect(result.error?.message).toContain('Failed to check inventory');
+      expect(mockAmazonClient.createFulfillmentOrder).not.toHaveBeenCalled();
+    });
+
+    it('should skip inventory check when inventorySync is not provided', async () => {
+      const orderId = 'TEST123';
+      const tiktokOrder = createValidTikTokOrder(orderId);
+      const normalizedAddress = createNormalizedAddress();
+      const mcfRequest = createMCFOrderRequest();
+
+      // Create router without inventory sync
+      const routerWithoutInventory = createOrderRouter({
+        tiktokClient: mockTikTokClient as any,
+        amazonClient: mockAmazonClient as any,
+        validator: mockValidator as any,
+        transformer: mockTransformer as any,
+      });
+
+      mockTikTokClient.getOrderDetail.mockResolvedValue({ order: tiktokOrder });
+      mockValidator.validateOrder.mockReturnValue({
+        valid: true,
+        errors: [],
+        normalizedOrder: {
+          id: orderId,
+          status: TikTokOrderStatus.AWAITING_SHIPMENT,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          customer: { name: 'John Doe', email: 'customer@example.com', phone: '+1-555-0100' },
+          shippingAddress: normalizedAddress,
+          items: [{ id: 'item-1', productId: 'prod-1', productName: 'Test Product', sku: 'SELLER-SKU-123', quantity: 2, price: 29.99, totalPrice: 59.98 }],
+          payment: { currency: 'USD', subtotal: 59.98, shippingFee: 5.00, tax: 5.40, discounts: 0, total: 70.38 },
+          fulfillmentType: 'FULFILLED_BY_SELLER',
+          rawOrder: tiktokOrder,
+        },
+        normalizedAddress,
+      });
+      mockTransformer.transformOrder.mockReturnValue({
+        success: true,
+        errors: [],
+        mcfOrderRequest: mcfRequest,
+      });
+      mockAmazonClient.createFulfillmentOrder.mockResolvedValue({});
+
+      const result = await routerWithoutInventory.routeOrder(orderId);
+
+      expect(result.success).toBe(true);
+      expect(mockInventorySync.checkInventoryBatch).not.toHaveBeenCalled();
+      expect(mockAmazonClient.createFulfillmentOrder).toHaveBeenCalled();
     });
   });
 
@@ -540,6 +847,7 @@ describe('OrderRouter', () => {
         errors: [],
         mcfOrderRequest: mcfRequest,
       });
+      mockInventorySync.checkInventoryBatch.mockResolvedValue(createSuccessfulInventoryResult());
       mockAmazonClient.createFulfillmentOrder.mockResolvedValue({});
 
       const result = await router.routeOrders(orderIds);
@@ -585,6 +893,7 @@ describe('OrderRouter', () => {
         errors: [],
         mcfOrderRequest: mcfRequest,
       });
+      mockInventorySync.checkInventoryBatch.mockResolvedValue(createSuccessfulInventoryResult());
       mockAmazonClient.createFulfillmentOrder.mockResolvedValue({});
 
       const result = await router.routeOrders(orderIds);
@@ -632,6 +941,7 @@ describe('OrderRouter', () => {
         errors: [],
         mcfOrderRequest: mcfRequest,
       });
+      mockInventorySync.checkInventoryBatch.mockResolvedValue(createSuccessfulInventoryResult());
       mockAmazonClient.createFulfillmentOrder.mockResolvedValue({});
 
       const result = await router.routeOrders(orderIds);
@@ -682,6 +992,7 @@ describe('OrderRouter', () => {
         errors: [],
         mcfOrderRequest: mcfRequest,
       });
+      mockInventorySync.checkInventoryBatch.mockResolvedValue(createSuccessfulInventoryResult());
       mockAmazonClient.createFulfillmentOrder.mockResolvedValue({});
 
       const result = await router.routeOrders(orderIds);
@@ -759,6 +1070,7 @@ describe('OrderRouter', () => {
         errors: [],
         mcfOrderRequest: mcfRequest,
       });
+      mockInventorySync.checkInventoryBatch.mockResolvedValue(createSuccessfulInventoryResult());
       mockAmazonClient.createFulfillmentOrder.mockResolvedValue({});
 
       const result = await router.routePendingOrders();
@@ -822,6 +1134,7 @@ describe('OrderRouter', () => {
         errors: [],
         mcfOrderRequest: mcfRequest,
       });
+      mockInventorySync.checkInventoryBatch.mockResolvedValue(createSuccessfulInventoryResult());
       mockAmazonClient.createFulfillmentOrder.mockResolvedValue({});
 
       const result = await router.routePendingOrders();
