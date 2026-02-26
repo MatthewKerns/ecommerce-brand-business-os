@@ -1,0 +1,19 @@
+# robots.txt for Infinity Cards Blog
+# This file is generated dynamically via app/robots.ts
+# Static fallback for compatibility
+
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /_next/
+
+# Block AI crawlers from training on our content
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+# Sitemap
+Sitemap: https://infinitycards.com/sitemap.xml
