@@ -671,3 +671,188 @@ TikTok Shop Features:
                 'average': round(order_value_stats['average'], 2)
             }
         }
+
+    def get_analytics(
+        self,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None,
+        metrics: Optional[List[str]] = None
+    ) -> Dict[str, Any]:
+        """
+        Get shop analytics and performance metrics from TikTok Shop
+
+        This method fetches comprehensive analytics data including sales metrics,
+        traffic data, conversion rates, and other performance indicators.
+
+        Args:
+            start_date: Start date for analytics period (format: 'YYYY-MM-DD')
+                       If None, defaults to last 30 days
+            end_date: End date for analytics period (format: 'YYYY-MM-DD')
+                     If None, defaults to today
+            metrics: List of specific metrics to retrieve. If None, gets all available.
+                    Common metrics include: 'sales', 'views', 'clicks', 'conversion_rate',
+                    'average_order_value', 'total_revenue'
+
+        Returns:
+            Dictionary containing analytics data:
+                - period: Date range for the analytics
+                - metrics: Dictionary of metric name -> value
+                - trends: Performance trends over time
+                - comparisons: Period-over-period comparisons
+
+        Raises:
+            TikTokShopAuthError: If authentication fails
+            TikTokShopAPIError: If API request fails
+
+        Example:
+            >>> agent = TikTokShopAgent(access_token='token')
+            >>> # Get last 30 days of analytics
+            >>> analytics = agent.get_analytics()
+            >>> print(f"Total Revenue: ${analytics['metrics']['total_revenue']}")
+            >>> print(f"Conversion Rate: {analytics['metrics']['conversion_rate']}%")
+            >>>
+            >>> # Get specific date range
+            >>> analytics = agent.get_analytics(
+            ...     start_date='2024-01-01',
+            ...     end_date='2024-01-31',
+            ...     metrics=['sales', 'revenue']
+            ... )
+        """
+        client = self._get_client()
+
+        # Set default date range if not provided
+        if not end_date:
+            end_date = datetime.now().strftime('%Y-%m-%d')
+        if not start_date:
+            start_datetime = datetime.now() - timedelta(days=30)
+            start_date = start_datetime.strftime('%Y-%m-%d')
+
+        # Fetch analytics from TikTok Shop API
+        return client.get_analytics(
+            start_date=start_date,
+            end_date=end_date,
+            metrics=metrics
+        )
+
+    def get_product_analytics(
+        self,
+        product_id: str,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Get analytics for a specific product
+
+        This method retrieves performance metrics for an individual product,
+        including views, sales, conversion rates, and revenue.
+
+        Args:
+            product_id: TikTok Shop product ID
+            start_date: Start date for analytics period (format: 'YYYY-MM-DD')
+                       If None, defaults to last 30 days
+            end_date: End date for analytics period (format: 'YYYY-MM-DD')
+                     If None, defaults to today
+
+        Returns:
+            Dictionary containing product analytics:
+                - product_id: Product identifier
+                - product_name: Product name
+                - period: Date range for the analytics
+                - views: Number of product views
+                - clicks: Number of product clicks
+                - conversions: Number of purchases
+                - conversion_rate: Percentage of clicks that converted
+                - revenue: Total revenue from product
+                - units_sold: Total units sold
+                - average_price: Average selling price
+
+        Raises:
+            TikTokShopAuthError: If authentication fails
+            TikTokShopNotFoundError: If product not found
+            TikTokShopAPIError: If API request fails
+
+        Example:
+            >>> agent = TikTokShopAgent(access_token='token')
+            >>> analytics = agent.get_product_analytics('1234567890')
+            >>> print(f"Product Views: {analytics['views']}")
+            >>> print(f"Conversion Rate: {analytics['conversion_rate']}%")
+            >>> print(f"Total Revenue: ${analytics['revenue']}")
+        """
+        client = self._get_client()
+
+        # Set default date range if not provided
+        if not end_date:
+            end_date = datetime.now().strftime('%Y-%m-%d')
+        if not start_date:
+            start_datetime = datetime.now() - timedelta(days=30)
+            start_date = start_datetime.strftime('%Y-%m-%d')
+
+        # Fetch product analytics from TikTok Shop API
+        return client.get_product_analytics(
+            product_id=product_id,
+            start_date=start_date,
+            end_date=end_date
+        )
+
+    def get_shop_performance(
+        self,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Get overall shop performance metrics
+
+        This method retrieves high-level performance indicators for the entire shop,
+        including total sales, customer metrics, and operational statistics.
+
+        Args:
+            start_date: Start date for performance period (format: 'YYYY-MM-DD')
+                       If None, defaults to last 30 days
+            end_date: End date for performance period (format: 'YYYY-MM-DD')
+                     If None, defaults to today
+
+        Returns:
+            Dictionary containing shop performance metrics:
+                - period: Date range for the metrics
+                - total_revenue: Total revenue for the period
+                - total_orders: Total number of orders
+                - total_units_sold: Total units sold
+                - average_order_value: Average value per order
+                - customer_metrics: Customer acquisition and retention data
+                - fulfillment_metrics: Shipping and delivery performance
+                - return_rate: Percentage of orders returned
+                - cancellation_rate: Percentage of orders cancelled
+                - shop_rating: Overall shop rating
+                - response_time: Average customer service response time
+
+        Raises:
+            TikTokShopAuthError: If authentication fails
+            TikTokShopAPIError: If API request fails
+
+        Example:
+            >>> agent = TikTokShopAgent(access_token='token')
+            >>> performance = agent.get_shop_performance()
+            >>> print(f"Total Revenue: ${performance['total_revenue']}")
+            >>> print(f"Average Order Value: ${performance['average_order_value']}")
+            >>> print(f"Shop Rating: {performance['shop_rating']}/5")
+            >>>
+            >>> # Get specific date range
+            >>> performance = agent.get_shop_performance(
+            ...     start_date='2024-01-01',
+            ...     end_date='2024-01-31'
+            ... )
+        """
+        client = self._get_client()
+
+        # Set default date range if not provided
+        if not end_date:
+            end_date = datetime.now().strftime('%Y-%m-%d')
+        if not start_date:
+            start_datetime = datetime.now() - timedelta(days=30)
+            start_date = start_datetime.strftime('%Y-%m-%d')
+
+        # Fetch shop performance from TikTok Shop API
+        return client.get_shop_performance(
+            start_date=start_date,
+            end_date=end_date
+        )
