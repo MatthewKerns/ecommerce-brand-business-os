@@ -1,5 +1,10 @@
 import { notFound } from 'next/navigation';
 import { getPostBySlug, getAllPosts, getRelatedPosts } from '@/lib/cms';
+import {
+  generatePostMetadata,
+  generateBlogPostStructuredData,
+  generateBreadcrumbStructuredData,
+} from '@/lib/seo';
 import { BlogPost } from '@/components/BlogPost';
 import { TableOfContents } from '@/components/TableOfContents';
 import { ShareButtons } from '@/components/ShareButtons';
@@ -29,27 +34,15 @@ export async function generateMetadata({
   if (!post) {
     return {
       title: 'Post Not Found',
+      robots: {
+        index: false,
+        follow: false,
+      },
     };
   }
 
-  return {
-    title: `${post.title} - InfinityCards Blog`,
-    description: post.description,
-    openGraph: {
-      title: post.title,
-      description: post.description,
-      type: 'article',
-      publishedTime: post.date,
-      authors: [post.author],
-      images: post.image ? [post.image] : [],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: post.title,
-      description: post.description,
-      images: post.image ? [post.image] : [],
-    },
-  };
+  // Use SEO utility to generate comprehensive metadata
+  return generatePostMetadata(post);
 }
 
 export default function BlogPostPage({ params }: BlogPostPageProps) {
@@ -61,46 +54,66 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
 
   const relatedPosts = getRelatedPosts(params.slug, 3);
 
-  return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="flex flex-col gap-8 lg:flex-row">
-        {/* Main Content */}
-        <div className="flex-1">
-          <BlogPost post={post} />
+  // Generate structured data for SEO
+  const blogPostStructuredData = generateBlogPostStructuredData(post);
+  const breadcrumbStructuredData = generateBreadcrumbStructuredData(post);
 
-          {/* Share Buttons - Mobile */}
-          <div className="mt-12 lg:hidden">
+  return (
+    <>
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(blogPostStructuredData),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbStructuredData),
+        }}
+      />
+
+      <div className="container mx-auto px-4 py-12">
+        <div className="flex flex-col gap-8 lg:flex-row">
+          {/* Main Content */}
+          <div className="flex-1">
+            <BlogPost post={post} />
+
+            {/* Share Buttons - Mobile */}
+            <div className="mt-12 lg:hidden">
+              <ShareButtons
+                title={post.title}
+                description={post.description}
+                slug={post.slug}
+              />
+            </div>
+
+            {/* Related Posts - Mobile */}
+            {relatedPosts.length > 0 && (
+              <div className="mt-8 lg:hidden">
+                <RelatedPosts posts={relatedPosts} />
+              </div>
+            )}
+          </div>
+
+          {/* Sidebar - Desktop */}
+          <aside className="hidden w-80 shrink-0 space-y-8 lg:block">
+            {/* Table of Contents */}
+            <TableOfContents content={post.content} />
+
+            {/* Share Buttons */}
             <ShareButtons
               title={post.title}
               description={post.description}
               slug={post.slug}
             />
-          </div>
 
-          {/* Related Posts - Mobile */}
-          {relatedPosts.length > 0 && (
-            <div className="mt-8 lg:hidden">
-              <RelatedPosts posts={relatedPosts} />
-            </div>
-          )}
+            {/* Related Posts */}
+            {relatedPosts.length > 0 && <RelatedPosts posts={relatedPosts} />}
+          </aside>
         </div>
-
-        {/* Sidebar - Desktop */}
-        <aside className="hidden w-80 shrink-0 space-y-8 lg:block">
-          {/* Table of Contents */}
-          <TableOfContents content={post.content} />
-
-          {/* Share Buttons */}
-          <ShareButtons
-            title={post.title}
-            description={post.description}
-            slug={post.slug}
-          />
-
-          {/* Related Posts */}
-          {relatedPosts.length > 0 && <RelatedPosts posts={relatedPosts} />}
-        </aside>
       </div>
-    </div>
+    </>
   );
 }
