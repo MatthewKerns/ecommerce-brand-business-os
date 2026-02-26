@@ -257,3 +257,70 @@ class PerformanceMetrics(Base):
 
     def __repr__(self):
         return f"<PerformanceMetrics(id={self.id}, request_id='{self.request_id}', duration={self.total_duration_ms}ms)>"
+
+
+class ScheduledContent(Base):
+    """
+    Stores scheduled TikTok content for automatic publishing.
+
+    Attributes:
+        id: Primary key
+        content_type: Type of content (video, post)
+        content_data: JSON data containing content details (stored as text)
+        scheduled_time: When the content should be published
+        status: Current status (pending, published, failed)
+        retry_count: Number of publish attempts made
+        max_retries: Maximum number of retry attempts allowed
+        tiktok_video_id: TikTok video ID after successful publish
+        error_message: Error details if publishing failed
+        created_at: Timestamp when scheduled content was created
+        updated_at: Timestamp when record was last updated
+        published_at: Timestamp when content was successfully published
+    """
+    __tablename__ = "scheduled_content"
+
+    # Primary Key
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
+    # Content Details
+    content_type = Column(String(20), nullable=False, index=True)
+    content_data = Column(Text, nullable=False)  # JSON stored as text
+
+    # Scheduling
+    scheduled_time = Column(DateTime, nullable=False, index=True)
+
+    # Status Tracking
+    status = Column(String(20), nullable=False, default="pending", index=True)
+    retry_count = Column(Integer, nullable=False, default=0)
+    max_retries = Column(Integer, nullable=False, default=3)
+
+    # Publish Results
+    tiktok_video_id = Column(String(100))
+    error_message = Column(Text)
+
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    published_at = Column(DateTime)
+
+    # Relationships
+    # Note: PublishLog relationship will be added in subtask-1-2
+    # publish_logs = relationship("PublishLog", back_populates="scheduled_content", cascade="all, delete-orphan")
+
+    # Table constraints
+    __table_args__ = (
+        CheckConstraint(
+            "content_type IN ('video', 'post')",
+            name="check_scheduled_content_type"
+        ),
+        CheckConstraint(
+            "status IN ('pending', 'published', 'failed')",
+            name="check_scheduled_status"
+        ),
+        CheckConstraint("retry_count >= 0", name="check_retry_count"),
+        CheckConstraint("max_retries >= 0", name="check_max_retries"),
+        Index("idx_scheduled_content_status_time", "status", "scheduled_time"),
+    )
+
+    def __repr__(self):
+        return f"<ScheduledContent(id={self.id}, type='{self.content_type}', status='{self.status}', scheduled_time='{self.scheduled_time}')>"
