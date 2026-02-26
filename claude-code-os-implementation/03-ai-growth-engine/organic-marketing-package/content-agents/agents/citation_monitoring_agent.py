@@ -227,3 +227,235 @@ class CitationMonitoringAgent(BaseAgent):
             error_msg = f"Unexpected error querying {platform}: {str(e)}"
             self.logger.error(error_msg, exc_info=True)
             raise ContentGenerationError(error_msg)
+
+    def analyze_citation(
+        self,
+        query: str,
+        response_text: str,
+        platform: str,
+        brand_name: Optional[str] = None,
+        competitor_names: Optional[List[str]] = None,
+        response_metadata: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
+        """
+        Analyze an AI assistant response for brand and competitor citations
+
+        This method performs comprehensive citation analysis including:
+        - Brand mention detection (case-insensitive)
+        - Citation context extraction (text snippet around the mention)
+        - Position tracking (where in the response the brand appears)
+        - Competitor mention detection
+
+        Args:
+            query: The original query sent to the AI assistant
+            response_text: The full response text from the AI assistant
+            platform: AI platform that generated the response (chatgpt, claude, perplexity)
+            brand_name: Brand name to search for (defaults to BRAND_NAME from config)
+            competitor_names: Optional list of competitor names to check for
+            response_metadata: Optional metadata about the response (model, tokens, etc.)
+
+        Returns:
+            Dictionary containing citation analysis:
+                - query: The original query
+                - ai_platform: The AI platform
+                - response_text: Full response text
+                - brand_name: Brand name that was analyzed
+                - brand_mentioned: Boolean indicating if brand was mentioned
+                - citation_context: Text snippet showing how brand was mentioned (or None)
+                - position_in_response: Position of first brand mention (1-based index, or None)
+                - competitor_mentioned: Boolean indicating if any competitor was mentioned
+                - competitor_details: List of dicts with competitor citation details
+                - response_metadata: Optional metadata about the response
+
+        Raises:
+            ValueError: If required parameters are invalid
+            ContentGenerationError: For unexpected errors during analysis
+
+        Example:
+            >>> agent = CitationMonitoringAgent()
+            >>> analysis = agent.analyze_citation(
+            ...     query="What are the best TCG storage solutions?",
+            ...     response_text="For TCG storage, Infinity Vault offers...",
+            ...     platform="chatgpt"
+            ... )
+            >>> if analysis['brand_mentioned']:
+            ...     print(f"Brand mentioned at position {analysis['position_in_response']}")
+        """
+        # Validate required parameters
+        if not query or not query.strip():
+            raise ValueError("Query parameter is required and cannot be empty")
+        if not response_text or not response_text.strip():
+            raise ValueError("Response text parameter is required and cannot be empty")
+        if not platform or not platform.strip():
+            raise ValueError("Platform parameter is required and cannot be empty")
+
+        # Use configured brand name if not provided
+        if brand_name is None:
+            brand_name = BRAND_NAME
+
+        self.logger.info(f"Analyzing citation for brand '{brand_name}' in {platform} response")
+
+        try:
+            # Initialize result dictionary
+            analysis_result = {
+                'query': query,
+                'ai_platform': platform.lower(),
+                'response_text': response_text,
+                'brand_name': brand_name,
+                'brand_mentioned': False,
+                'citation_context': None,
+                'position_in_response': None,
+                'competitor_mentioned': False,
+                'competitor_details': [],
+                'response_metadata': response_metadata or {}
+            }
+
+            # Analyze brand mention
+            brand_mentioned, citation_context, position = self._extract_brand_citation(
+                response_text,
+                brand_name
+            )
+
+            analysis_result['brand_mentioned'] = brand_mentioned
+            analysis_result['citation_context'] = citation_context
+            analysis_result['position_in_response'] = position
+
+            # Analyze competitor mentions if competitor names provided
+            if competitor_names:
+                competitor_details = self._extract_competitor_citations(
+                    response_text,
+                    competitor_names
+                )
+                analysis_result['competitor_mentioned'] = len(competitor_details) > 0
+                analysis_result['competitor_details'] = competitor_details
+
+            self.logger.info(
+                f"Citation analysis complete: brand_mentioned={brand_mentioned}, "
+                f"competitors_found={len(analysis_result['competitor_details'])}"
+            )
+
+            return analysis_result
+
+        except ValueError as e:
+            # Re-raise validation errors
+            self.logger.error(f"Validation error in citation analysis: {e}")
+            raise
+
+        except Exception as e:
+            # Catch any unexpected errors
+            error_msg = f"Unexpected error analyzing citation: {str(e)}"
+            self.logger.error(error_msg, exc_info=True)
+            raise ContentGenerationError(error_msg)
+
+    def _extract_brand_citation(
+        self,
+        response_text: str,
+        brand_name: str,
+        context_chars: int = 150
+    ) -> tuple[bool, Optional[str], Optional[int]]:
+        """
+        Extract brand citation details from response text
+
+        Args:
+            response_text: Full response text to analyze
+            brand_name: Brand name to search for
+            context_chars: Number of characters to extract around the mention
+
+        Returns:
+            Tuple of (brand_mentioned, citation_context, position_in_response)
+            - brand_mentioned: Boolean indicating if brand was found
+            - citation_context: Text snippet around the mention (or None)
+            - position_in_response: 1-based position of first mention (or None)
+        """
+        # Perform case-insensitive search
+        response_lower = response_text.lower()
+        brand_lower = brand_name.lower()
+
+        # Check if brand is mentioned
+        if brand_lower not in response_lower:
+            return False, None, None
+
+        # Find first occurrence position
+        first_occurrence = response_lower.find(brand_lower)
+
+        # Calculate position (1-based index of which mention this is in the text)
+        # Count newlines or sentences before this point to get a position metric
+        text_before = response_text[:first_occurrence]
+
+        # Count approximate position: split by sentences/paragraphs
+        sentences_before = text_before.count('.') + text_before.count('?') + text_before.count('!')
+        position_in_response = sentences_before + 1  # 1-based position
+
+        # Extract context around the mention
+        start_pos = max(0, first_occurrence - context_chars)
+        end_pos = min(len(response_text), first_occurrence + len(brand_name) + context_chars)
+
+        citation_context = response_text[start_pos:end_pos].strip()
+
+        # Add ellipsis if we truncated
+        if start_pos > 0:
+            citation_context = "..." + citation_context
+        if end_pos < len(response_text):
+            citation_context = citation_context + "..."
+
+        return True, citation_context, position_in_response
+
+    def _extract_competitor_citations(
+        self,
+        response_text: str,
+        competitor_names: List[str],
+        context_chars: int = 150
+    ) -> List[Dict[str, Any]]:
+        """
+        Extract competitor citation details from response text
+
+        Args:
+            response_text: Full response text to analyze
+            competitor_names: List of competitor names to search for
+            context_chars: Number of characters to extract around each mention
+
+        Returns:
+            List of dictionaries containing competitor citation details:
+                - competitor_name: Name of the competitor
+                - mentioned: Boolean indicating if competitor was found
+                - citation_context: Text snippet around the mention
+                - position_in_response: 1-based position of first mention
+        """
+        competitor_details = []
+        response_lower = response_text.lower()
+
+        for competitor_name in competitor_names:
+            competitor_lower = competitor_name.lower()
+
+            # Check if competitor is mentioned
+            if competitor_lower not in response_lower:
+                continue
+
+            # Find first occurrence position
+            first_occurrence = response_lower.find(competitor_lower)
+
+            # Calculate position
+            text_before = response_text[:first_occurrence]
+            sentences_before = text_before.count('.') + text_before.count('?') + text_before.count('!')
+            position_in_response = sentences_before + 1
+
+            # Extract context around the mention
+            start_pos = max(0, first_occurrence - context_chars)
+            end_pos = min(len(response_text), first_occurrence + len(competitor_name) + context_chars)
+
+            citation_context = response_text[start_pos:end_pos].strip()
+
+            # Add ellipsis if we truncated
+            if start_pos > 0:
+                citation_context = "..." + citation_context
+            if end_pos < len(response_text):
+                citation_context = citation_context + "..."
+
+            competitor_details.append({
+                'competitor_name': competitor_name,
+                'mentioned': True,
+                'citation_context': citation_context,
+                'position_in_response': position_in_response
+            })
+
+        return competitor_details
