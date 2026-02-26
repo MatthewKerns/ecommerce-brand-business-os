@@ -18,7 +18,7 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./*"]
     },
     // Additional strict mode options
     "noUnusedLocals": true,
