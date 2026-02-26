@@ -9,6 +9,8 @@ import {
   SkeletonAvatar,
   SkeletonCard,
 } from "@/components/SkeletonLoader";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { ErrorTest } from "@/components/ErrorTest";
 import { useState } from "react";
 
 /**
@@ -45,6 +47,21 @@ export default function DashboardPage() {
 
       {/* KPI Overview */}
       <KPIOverview isLoading={showLoadingDemo} />
+
+      {/* Error Boundary Test Section */}
+      <div className="rounded-lg border border-slate-200 bg-white p-6">
+        <div className="mb-4">
+          <h2 className="text-lg font-semibold text-slate-900">
+            Error Boundary Demo
+          </h2>
+          <p className="text-sm text-slate-600">
+            Test error handling and recovery functionality
+          </p>
+        </div>
+        <ErrorBoundary>
+          <ErrorTest />
+        </ErrorBoundary>
+      </div>
 
       {/* Loading States Demo Section */}
       <div className="mt-12 rounded-lg border border-slate-200 bg-slate-50 p-6">
