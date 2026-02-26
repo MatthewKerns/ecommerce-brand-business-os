@@ -270,7 +270,7 @@ describe('OrderRouter', () => {
       const mcfOrder = createMCFFulfillmentOrder();
 
       // Setup mocks
-      mockTikTokClient.getOrderDetail.mockResolvedValue({ order: tiktokOrder });
+      mockTikTokClient.getOrderDetail.mockResolvedValue(tiktokOrder);
       mockValidator.validateOrder.mockReturnValue({
         valid: true,
         errors: [],
@@ -333,8 +333,17 @@ describe('OrderRouter', () => {
       expect(mockInventorySync.checkInventoryBatch).toHaveBeenCalledWith([
         { sku: 'AMAZON-SKU-123', quantity: 2 },
       ]);
-      expect(mockAmazonClient.createFulfillmentOrder).toHaveBeenCalledWith(mcfRequest);
-      expect(mockAmazonClient.getFulfillmentOrder).toHaveBeenCalledWith('TIKTOK-TEST123');
+      // Verify Amazon client called with converted params (not raw mcfRequest)
+      expect(mockAmazonClient.createFulfillmentOrder).toHaveBeenCalledWith(
+        expect.objectContaining({
+          orderId: mcfRequest.sellerFulfillmentOrderId,
+          displayableOrderId: mcfRequest.displayableOrderId,
+          shippingSpeed: mcfRequest.shippingSpeedCategory,
+        })
+      );
+      expect(mockAmazonClient.getFulfillmentOrder).toHaveBeenCalledWith({
+        sellerFulfillmentOrderId: 'TIKTOK-TEST123',
+      });
     });
 
     it('should handle TikTok fetch failure', async () => {
@@ -358,7 +367,7 @@ describe('OrderRouter', () => {
       const orderId = 'TEST123';
       const tiktokOrder = createValidTikTokOrder(orderId);
 
-      mockTikTokClient.getOrderDetail.mockResolvedValue({ order: tiktokOrder });
+      mockTikTokClient.getOrderDetail.mockResolvedValue(tiktokOrder);
       mockValidator.validateOrder.mockReturnValue({
         valid: false,
         errors: [
@@ -383,7 +392,7 @@ describe('OrderRouter', () => {
       const normalizedAddress = createNormalizedAddress();
       const mcfRequest = createMCFOrderRequest();
 
-      mockTikTokClient.getOrderDetail.mockResolvedValue({ order: tiktokOrder });
+      mockTikTokClient.getOrderDetail.mockResolvedValue(tiktokOrder);
       mockValidator.validateOrder.mockReturnValue({
         valid: true,
         errors: [],
@@ -426,7 +435,7 @@ describe('OrderRouter', () => {
       const tiktokOrder = createValidTikTokOrder(orderId);
       const normalizedAddress = createNormalizedAddress();
 
-      mockTikTokClient.getOrderDetail.mockResolvedValue({ order: tiktokOrder });
+      mockTikTokClient.getOrderDetail.mockResolvedValue(tiktokOrder);
       mockValidator.validateOrder.mockReturnValue({
         valid: true,
         errors: [],
@@ -468,7 +477,7 @@ describe('OrderRouter', () => {
       const normalizedAddress = createNormalizedAddress();
       const mcfRequest = createMCFOrderRequest();
 
-      mockTikTokClient.getOrderDetail.mockResolvedValue({ order: tiktokOrder });
+      mockTikTokClient.getOrderDetail.mockResolvedValue(tiktokOrder);
       mockValidator.validateOrder.mockReturnValue({
         valid: true,
         errors: [],
@@ -513,7 +522,7 @@ describe('OrderRouter', () => {
       const mcfRequest = createMCFOrderRequest();
       const error = new Error('MCF API error: insufficient inventory');
 
-      mockTikTokClient.getOrderDetail.mockResolvedValue({ order: tiktokOrder });
+      mockTikTokClient.getOrderDetail.mockResolvedValue(tiktokOrder);
       mockValidator.validateOrder.mockReturnValue({
         valid: true,
         errors: [],
@@ -536,6 +545,23 @@ describe('OrderRouter', () => {
         errors: [],
         mcfOrderRequest: mcfRequest,
       });
+      mockInventorySync.checkInventoryBatch.mockResolvedValue({
+        successCount: 1,
+        insufficientCount: 0,
+        lowStockCount: 0,
+        errorCount: 0,
+        results: [
+          {
+            sku: 'AMAZON-SKU-123',
+            available: 100,
+            requested: 2,
+            sufficient: true,
+            lowStock: false,
+            cached: false,
+          },
+        ],
+        errors: [],
+      });
       mockAmazonClient.createFulfillmentOrder.mockRejectedValue(error);
 
       const result = await router.routeOrder(orderId);
@@ -555,7 +581,7 @@ describe('OrderRouter', () => {
       const normalizedAddress = createNormalizedAddress();
       const mcfRequest = createMCFOrderRequest();
 
-      mockTikTokClient.getOrderDetail.mockResolvedValue({ order: tiktokOrder });
+      mockTikTokClient.getOrderDetail.mockResolvedValue(tiktokOrder);
       mockValidator.validateOrder.mockReturnValue({
         valid: true,
         errors: [],
@@ -612,7 +638,7 @@ describe('OrderRouter', () => {
       const normalizedAddress = createNormalizedAddress();
       const mcfRequest = createMCFOrderRequest();
 
-      mockTikTokClient.getOrderDetail.mockResolvedValue({ order: tiktokOrder });
+      mockTikTokClient.getOrderDetail.mockResolvedValue(tiktokOrder);
       mockValidator.validateOrder.mockReturnValue({
         valid: true,
         errors: [],
@@ -674,7 +700,7 @@ describe('OrderRouter', () => {
       const normalizedAddress = createNormalizedAddress();
       const mcfRequest = createMCFOrderRequest();
 
-      mockTikTokClient.getOrderDetail.mockResolvedValue({ order: tiktokOrder });
+      mockTikTokClient.getOrderDetail.mockResolvedValue(tiktokOrder);
       mockValidator.validateOrder.mockReturnValue({
         valid: true,
         errors: [],
@@ -733,7 +759,7 @@ describe('OrderRouter', () => {
       const normalizedAddress = createNormalizedAddress();
       const mcfRequest = createMCFOrderRequest();
 
-      mockTikTokClient.getOrderDetail.mockResolvedValue({ order: tiktokOrder });
+      mockTikTokClient.getOrderDetail.mockResolvedValue(tiktokOrder);
       mockValidator.validateOrder.mockReturnValue({
         valid: true,
         errors: [],
@@ -783,7 +809,7 @@ describe('OrderRouter', () => {
         transformer: mockTransformer as any,
       });
 
-      mockTikTokClient.getOrderDetail.mockResolvedValue({ order: tiktokOrder });
+      mockTikTokClient.getOrderDetail.mockResolvedValue(tiktokOrder);
       mockValidator.validateOrder.mockReturnValue({
         valid: true,
         errors: [],

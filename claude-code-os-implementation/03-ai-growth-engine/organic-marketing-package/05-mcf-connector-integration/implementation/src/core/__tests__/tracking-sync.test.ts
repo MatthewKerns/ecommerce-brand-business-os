@@ -114,12 +114,18 @@ describe('TrackingSync', () => {
   let dependencies: TrackingSyncDependencies;
 
   beforeEach(() => {
+    jest.useFakeTimers();
     mockTikTokClient = createMockTikTokClient();
     mockAmazonClient = createMockAmazonClient();
     dependencies = {
       tiktokClient: mockTikTokClient as any,
       amazonClient: mockAmazonClient as any,
     };
+  });
+
+  afterEach(() => {
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
   });
 
   describe('constructor', () => {

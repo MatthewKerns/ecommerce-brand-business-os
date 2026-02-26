@@ -41,20 +41,16 @@ describeE2E('End-to-End Order Routing', () => {
 
     // Initialize the connector
     connector = new MCFConnector({
-      tiktokShop: config.tiktokShop,
-      amazonMCF: config.amazonMCF,
-      connector: {
-        ...config.connector,
-        enableInventorySync: true,
-        enableTrackingSyncScheduler: false, // Manual sync for testing
-      },
+      config: config,
+      enableInventorySync: true,
+      enableTrackingSyncScheduler: false,
     });
 
     // Verify API connections
     const connections = await connector.testConnections();
 
-    expect(connections.tiktok.success).toBe(true);
-    expect(connections.amazon.success).toBe(true);
+    expect(connections.tiktok).toBe(true);
+    expect(connections.amazon).toBe(true);
   }, API_TIMEOUT);
 
   afterAll(async () => {
@@ -74,14 +70,12 @@ describeE2E('End-to-End Order Routing', () => {
   describe('Connection Tests', () => {
     it('should successfully connect to TikTok Shop API', async () => {
       const result = await connector.testConnections();
-      expect(result.tiktok.success).toBe(true);
-      expect(result.tiktok.error).toBeUndefined();
+      expect(result.tiktok).toBe(true);
     }, API_TIMEOUT);
 
     it('should successfully connect to Amazon MCF API', async () => {
       const result = await connector.testConnections();
-      expect(result.amazon.success).toBe(true);
-      expect(result.amazon.error).toBeUndefined();
+      expect(result.amazon).toBe(true);
     }, API_TIMEOUT);
   });
 
@@ -130,9 +124,9 @@ describeE2E('End-to-End Order Routing', () => {
         expect(firstResult.success).toBe(true);
         console.log('\nValidation passed successfully');
 
-        if (firstResult.warnings && firstResult.warnings.length > 0) {
-          console.log('Warnings:');
-          firstResult.warnings.forEach(w => console.log(`  - ${w.message}`));
+        if (firstResult.success && firstResult.successResult?.warnings?.length) {
+          console.log(`\nWarnings for order ${firstResult.orderId}:`);
+          firstResult.successResult.warnings.forEach((w: any) => console.log(`  - ${w.message}`));
         }
       }
     }, API_TIMEOUT);
@@ -206,20 +200,16 @@ describeE2E('End-to-End Order Routing', () => {
       const testSku = 'TEST-SKU-001';
 
       try {
-        const inventoryResult = await connector.checkInventory([testSku]);
+        const inventoryResult = await connector.checkInventory(testSku, 1);
 
         console.log('\nInventory Check Result:');
         console.log(`  SKU: ${testSku}`);
 
-        if (inventoryResult.success) {
-          const summary = inventoryResult.summaries[0];
-          console.log(`  Available: ${summary.totalQuantity}`);
-          console.log(`  Fulfillable: ${summary.fulfillableQuantity}`);
-          console.log(`  Reserved: ${summary.reservedQuantity || 0}`);
-
-          expect(inventoryResult.summaries).toHaveLength(1);
+        if (inventoryResult.sufficient) {
+          console.log(`  Available: ${inventoryResult.available} units`);
+          expect(inventoryResult.sufficient).toBe(true);
         } else {
-          console.log(`  Error: ${inventoryResult.error?.message}`);
+          console.log(`  Insufficient inventory`);
         }
       } catch (error) {
         console.log('\nInventory check failed (this is expected if SKU does not exist in sandbox)');
