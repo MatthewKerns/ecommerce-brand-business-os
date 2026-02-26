@@ -954,10 +954,197 @@ async def get_citations(
         )
 
 
+@router.get(
+    "/recommendations",
+    response_model=RecommendationListResponse,
+    summary="Get optimization recommendations",
+    description="Retrieve optimization recommendations with optional filtering by status, priority, and platform"
+)
+async def get_recommendations(
+    days: Optional[int] = Query(
+        default=30,
+        ge=1,
+        le=365,
+        description="Number of days to retrieve (from today backwards)"
+    ),
+    platform: Optional[str] = Query(
+        default=None,
+        pattern="^(chatgpt|claude|perplexity|all)$",
+        description="Filter by AI platform"
+    ),
+    status: Optional[str] = Query(
+        default=None,
+        pattern="^(pending|implemented|dismissed|archived)$",
+        description="Filter by recommendation status"
+    ),
+    priority: Optional[str] = Query(
+        default=None,
+        pattern="^(high|medium|low)$",
+        description="Filter by priority level"
+    ),
+    recommendation_type: Optional[str] = Query(
+        default=None,
+        pattern="^(content|keyword|structure|technical|other)$",
+        description="Filter by recommendation type"
+    ),
+    limit: Optional[int] = Query(
+        default=100,
+        ge=1,
+        le=1000,
+        description="Maximum number of records to return"
+    ),
+    request_id: str = Depends(get_request_id)
+) -> Dict[str, Any]:
+    """
+    Get optimization recommendations with optional filtering.
+
+    Args:
+        days: Number of days to retrieve (from today backwards)
+        platform: Filter by specific AI platform
+        status: Filter by recommendation status
+        priority: Filter by priority level
+        recommendation_type: Filter by recommendation type
+        limit: Maximum number of records to return
+        request_id: Unique request identifier
+
+    Returns:
+        Recommendation list response with recommendations and statistics
+
+    Raises:
+        HTTPException: If database query fails
+    """
+    logger.info(
+        f"[{request_id}] Retrieving recommendations: days={days}, "
+        f"platform={platform}, status={status}, priority={priority}, "
+        f"type={recommendation_type}, limit={limit}"
+    )
+    start_time = time.time()
+
+    try:
+        # Import database dependencies
+        from database.models import OptimizationRecommendation
+        from database.connection import get_db_session
+        from datetime import timedelta
+
+        # Get database session
+        db_session = get_db_session()
+
+        try:
+            # Build query
+            query = db_session.query(OptimizationRecommendation)
+
+            # Apply platform filter
+            if platform:
+                query = query.filter(OptimizationRecommendation.ai_platform == platform.lower())
+
+            # Apply status filter
+            if status:
+                query = query.filter(OptimizationRecommendation.status == status.lower())
+
+            # Apply priority filter
+            if priority:
+                query = query.filter(OptimizationRecommendation.priority == priority.lower())
+
+            # Apply type filter
+            if recommendation_type:
+                query = query.filter(OptimizationRecommendation.recommendation_type == recommendation_type.lower())
+
+            # Apply date filter
+            if days:
+                cutoff_date = datetime.utcnow() - timedelta(days=days)
+                query = query.filter(OptimizationRecommendation.created_at >= cutoff_date)
+
+            # Order by priority (high first) then creation date (most recent first)
+            priority_order = {
+                'high': 1,
+                'medium': 2,
+                'low': 3
+            }
+            query = query.order_by(
+                OptimizationRecommendation.created_at.desc()
+            )
+
+            # Apply limit
+            query = query.limit(limit)
+
+            # Execute query
+            records = query.all()
+
+            # Convert to response models
+            recommendations = []
+            for record in records:
+                recommendation = RecommendationResponse(
+                    id=record.id,
+                    recommendation_type=record.recommendation_type,
+                    title=record.title,
+                    description=record.description,
+                    priority=record.priority,
+                    status=record.status,
+                    ai_platform=record.ai_platform,
+                    expected_impact=record.expected_impact,
+                    actual_impact=record.actual_impact,
+                    implementation_effort=record.implementation_effort,
+                    created_at=record.created_at
+                )
+                recommendations.append(recommendation)
+
+            # Calculate statistics
+            total_count = len(recommendations)
+
+            # Count by priority
+            by_priority = {}
+            for rec in recommendations:
+                by_priority[rec.priority] = by_priority.get(rec.priority, 0) + 1
+
+            # Count by type
+            by_type = {}
+            for rec in recommendations:
+                by_type[rec.recommendation_type] = by_type.get(rec.recommendation_type, 0) + 1
+
+            # Count by status
+            by_status = {}
+            for rec in recommendations:
+                by_status[rec.status] = by_status.get(rec.status, 0) + 1
+
+            # Calculate query time
+            query_time_ms = int((time.time() - start_time) * 1000)
+
+            # Build response
+            response = {
+                "request_id": request_id,
+                "recommendations": [r.dict() for r in recommendations],
+                "total_count": total_count,
+                "by_priority": by_priority,
+                "by_type": by_type,
+                "by_status": by_status
+            }
+
+            logger.info(
+                f"[{request_id}] Retrieved {total_count} recommendations in {query_time_ms}ms: "
+                f"by_priority={by_priority}, by_status={by_status}"
+            )
+            return response
+
+        finally:
+            # Close database session
+            db_session.close()
+
+    except Exception as e:
+        logger.error(f"[{request_id}] Error retrieving recommendations: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": "RecommendationRetrievalError",
+                "message": f"Failed to retrieve recommendations: {str(e)}",
+                "request_id": request_id,
+                "timestamp": datetime.utcnow().isoformat() + "Z"
+            }
+        )
+
+
 # ============================================================================
 # Additional Route Handlers (to be implemented in subsequent subtasks)
 # ============================================================================
 
 # Placeholder comment: Additional route handlers will be implemented in:
-# - subtask-4-4: GET /recommendations endpoint
 # - subtask-6-3: GET /alerts endpoint
