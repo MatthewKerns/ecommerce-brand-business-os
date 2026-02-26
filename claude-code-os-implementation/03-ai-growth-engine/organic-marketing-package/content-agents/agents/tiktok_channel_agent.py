@@ -1223,3 +1223,205 @@ PRIMARY SUCCESS METRIC: Save rate (saves/views)
         )
 
         return results
+
+    def get_channel_performance(
+        self,
+        channel_element: str,
+        days_back: int = 30
+    ) -> Dict[str, Any]:
+        """
+        Get performance metrics for a specific channel including save rate tracking
+
+        This method retrieves content tracking and save rate metrics for a channel,
+        which are the primary indicators of content value and purchase intent on TikTok.
+
+        Args:
+            channel_element: Channel element identifier (air, water, fire, earth)
+            days_back: Number of days to look back for metrics (default 30)
+
+        Returns:
+            Dictionary containing performance metrics:
+            - channel_element: Channel element identifier
+            - channel_name: Display name of the channel
+            - total_posts: Total number of posts
+            - total_saves: Total save count across all posts
+            - total_views: Total view count across all posts
+            - save_rate: Save rate percentage (saves/views * 100)
+            - avg_saves_per_post: Average saves per post
+            - avg_views_per_post: Average views per post
+            - avg_engagement_rate: Average engagement rate
+            - top_performing_content: List of top 5 posts by save count
+            - period_days: Number of days analyzed
+
+        Raises:
+            ValueError: If channel_element is invalid
+
+        Example:
+            >>> agent = TikTokChannelAgent()
+            >>> metrics = agent.get_channel_performance('air')
+            >>> print(f"Save Rate: {metrics['save_rate']:.2f}%")
+            Save Rate: 3.45%
+            >>> print(f"Total Saves: {metrics['total_saves']}")
+            Total Saves: 1250
+        """
+        self.logger.info(
+            f"Getting performance metrics for {channel_element} channel "
+            f"(last {days_back} days)"
+        )
+
+        # Validate channel element
+        if channel_element not in self.channels:
+            valid_channels = ", ".join(self.channels.keys())
+            raise ValueError(
+                f"Invalid channel element: '{channel_element}'. "
+                f"Valid channels: {valid_channels}"
+            )
+
+        # Get database session
+        db = get_db_session()
+        try:
+            # Get the channel from database
+            channel = db.query(TikTokChannel).filter(
+                TikTokChannel.element_theme == channel_element,
+                TikTokChannel.is_active == True
+            ).first()
+
+            if not channel:
+                # Channel not in database yet, return empty metrics
+                self.logger.info(
+                    f"Channel '{channel_element}' not found in database. "
+                    f"Returning empty metrics."
+                )
+                return {
+                    "channel_element": channel_element,
+                    "channel_name": self.channels[channel_element]["channel_name"],
+                    "total_posts": 0,
+                    "total_saves": 0,
+                    "total_views": 0,
+                    "save_rate": 0.0,
+                    "avg_saves_per_post": 0.0,
+                    "avg_views_per_post": 0.0,
+                    "avg_engagement_rate": 0.0,
+                    "top_performing_content": [],
+                    "period_days": days_back,
+                    "status": "no_data"
+                }
+
+            # Calculate date threshold
+            date_threshold = datetime.utcnow() - timedelta(days=days_back)
+
+            # Query channel content within the time period
+            channel_content_records = db.query(ChannelContent).filter(
+                ChannelContent.channel_id == channel.id,
+                ChannelContent.post_date >= date_threshold
+            ).all()
+
+            if not channel_content_records:
+                # No content posted yet
+                self.logger.info(
+                    f"No content found for channel '{channel_element}' "
+                    f"in last {days_back} days"
+                )
+                return {
+                    "channel_element": channel_element,
+                    "channel_name": channel.channel_name,
+                    "total_posts": 0,
+                    "total_saves": 0,
+                    "total_views": 0,
+                    "save_rate": 0.0,
+                    "avg_saves_per_post": 0.0,
+                    "avg_views_per_post": 0.0,
+                    "avg_engagement_rate": 0.0,
+                    "top_performing_content": [],
+                    "period_days": days_back,
+                    "status": "no_content"
+                }
+
+            # Calculate aggregate metrics
+            total_posts = len(channel_content_records)
+            total_saves = sum(record.save_count for record in channel_content_records)
+            total_views = sum(record.view_count for record in channel_content_records)
+
+            # Calculate save rate (primary TikTok metric)
+            save_rate = (total_saves / total_views * 100) if total_views > 0 else 0.0
+
+            # Calculate averages
+            avg_saves_per_post = total_saves / total_posts if total_posts > 0 else 0.0
+            avg_views_per_post = total_views / total_posts if total_posts > 0 else 0.0
+
+            # Calculate average engagement rate
+            engagement_rates = [
+                float(record.engagement_rate)
+                for record in channel_content_records
+                if record.engagement_rate is not None
+            ]
+            avg_engagement_rate = (
+                sum(engagement_rates) / len(engagement_rates)
+                if engagement_rates else 0.0
+            )
+
+            # Get top performing content (top 5 by save count)
+            top_performing = sorted(
+                channel_content_records,
+                key=lambda x: x.save_count,
+                reverse=True
+            )[:5]
+
+            top_performing_content = [
+                {
+                    "content_id": record.content_id,
+                    "post_date": record.post_date.isoformat() if record.post_date else None,
+                    "saves": record.save_count,
+                    "views": record.view_count,
+                    "save_rate": (
+                        (record.save_count / record.view_count * 100)
+                        if record.view_count > 0 else 0.0
+                    ),
+                    "engagement_rate": float(record.engagement_rate) if record.engagement_rate else 0.0
+                }
+                for record in top_performing
+            ]
+
+            self.logger.info(
+                f"Retrieved metrics for {channel_element}: "
+                f"{total_posts} posts, {total_saves} saves, {save_rate:.2f}% save rate"
+            )
+
+            return {
+                "channel_element": channel_element,
+                "channel_name": channel.channel_name,
+                "total_posts": total_posts,
+                "total_saves": total_saves,
+                "total_views": total_views,
+                "save_rate": round(save_rate, 2),
+                "avg_saves_per_post": round(avg_saves_per_post, 2),
+                "avg_views_per_post": round(avg_views_per_post, 2),
+                "avg_engagement_rate": round(avg_engagement_rate, 2),
+                "top_performing_content": top_performing_content,
+                "period_days": days_back,
+                "status": "success"
+            }
+
+        except Exception as e:
+            self.logger.error(
+                f"Error getting performance metrics for {channel_element}: {e}",
+                exc_info=True
+            )
+            # Return empty metrics on error
+            return {
+                "channel_element": channel_element,
+                "channel_name": self.channels.get(channel_element, {}).get("channel_name", channel_element),
+                "total_posts": 0,
+                "total_saves": 0,
+                "total_views": 0,
+                "save_rate": 0.0,
+                "avg_saves_per_post": 0.0,
+                "avg_views_per_post": 0.0,
+                "avg_engagement_rate": 0.0,
+                "top_performing_content": [],
+                "period_days": days_back,
+                "status": "error",
+                "error": str(e)
+            }
+        finally:
+            db.close()
