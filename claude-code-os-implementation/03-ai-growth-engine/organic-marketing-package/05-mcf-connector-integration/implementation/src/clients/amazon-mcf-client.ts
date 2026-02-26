@@ -276,7 +276,7 @@ export class AmazonMCFClient {
   constructor(config: AmazonMCFClientConfig, retryConfig: RetryConfig = {}) {
     this.config = config;
     this.retryConfig = { ...DEFAULT_RETRY_CONFIG, ...retryConfig };
-    this.endpoint = SP_API_ENDPOINTS[config.region] || SP_API_ENDPOINTS['na'];
+    this.endpoint = SP_API_ENDPOINTS[config.region as keyof typeof SP_API_ENDPOINTS] || SP_API_ENDPOINTS['na'];
 
     this.httpClient = axios.create({
       baseURL: this.endpoint,
