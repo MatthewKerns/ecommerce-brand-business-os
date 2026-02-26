@@ -20,7 +20,9 @@ from tests.fixtures.mock_responses import (
     MOCK_EMAIL_RESPONSE,
     MOCK_VIDEO_SCRIPT_RESPONSE,
     MOCK_API_ERROR,
-    create_mock_response
+    create_mock_response,
+    MOCK_AMAZON_RESPONSE,
+    MOCK_COMPETITOR_RESPONSE
 )
 
 
@@ -112,3 +114,15 @@ def mock_content_response():
             "timestamp": "2025-01-01T00:00:00Z"
         }
     }
+
+
+@pytest.fixture
+def mock_amazon_client():
+    """Mock client for Amazon listing generation"""
+    return create_mock_client(MOCK_AMAZON_RESPONSE)
+
+
+@pytest.fixture
+def mock_competitor_client():
+    """Mock client for competitor analysis"""
+    return create_mock_client(MOCK_COMPETITOR_RESPONSE)

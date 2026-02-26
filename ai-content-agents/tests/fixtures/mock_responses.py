@@ -113,6 +113,58 @@ Voiceover: "Don't just store your deck. Protect your arsenal. BattleVault - Show
 [End card with discount code]""")]
 )
 
+MOCK_AMAZON_RESPONSE = MockMessage(
+    content=[MockTextBlock(text="""OPTION 1: Premium Trading Card Binder - Battle-Ready 9-Pocket Pages - Scratch-Resistant Storage for Pokemon, MTG, Sports Cards - Professional Tournament-Grade with Lifetime Warranty
+
+OPTION 2: Tournament-Grade Trading Card Binder - Premium Scratch-Resistant Protection - 9-Pocket Battle-Ready Storage for Pokemon, MTG, Yu-Gi-Oh - Lifetime Warranty Included
+
+OPTION 3: Battle-Ready Trading Card Storage Binder - Professional 9-Pocket Scratch-Resistant Pages - Premium Protection for Pokemon, MTG, Sports Cards - Tournament-Grade Quality
+
+RECOMMENDED: Option 1 - It front-loads "Premium" as the value signal, clearly states the category (Trading Card Binder), highlights the battle-ready positioning, and includes the lifetime warranty which is a strong trust signal.""")]
+)
+
+MOCK_COMPETITOR_RESPONSE = MockMessage(
+    content=[MockTextBlock(text="""## COMPETITOR OVERVIEW
+This competitor positions themselves as a mid-tier storage solution, focusing primarily on affordability and basic functionality rather than premium quality or identity-driven positioning.
+
+## DETAILED ANALYSIS
+
+### Positioning Analysis
+The competitor uses commodity positioning - emphasizing price point and basic features rather than aspirational identity or premium quality signals.
+
+### Keyword Strategy
+Front-loaded keywords include "storage" and "organizer" - functional but not emotionally resonant. Missing opportunity to target "tournament," "professional," or "battle-ready" terminology.
+
+### Messaging Analysis
+Benefits-to-features ratio is approximately 30:70, heavily weighted toward features. Brand voice is neutral and informational rather than inspiring or identity-driven.
+
+## STRENGTHS
+- Clear product specifications
+- Competitive pricing strategy
+- Good use of bullet point structure
+
+## WEAKNESSES
+- Commodity positioning leaves them vulnerable to premium competitors
+- No emotional connection or identity positioning
+- Generic language that doesn't resonate with serious players
+- Weak warranty offering (90 days vs. our lifetime)
+
+## DIFFERENTIATION STRATEGY
+Infinity Vault should emphasize:
+1. Battle-ready positioning (not just storage)
+2. Professional/tournament-grade quality signals
+3. Identity-driven messaging (serious players, not casual collectors)
+4. Lifetime warranty as trust builder
+5. Premium materials and construction
+
+## ACTION ITEMS
+1. Highlight lifetime warranty prominently
+2. Use battle-ready language throughout
+3. Position as professional equipment, not commodity storage
+4. Emphasize tournament-tested durability
+5. Create emotional connection with serious player identity""")]
+)
+
 # Error scenario mock responses
 MOCK_API_ERROR = Exception("API rate limit exceeded")
 MOCK_TIMEOUT_ERROR = Exception("Request timeout")
