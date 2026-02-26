@@ -259,6 +259,22 @@ class ContentGenerationResponse(BaseModel):
     )
 
 
+class ChannelMetricsResponse(BaseModel):
+    """Response model for channel performance metrics."""
+    request_id: str = Field(
+        ...,
+        description="Unique identifier for the request"
+    )
+    metrics: Dict[str, Any] = Field(
+        ...,
+        description="Performance metrics for the channel"
+    )
+    status: str = Field(
+        default="success",
+        description="Status of the request"
+    )
+
+
 # ============================================================================
 # Route Handlers
 # ============================================================================
@@ -301,6 +317,76 @@ async def list_all_channels(
         raise HTTPException(
             status_code=500,
             detail=f"Failed to list channels: {str(e)}"
+        )
+
+
+@router.get("/{channel_element}/metrics", response_model=ChannelMetricsResponse)
+async def get_channel_metrics(
+    channel_element: str,
+    days_back: int = 30,
+    request_id: str = Depends(get_request_id)
+) -> ChannelMetricsResponse:
+    """
+    Get performance metrics for a specific TikTok channel.
+
+    Args:
+        channel_element: Channel element (air, water, fire, earth)
+        days_back: Number of days to look back for metrics (default 30)
+        request_id: Unique request identifier
+
+    Returns:
+        ChannelMetricsResponse with performance metrics including:
+        - total_posts: Total number of posts
+        - total_saves: Total save count
+        - total_views: Total view count
+        - save_rate: Save rate percentage (primary TikTok metric)
+        - avg_saves_per_post: Average saves per post
+        - avg_views_per_post: Average views per post
+        - top_performing_content: List of top 5 posts by save count
+
+    Raises:
+        HTTPException: If channel not found or retrieval fails
+    """
+    logger.info(
+        f"[{request_id}] Getting metrics for channel: element='{channel_element}', "
+        f"days_back={days_back}"
+    )
+
+    try:
+        # Initialize agent
+        agent = TikTokChannelAgent()
+
+        # Get channel performance metrics
+        metrics = agent.get_channel_performance(
+            channel_element=channel_element,
+            days_back=days_back
+        )
+
+        # Create response
+        response = ChannelMetricsResponse(
+            request_id=request_id,
+            metrics=metrics,
+            status="success"
+        )
+
+        logger.info(
+            f"[{request_id}] Successfully retrieved metrics for '{channel_element}': "
+            f"{metrics.get('total_posts', 0)} posts, "
+            f"{metrics.get('save_rate', 0):.2f}% save rate"
+        )
+        return response
+
+    except ValueError as e:
+        logger.warning(f"[{request_id}] Channel not found: {e}")
+        raise HTTPException(
+            status_code=404,
+            detail=f"Channel not found: {str(e)}"
+        )
+    except Exception as e:
+        logger.error(f"[{request_id}] Error getting metrics: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to get channel metrics: {str(e)}"
         )
 
 
