@@ -257,3 +257,73 @@ class PerformanceMetrics(Base):
 
     def __repr__(self):
         return f"<PerformanceMetrics(id={self.id}, request_id='{self.request_id}', duration={self.total_duration_ms}ms)>"
+
+
+class AEOCitationTest(Base):
+    """
+    Tracks AI assistant citation tests for AEO (Agentic Engine Optimization) monitoring.
+
+    Attributes:
+        id: Primary key
+        test_id: Unique identifier for the test
+        query: The query sent to the AI assistant
+        ai_assistant: Name of AI assistant tested (chatgpt, claude, perplexity, gemini, copilot)
+        query_category: Category of query (product_discovery, problem_solving, comparison, purchase_intent, educational)
+        brand_mentioned: Whether brand was mentioned in response
+        brand_recommended: Whether brand was explicitly recommended
+        citation_position: Position of brand mention (1-10, null if not mentioned)
+        response_text: Full or partial response from AI assistant
+        response_metadata: JSON metadata about the response
+        test_date: When the test was performed
+        tester_name: Name of person who performed the test
+        notes: Additional notes or observations
+        created_at: Timestamp when record was created
+    """
+    __tablename__ = "aeo_citation_test"
+
+    # Primary Key
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
+    # Test Identification
+    test_id = Column(String(50), unique=True, nullable=False, index=True)
+
+    # Query Details
+    query = Column(Text, nullable=False)
+    ai_assistant = Column(String(20), nullable=False, index=True)
+    query_category = Column(String(30), nullable=False, index=True)
+
+    # Citation Metrics
+    brand_mentioned = Column(Boolean, default=False, nullable=False, index=True)
+    brand_recommended = Column(Boolean, default=False, nullable=False)
+    citation_position = Column(Integer)
+
+    # Response Details
+    response_text = Column(Text)
+    response_metadata = Column(Text)  # JSON stored as text
+
+    # Test Context
+    test_date = Column(DateTime, nullable=False, index=True)
+    tester_name = Column(String(100))
+    notes = Column(Text)
+
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+
+    # Table constraints
+    __table_args__ = (
+        CheckConstraint(
+            "ai_assistant IN ('chatgpt', 'claude', 'perplexity', 'gemini', 'copilot', 'other')",
+            name="check_ai_assistant"
+        ),
+        CheckConstraint(
+            "query_category IN ('product_discovery', 'problem_solving', 'comparison', 'purchase_intent', 'educational', 'other')",
+            name="check_query_category"
+        ),
+        CheckConstraint("citation_position >= 1 AND citation_position <= 10", name="check_citation_position"),
+        Index("idx_aeo_citation_assistant_date", "ai_assistant", "test_date"),
+        Index("idx_aeo_citation_category_date", "query_category", "test_date"),
+        Index("idx_aeo_citation_mentioned", "brand_mentioned", "test_date"),
+    )
+
+    def __repr__(self):
+        return f"<AEOCitationTest(id={self.id}, test_id='{self.test_id}', assistant='{self.ai_assistant}', mentioned={self.brand_mentioned})>"
