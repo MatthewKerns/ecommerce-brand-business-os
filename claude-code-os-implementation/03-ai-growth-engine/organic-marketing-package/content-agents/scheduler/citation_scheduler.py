@@ -565,6 +565,222 @@ class CitationScheduler:
         except Exception as e:
             self.logger.warning(f"Failed to resume job '{job_id}': {e}")
 
+    def configure_weekly_jobs_from_config(
+        self,
+        job_configs: List[Dict[str, Any]],
+        replace_existing: bool = True
+    ) -> List[Job]:
+        """
+        Configure multiple weekly jobs from a list of configuration dictionaries
+
+        This is a convenience method for setting up multiple weekly citation monitoring
+        jobs from a configuration source (e.g., config file, database, environment).
+
+        Args:
+            job_configs: List of job configuration dictionaries, each containing:
+                - job_id (str, required): Unique identifier for the job
+                - queries (List[str], required): List of queries to test
+                - platforms (List[str], optional): AI platforms to query
+                - competitor_names (List[str], optional): Competitor names to track
+                - brand_name (str, optional): Brand name to monitor
+                - day_of_week (str, optional): Day to run (default: 'mon')
+                - hour (int, optional): Hour to run (default: 9)
+                - minute (int, optional): Minute to run (default: 0)
+                - save_to_db (bool, optional): Save to database (default: True)
+            replace_existing: If True, remove existing jobs before adding new ones
+
+        Returns:
+            List of APScheduler Job instances
+
+        Raises:
+            ValueError: If job_configs is invalid or contains invalid job configurations
+            ConfigurationError: If job scheduling fails
+
+        Example:
+            >>> scheduler = CitationScheduler()
+            >>> job_configs = [
+            ...     {
+            ...         'job_id': 'weekly_tcg_storage',
+            ...         'queries': ['Best TCG storage', 'Top card binders'],
+            ...         'platforms': ['chatgpt', 'claude'],
+            ...         'day_of_week': 'mon',
+            ...         'hour': 9
+            ...     },
+            ...     {
+            ...         'job_id': 'weekly_tcg_protection',
+            ...         'queries': ['Best card sleeves', 'TCG protection'],
+            ...         'platforms': ['perplexity'],
+            ...         'day_of_week': 'wed',
+            ...         'hour': 14
+            ...     }
+            ... ]
+            >>> jobs = scheduler.configure_weekly_jobs_from_config(job_configs)
+            >>> scheduler.start()
+        """
+        # Validate input
+        if not isinstance(job_configs, list):
+            raise ValueError("job_configs must be a list of dictionaries")
+        if len(job_configs) == 0:
+            self.logger.warning("No job configurations provided")
+            return []
+
+        self.logger.info(f"Configuring {len(job_configs)} weekly jobs from configuration")
+
+        # Remove existing jobs if requested
+        if replace_existing:
+            existing_jobs = self.get_jobs()
+            if existing_jobs:
+                self.logger.info(f"Removing {len(existing_jobs)} existing jobs")
+                for job in existing_jobs:
+                    self.remove_job(job.id)
+
+        # Add new jobs
+        jobs = []
+        for i, config in enumerate(job_configs):
+            try:
+                # Validate required fields
+                if not isinstance(config, dict):
+                    raise ValueError(f"Job config at index {i} must be a dictionary")
+                if 'job_id' not in config:
+                    raise ValueError(f"Job config at index {i} missing required field 'job_id'")
+                if 'queries' not in config:
+                    raise ValueError(f"Job config at index {i} missing required field 'queries'")
+
+                # Extract configuration with defaults
+                job_id = config['job_id']
+                queries = config['queries']
+                platforms = config.get('platforms', None)
+                competitor_names = config.get('competitor_names', None)
+                brand_name = config.get('brand_name', None)
+                day_of_week = config.get('day_of_week', 'mon')
+                hour = config.get('hour', 9)
+                minute = config.get('minute', 0)
+                save_to_db = config.get('save_to_db', True)
+                callback = config.get('callback', None)
+
+                # Add weekly job
+                job = self.add_weekly_job(
+                    job_id=job_id,
+                    queries=queries,
+                    platforms=platforms,
+                    competitor_names=competitor_names,
+                    brand_name=brand_name,
+                    day_of_week=day_of_week,
+                    hour=hour,
+                    minute=minute,
+                    save_to_db=save_to_db,
+                    callback=callback
+                )
+                jobs.append(job)
+
+                self.logger.info(
+                    f"Configured job '{job_id}': {len(queries)} queries, "
+                    f"runs every {day_of_week} at {hour:02d}:{minute:02d} UTC"
+                )
+
+            except Exception as e:
+                error_msg = f"Failed to configure job at index {i}: {str(e)}"
+                self.logger.error(error_msg, exc_info=True)
+                # Continue with other jobs instead of failing completely
+                # But log the error for debugging
+                continue
+
+        self.logger.info(
+            f"Successfully configured {len(jobs)}/{len(job_configs)} weekly jobs"
+        )
+        return jobs
+
+    def setup_default_weekly_monitoring(
+        self,
+        job_id: str = 'default_weekly_citation_monitoring',
+        queries: Optional[List[str]] = None,
+        platforms: Optional[List[str]] = None,
+        competitor_names: Optional[List[str]] = None,
+        brand_name: Optional[str] = None,
+        day_of_week: str = 'mon',
+        hour: int = 9
+    ) -> Job:
+        """
+        Set up a single default weekly citation monitoring job
+
+        This is a convenience method for quickly setting up a default weekly job
+        without manually specifying all parameters. Useful for getting started
+        quickly or setting up standard monitoring schedules.
+
+        Args:
+            job_id: Unique identifier for the job (default: 'default_weekly_citation_monitoring')
+            queries: List of queries to test (defaults to common TCG-related queries)
+            platforms: List of AI platforms to query (defaults to all available)
+            competitor_names: Optional list of competitor names to track
+            brand_name: Brand name to monitor (defaults to BRAND_NAME from config)
+            day_of_week: Day of week to run (default: 'mon')
+            hour: Hour of day to run (default: 9, UTC)
+
+        Returns:
+            APScheduler Job instance
+
+        Raises:
+            ConfigurationError: If job scheduling fails
+
+        Example:
+            >>> scheduler = CitationScheduler()
+            >>> # Set up with default queries
+            >>> job = scheduler.setup_default_weekly_monitoring()
+            >>> scheduler.start()
+            >>>
+            >>> # Or customize
+            >>> job = scheduler.setup_default_weekly_monitoring(
+            ...     queries=['Best TCG storage', 'Top card binders'],
+            ...     platforms=['chatgpt', 'claude'],
+            ...     day_of_week='wed',
+            ...     hour=14
+            ... )
+        """
+        # Use default queries if not provided
+        if queries is None:
+            queries = [
+                'Best TCG storage solutions',
+                'Top trading card binders',
+                'Best card sleeves for protection',
+                'How to organize trading card collection',
+                'Best deck boxes for TCG players'
+            ]
+            self.logger.info("Using default TCG-related queries for weekly monitoring")
+
+        # Use all available platforms if not specified
+        if platforms is None:
+            platforms = self.agent.get_available_platforms()
+            self.logger.info(f"Using all available platforms: {platforms}")
+
+        # Use configured brand name if not provided
+        if brand_name is None:
+            brand_name = BRAND_NAME
+            self.logger.info(f"Using brand name from config: {brand_name}")
+
+        self.logger.info(
+            f"Setting up default weekly citation monitoring job '{job_id}': "
+            f"{len(queries)} queries across {len(platforms)} platforms, "
+            f"running every {day_of_week} at {hour:02d}:00 UTC"
+        )
+
+        # Add weekly job
+        job = self.add_weekly_job(
+            job_id=job_id,
+            queries=queries,
+            platforms=platforms,
+            competitor_names=competitor_names,
+            brand_name=brand_name,
+            day_of_week=day_of_week,
+            hour=hour,
+            minute=0,
+            save_to_db=True
+        )
+
+        self.logger.info(
+            f"Default weekly monitoring job configured successfully (next run: {job.next_run_time})"
+        )
+        return job
+
     def __enter__(self):
         """Context manager entry - start scheduler"""
         self.start()
