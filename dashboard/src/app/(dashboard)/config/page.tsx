@@ -1,11 +1,15 @@
+"use client";
+
+import { useState } from "react";
 import { Settings } from "lucide-react";
+import { ApiKeyManager } from "@/components/ApiKeyManager";
 
 /**
  * Configuration Management Page
  *
  * Interface for managing API keys, service settings, and workspace configuration.
  *
- * Features (to be implemented):
+ * Features:
  * - API key management with secure storage
  * - Service configuration forms (TikTok, Blog, Email)
  * - Workspace settings (name, members, invites)
@@ -15,6 +19,8 @@ import { Settings } from "lucide-react";
  * @route /config
  */
 export default function ConfigPage() {
+  const [activeTab, setActiveTab] = useState<"api-keys" | "services" | "workspace">("api-keys");
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -30,84 +36,67 @@ export default function ConfigPage() {
         </div>
       </div>
 
-      {/* Tab Navigation Placeholder */}
+      {/* Tab Navigation */}
       <div className="border-b border-slate-200">
         <div className="flex gap-6">
-          {["API Keys", "Services", "Workspace"].map((tab, index) => (
+          {[
+            { id: "api-keys", label: "API Keys" },
+            { id: "services", label: "Services" },
+            { id: "workspace", label: "Workspace" },
+          ].map((tab) => (
             <button
-              key={tab}
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as typeof activeTab)}
               className={`border-b-2 px-1 pb-3 text-sm font-medium transition-colors ${
-                index === 0
+                activeTab === tab.id
                   ? "border-blue-600 text-blue-600"
                   : "border-transparent text-slate-600 hover:text-slate-900"
               }`}
             >
-              {tab}
+              {tab.label}
             </button>
           ))}
         </div>
       </div>
 
-      {/* API Keys Section */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-semibold text-slate-900">API Keys</h2>
-            <p className="text-sm text-slate-600">
-              Manage authentication keys for external services
-            </p>
-          </div>
-          <button className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
-            Add API Key
-          </button>
-        </div>
+      {/* Tab Content */}
+      {activeTab === "api-keys" && (
+        <ApiKeyManager
+          onAddKey={() => {
+            // TODO: Implement add key dialog in future subtask
+          }}
+          onDeleteKey={(id) => {
+            // TODO: Implement delete API call in future subtask
+          }}
+          onCopyKey={(value) => {
+            // Success feedback is handled in ApiKeyItem
+          }}
+        />
+      )}
 
-        {/* API Keys List Placeholder */}
-        <div className="space-y-3">
-          {[
-            { name: "TikTok API Key", service: "TikTok", created: "2024-01-15" },
-            { name: "OpenAI API Key", service: "AI Agents", created: "2024-01-10" },
-            { name: "SendGrid API Key", service: "Email", created: "2024-01-05" },
-          ].map((key) => (
-            <div
-              key={key.name}
-              className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-4"
-            >
-              <div className="flex-1">
-                <div className="flex items-center gap-3">
-                  <h3 className="font-semibold text-slate-900">{key.name}</h3>
-                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
-                    {key.service}
-                  </span>
-                </div>
-                <div className="mt-1 flex items-center gap-4 text-sm text-slate-600">
-                  <span className="font-mono">sk-••••••••••••••••</span>
-                  <span>Created {key.created}</span>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <button className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100">
-                  Copy
-                </button>
-                <button className="rounded-lg px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50">
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))}
+      {activeTab === "services" && (
+        <div className="rounded-lg border border-slate-200 bg-white p-6">
+          <h2 className="mb-4 text-lg font-semibold text-slate-900">
+            Service Configuration
+          </h2>
+          <p className="text-sm text-slate-600">
+            Configure settings for TikTok, Blog Engine, Email Automation, and other services.
+            Configuration forms will be displayed here in a future subtask.
+          </p>
         </div>
-      </div>
+      )}
 
-      {/* Service Configuration Section */}
-      <div className="rounded-lg border border-slate-200 bg-white p-6">
-        <h2 className="mb-4 text-lg font-semibold text-slate-900">
-          Service Configuration
-        </h2>
-        <p className="text-sm text-slate-600">
-          Configure settings for TikTok, Blog Engine, Email Automation, and other services.
-          Configuration forms will be displayed here.
-        </p>
-      </div>
+      {activeTab === "workspace" && (
+        <div className="rounded-lg border border-slate-200 bg-white p-6">
+          <h2 className="mb-4 text-lg font-semibold text-slate-900">
+            Workspace Settings
+          </h2>
+          <p className="text-sm text-slate-600">
+            Manage workspace name, team members, and invitations.
+            Workspace settings will be displayed here in a future subtask.
+          </p>
+        </div>
+      )}
     </div>
   );
 }
