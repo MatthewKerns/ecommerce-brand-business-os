@@ -39,7 +39,7 @@ function createMockTikTokOrder(orderId: string = 'TT-123456'): TikTokOrder {
       city: 'San Francisco',
       state: 'California',
       postal_code: '94102',
-      region_code: 'CA',
+      region_code: 'US', // Country code, not state code
     },
     items: [
       {
@@ -148,6 +148,20 @@ function createMockConnector(): {
     createFulfillmentOrder: jest.fn(),
     getFulfillmentOrder: jest.fn(),
     getPackageTracking: jest.fn(),
+    getInventorySummaries: jest.fn().mockResolvedValue({
+      inventorySummaries: [
+        {
+          sellerSku: 'AMAZON-SKU-001',
+          fulfillableQuantity: 100,
+          inboundWorkingQuantity: 0,
+          inboundShippedQuantity: 0,
+          inboundReceivingQuantity: 0,
+          reservedQuantity: 0,
+          unfulfillableQuantity: 0,
+          totalQuantity: 100,
+        },
+      ],
+    }),
     refreshAccessToken: jest.fn(),
     testConnection: jest.fn().mockResolvedValue(true),
   } as unknown as jest.Mocked<AmazonMCFClient>;
@@ -198,9 +212,24 @@ function createMockConnector(): {
   (connector as any).tiktok = mockTikTokClient;
   (connector as any).amazon = mockAmazonClient;
 
+  // Re-initialize inventory sync with mocked clients (if enabled)
+  if (connector.inventorySync) {
+    const InventorySyncClass = (connector.inventorySync as any).constructor;
+    connector.inventorySync = new InventorySyncClass(
+      { amazonClient: mockAmazonClient },
+      {
+        cacheTtlMs: 5 * 60 * 1000,
+        safetyStock: 5,
+        lowStockThreshold: 10,
+        batchSize: 50,
+        enableCaching: true,
+      }
+    );
+  }
+
   // Re-initialize router with mocked clients
-  connector.router = (connector as any).router.constructor.call(
-    Object.create((connector as any).router.constructor.prototype),
+  const OrderRouterClass = (connector as any).router.constructor;
+  connector.router = new OrderRouterClass(
     {
       tiktokClient: mockTikTokClient,
       amazonClient: mockAmazonClient,
@@ -212,8 +241,8 @@ function createMockConnector(): {
   );
 
   // Re-initialize tracking sync with mocked clients
-  connector.trackingSync = (connector as any).trackingSync.constructor.call(
-    Object.create((connector as any).trackingSync.constructor.prototype),
+  const TrackingSyncClass = (connector as any).trackingSync.constructor;
+  connector.trackingSync = new TrackingSyncClass(
     {
       tiktokClient: mockTikTokClient,
       amazonClient: mockAmazonClient,
