@@ -456,26 +456,307 @@ This document tracks manual validation and testing results for the TikTok Shop A
 ## Phase 5: Rate Limiting & Error Handling Testing
 
 ### Test: Rate Limiting Under Load
-**Status**: ⏳ Pending
+**Status**: ⏳ Pending / ✅ Completed / ❌ Failed
+
+**Test Script**: `test_rate_limiting_errors.py`
+
+#### Prerequisites Checklist
+- [ ] TikTok Shop API integration implemented
+- [ ] Rate limiter implemented with token bucket algorithm
+- [ ] Error handling and retry logic implemented
+- [ ] Valid API credentials for integration tests (optional for offline tests)
 
 #### Test Steps
-1. **Rate Limiter Validation**
-   - [ ] Make rapid consecutive requests
-   - [ ] Verify rate limiter throttles requests
-   - [ ] No API rate limit errors occur
-   - [ ] Token bucket algorithm works correctly
 
-2. **Error Handling**
-   - [ ] Invalid access token returns TikTokShopAuthError
-   - [ ] Invalid product ID returns TikTokShopNotFoundError
-   - [ ] Network errors return TikTokShopNetworkError
-   - [ ] Server errors trigger automatic retry
-   - [ ] Retry logic works with exponential backoff
+##### 1. Rate Limiter Basic Functionality
+**Purpose**: Validate token bucket algorithm implementation
 
-3. **Resilience Testing**
-   - [ ] Transient errors are retried automatically
-   - [ ] Permanent errors fail immediately
-   - [ ] Error messages are clear and actionable
+Test Cases:
+- [ ] Rate limiter initializes correctly with configured rate
+- [ ] Initial token bucket is full (equals bucket_capacity)
+- [ ] Tokens are consumed on acquire()
+- [ ] Available tokens decrease after acquisition
+- [ ] Non-blocking acquire returns False when bucket is empty
+- [ ] Tokens refill automatically over time at configured rate
+- [ ] Token refill rate matches configured requests_per_second
+- [ ] Bucket never exceeds maximum capacity after refill
+- [ ] Reset() method refills bucket to full capacity
+- [ ] Thread-safe operations with lock
+
+**Expected Results**:
+```
+✓ Rate limiter created with 5 requests/second
+✓ Initial available tokens: 5.00
+✓ Acquired 1 token successfully
+✓ Remaining tokens after acquisition: 4.00
+✓ Non-blocking acquire correctly failed with empty bucket
+✓ Tokens after 0.5s refill: 2.50 (approximately)
+✓ Tokens after reset: 5.00
+```
+
+##### 2. Rate Limiter Under Load
+**Purpose**: Validate rate limiting under rapid consecutive requests
+
+Test Cases:
+- [ ] Rate limiter handles burst requests (uses bucket capacity)
+- [ ] Rate limiter throttles requests beyond burst capacity
+- [ ] Requests complete at or below configured rate
+- [ ] Blocking acquire waits for token availability
+- [ ] Wait time is calculated correctly based on token refill rate
+- [ ] No requests are dropped or lost during throttling
+- [ ] Effective request rate matches configured limit over time
+
+**Test Configuration**:
+- Rate limit: 10 requests/second
+- Burst capacity: 20 tokens
+- Test requests: 30 rapid consecutive requests
+
+**Expected Results**:
+```
+✓ Rate limiter created with 10 requests/second, 20 burst capacity
+✓ All 30 requests completed
+ℹ Total time: ~1.0-2.0 seconds
+ℹ Effective rate: ~10-15 requests/second
+  (First 20 requests use burst capacity, remaining 10 throttled)
+```
+
+##### 3. API Client Rate Limiting Integration
+**Purpose**: Verify API client respects rate limits during real API calls
+
+Test Cases:
+- [ ] API client initializes rate limiter on creation
+- [ ] Rate limiter.acquire() called before each API request
+- [ ] Multiple rapid API requests are throttled automatically
+- [ ] No TikTokShopRateLimitError exceptions from API
+- [ ] Effective request rate does not exceed configured limit
+- [ ] Rate limiting works with concurrent requests
+- [ ] API responses are correct despite rate limiting
+
+**Test Configuration**:
+- API rate limit: 10 requests/second (configured in client)
+- Test: 15 rapid consecutive API calls (list_products)
+
+**Expected Results**:
+```
+✓ Making 15 rapid consecutive API calls
+ℹ Request 1/15: SUCCESS
+ℹ Request 2/15: SUCCESS
+...
+ℹ Request 15/15: SUCCESS
+✓ Rate limiter successfully throttled requests
+✓ No rate limit errors from API
+ℹ Effective rate: ~9-10 requests/second
+```
+
+##### 4. Authentication Error Handling
+**Purpose**: Validate authentication error detection and handling
+
+Test Cases:
+- [ ] Invalid access token raises TikTokShopAuthError
+- [ ] Missing access token raises TikTokShopAuthError
+- [ ] Expired access token raises TikTokShopAuthError
+- [ ] Auth errors are not retried (permanent failure)
+- [ ] Error message includes helpful information
+- [ ] Error response data is captured
+
+**Test Configuration**:
+- Invalid token: "invalid_token_12345"
+- Missing token: None
+
+**Expected Results**:
+```
+✓ Client created with invalid token
+✓ Correctly caught TikTokShopAuthError: [401] Access token is invalid or expired
+✓ Correctly caught TikTokShopAuthError for missing token: Access token is required
+✓ Auth error not retried (immediate failure)
+```
+
+##### 5. Validation Error Handling
+**Purpose**: Validate request validation error detection
+
+Test Cases:
+- [ ] Invalid parameters raise TikTokShopValidationError
+- [ ] Invalid data types are detected
+- [ ] Required fields validation works
+- [ ] Validation errors are not retried (permanent failure)
+- [ ] Error message indicates which field failed validation
+
+**Test Configuration**:
+- Test: get_products(page_size=-1)  # Invalid negative value
+- Test: Invalid date formats, missing required fields
+
+**Expected Results**:
+```
+✓ Correctly caught validation error: Invalid parameter: page_size must be positive
+✓ Validation error not retried (immediate failure)
+```
+
+##### 6. Not Found Error Handling
+**Purpose**: Validate resource not found error detection
+
+Test Cases:
+- [ ] Invalid product ID raises TikTokShopNotFoundError
+- [ ] Invalid order ID raises TikTokShopNotFoundError
+- [ ] Deleted resources return 404
+- [ ] Not found errors are not retried (permanent failure)
+- [ ] Error message includes resource ID
+
+**Test Configuration**:
+- Test: get_product(product_id="invalid_product_id_99999")
+
+**Expected Results**:
+```
+✓ Correctly caught TikTokShopNotFoundError: Product not found: invalid_product_id_99999
+✓ Not found error not retried (immediate failure)
+```
+
+##### 7. Server Error Retry Logic
+**Purpose**: Validate automatic retry for transient server errors
+
+Test Cases:
+- [ ] 5xx errors raise TikTokShopServerError
+- [ ] Server errors are marked as retryable
+- [ ] Retry uses exponential backoff (1s → 2s → 4s)
+- [ ] Maximum retry attempts enforced (2 retries for server errors)
+- [ ] Backoff time capped at maximum (32 seconds)
+- [ ] Error details preserved through retries
+
+**Expected Retry Behavior**:
+```
+Retry 0: Wait 2.0s  (INITIAL_BACKOFF_SECONDS * 2^0)
+Retry 1: Wait 4.0s  (INITIAL_BACKOFF_SECONDS * 2^1)
+Retry 2: Wait 8.0s  (INITIAL_BACKOFF_SECONDS * 2^2)
+After 2 retries: Raise TikTokShopServerError
+```
+
+**Test Results**:
+```
+✓ Server error marked for retry (wait: 2.0s)
+✓ Exponential backoff calculated correctly
+✓ Max retries enforced (2 attempts)
+✓ Error raised after max retries exceeded
+```
+
+##### 8. Network Error Retry Logic
+**Purpose**: Validate automatic retry for transient network errors
+
+Test Cases:
+- [ ] Connection timeout raises TikTokShopNetworkError
+- [ ] Connection errors raise TikTokShopNetworkError
+- [ ] Network errors are marked as retryable
+- [ ] Retry uses exponential backoff
+- [ ] Maximum retry attempts enforced (2 retries for network errors)
+- [ ] Original exception preserved in error details
+
+**Expected Retry Behavior**:
+```
+Retry 0: Wait 2.0s
+Retry 1: Wait 4.0s
+After 2 retries: Raise TikTokShopNetworkError
+```
+
+**Test Results**:
+```
+✓ Network error marked for retry (wait: 2.0s)
+✓ Exponential backoff calculated correctly
+✓ Max retries enforced (2 attempts)
+✓ Original exception preserved
+```
+
+##### 9. Rate Limit Error Retry Logic
+**Purpose**: Validate automatic retry with backoff for rate limit errors
+
+Test Cases:
+- [ ] 429 status code raises TikTokShopRateLimitError
+- [ ] Rate limit errors are marked as retryable
+- [ ] Retry uses API-provided retry_after if available
+- [ ] Falls back to exponential backoff if retry_after not provided
+- [ ] Maximum retry attempts enforced (3 retries for rate limits)
+- [ ] Backoff respects API rate limit recovery time
+
+**Expected Retry Behavior with retry_after**:
+```
+API Response: retry_after=5
+Retry 0: Wait 5.0s (use API retry_after)
+Retry 1: Wait 5.0s (use API retry_after)
+Retry 2: Wait 5.0s (use API retry_after)
+After 3 retries: Raise TikTokShopRateLimitError
+```
+
+**Expected Retry Behavior without retry_after**:
+```
+Retry 0: Wait 2.0s  (INITIAL_BACKOFF_SECONDS * 2^0)
+Retry 1: Wait 4.0s  (INITIAL_BACKOFF_SECONDS * 2^1)
+Retry 2: Wait 8.0s  (INITIAL_BACKOFF_SECONDS * 2^2)
+After 3 retries: Raise TikTokShopRateLimitError
+```
+
+**Test Results**:
+```
+✓ Rate limit error marked for retry (wait: 5.0s with retry_after)
+✓ Rate limit error marked for retry (wait: 2.0s with exponential backoff)
+✓ Max retries enforced (3 attempts)
+✓ Rate limiter should prevent these errors in normal operation
+```
+
+##### 10. Non-Retryable Error Handling
+**Purpose**: Validate that permanent errors are not retried
+
+Test Cases:
+- [ ] TikTokShopAuthError is not retried
+- [ ] TikTokShopValidationError is not retried
+- [ ] TikTokShopNotFoundError is not retried
+- [ ] Errors fail immediately without delay
+- [ ] Error details preserved for debugging
+
+**Test Results**:
+```
+✓ Auth error correctly marked as non-retryable
+✓ Validation error correctly marked as non-retryable
+✓ Not found error correctly marked as non-retryable
+✓ Errors fail immediately (no wait time)
+```
+
+#### Performance Metrics
+
+| Test | Expected Time | Actual Time | Status |
+|------|---------------|-------------|--------|
+| Rate limiter basic (5 tokens) | < 1s | [TBD] | ⏳ |
+| Rate limiter load (30 requests @ 10/s) | ~1-2s | [TBD] | ⏳ |
+| API client rate limiting (15 requests) | ~1.5-2s | [TBD] | ⏳ |
+| Auth error (immediate fail) | < 0.5s | [TBD] | ⏳ |
+| Validation error (immediate fail) | < 0.5s | [TBD] | ⏳ |
+| Not found error (immediate fail) | < 0.5s | [TBD] | ⏳ |
+| Server error retry (2 retries) | ~6s total | [TBD] | ⏳ |
+| Network error retry (2 retries) | ~6s total | [TBD] | ⏳ |
+| Rate limit retry (3 retries) | ~14s total | [TBD] | ⏳ |
+
+#### Test Results
+
+**Date Tested**: [To be filled]
+
+**Test Configuration**:
+- Rate limiter: 10 requests/second, 20 burst capacity
+- Max retry attempts: 3 (rate limit), 2 (server), 2 (network)
+- Initial backoff: 1.0s
+- Max backoff: 32.0s
+- Timeout: 30s per request
+
+**Outcome**:
+```
+[Test output to be pasted here]
+```
+
+**Summary**:
+- Total tests: [Number]
+- Passed: [Number]
+- Failed: [Number]
+
+**Issues Encountered**:
+- [List any issues]
+
+**Notes**:
+- [Any additional observations]
 
 ---
 
@@ -590,6 +871,11 @@ python test_product_sync.py
 
 # Test order retrieval and analytics
 python test_order_analytics.py
+
+# Test rate limiting and error handling
+python test_rate_limiting_errors.py
+# Or use the shell script:
+./run_rate_limiting_tests.sh
 ```
 
 ### Environment Setup
