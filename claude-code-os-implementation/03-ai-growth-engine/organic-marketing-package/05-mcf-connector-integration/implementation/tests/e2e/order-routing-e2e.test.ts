@@ -246,7 +246,7 @@ describeE2E('End-to-End Order Routing', () => {
         console.log('  None (all SKUs have sufficient stock)');
       } else {
         lowStockSkus.forEach(sku => {
-          console.log(`  - ${sku.sku}: ${sku.fulfillableQuantity} units remaining`);
+          console.log(`  - ${sku.sku}: ${sku.available} units remaining`);
         });
       }
 
@@ -273,10 +273,9 @@ describeE2E('End-to-End Order Routing', () => {
 
       console.log('\nTracking Sync Results:');
       console.log(`  Total Orders: ${syncResult.totalOrders}`);
-      console.log(`  Synced: ${syncResult.syncedCount}`);
-      console.log(`  Failed: ${syncResult.failedCount}`);
-      console.log(`  No Tracking Available: ${syncResult.noTrackingCount}`);
-      console.log(`  Already Synced: ${syncResult.alreadySyncedCount}`);
+      console.log(`  Success: ${syncResult.successCount}`);
+      console.log(`  Failed: ${syncResult.failureCount}`);
+      console.log(`  Skipped: ${syncResult.skippedCount}`);
 
       expect(syncResult.totalOrders).toBeGreaterThanOrEqual(0);
 
@@ -284,7 +283,7 @@ describeE2E('End-to-End Order Routing', () => {
         console.log('\nSync Details:');
         syncResult.results.forEach(r => {
           console.log(`  Order ${r.orderId}:`);
-          console.log(`    Status: ${r.synced ? 'SYNCED' : 'NOT SYNCED'}`);
+          console.log(`    Status: ${r.success ? 'SYNCED' : 'NOT SYNCED'}`);
           if (r.trackingNumber) {
             console.log(`    Tracking: ${r.trackingNumber}`);
             console.log(`    Carrier: ${r.carrier || 'N/A'}`);
@@ -302,9 +301,9 @@ describeE2E('End-to-End Order Routing', () => {
       const secondSyncResult = await connector.syncAllTracking();
 
       console.log('\nSecond Sync (Should Skip Already Synced):');
-      console.log(`  Already Synced: ${secondSyncResult.alreadySyncedCount}`);
+      console.log(`  Skipped: ${secondSyncResult.skippedCount}`);
 
-      expect(secondSyncResult.alreadySyncedCount).toBeGreaterThanOrEqual(0);
+      expect(secondSyncResult.skippedCount).toBeGreaterThanOrEqual(0);
     }, API_TIMEOUT);
   });
 
@@ -317,7 +316,7 @@ describeE2E('End-to-End Order Routing', () => {
       const routeResult = await connector.routePendingOrders();
       console.log(`  ✓ Found ${routeResult.totalOrders} order(s)`);
       console.log(`  ✓ Successfully routed: ${routeResult.successCount}`);
-      console.log(`  ✗ Failed: ${routeResult.failedCount}`);
+      console.log(`  ✗ Failed: ${routeResult.failureCount}`);
 
       if (routeResult.totalOrders === 0) {
         console.log('\nℹ No orders to process. Create a test order in TikTok Shop sandbox to test the full flow.');
@@ -348,16 +347,16 @@ describeE2E('End-to-End Order Routing', () => {
       // Step 4: Sync tracking information
       console.log('\nStep 4: Syncing tracking information...');
       const syncResult = await connector.syncAllTracking();
-      console.log(`  ✓ Synced: ${syncResult.syncedCount}`);
-      console.log(`  ℹ No tracking yet: ${syncResult.noTrackingCount}`);
-      console.log(`  ✗ Failed: ${syncResult.failedCount}`);
+      console.log(`  ✓ Success: ${syncResult.successCount}`);
+      console.log(`  ℹ Skipped: ${syncResult.skippedCount}`);
+      console.log(`  ✗ Failed: ${syncResult.failureCount}`);
 
       // Step 5: Summary
       console.log('\n=== END-TO-END TEST COMPLETE ===\n');
       console.log('Summary:');
       console.log(`  Orders Detected: ${routeResult.totalOrders}`);
       console.log(`  Orders Routed: ${routeResult.successCount}`);
-      console.log(`  Tracking Synced: ${syncResult.syncedCount}`);
+      console.log(`  Tracking Synced: ${syncResult.successCount}`);
 
       if (routeResult.successCount > 0) {
         console.log('\n✓ End-to-end flow completed successfully!');
@@ -388,11 +387,11 @@ describeE2E('End-to-End Order Routing', () => {
       ]);
 
       expect(result.totalOrders).toBe(3);
-      expect(result.failedCount).toBe(3);
+      expect(result.failureCount).toBe(3);
 
       console.log('\nBatch processing with errors:');
       console.log(`  Processed: ${result.totalOrders}`);
-      console.log(`  Failed: ${result.failedCount}`);
+      console.log(`  Failed: ${result.failureCount}`);
       console.log('  All errors were handled without stopping batch processing');
     }, API_TIMEOUT);
   });

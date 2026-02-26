@@ -40,11 +40,8 @@ function createMockTikTokOrder(orderId: string = 'TT-123456'): TikTokOrder {
       state: 'California',
       postal_code: '94102',
       region_code: 'CA',
-      district_code: '',
-      country: 'United States',
-      country_code: 'US',
     },
-    item_list: [
+    items: [
       {
         id: 'ITEM-001',
         product_id: 'PROD-001',
@@ -56,7 +53,6 @@ function createMockTikTokOrder(orderId: string = 'TT-123456'): TikTokOrder {
         original_price: 39.99,
         platform_discount: 5.0,
         seller_discount: 5.0,
-        currency: 'USD',
       },
     ],
     payment_info: {
@@ -68,7 +64,7 @@ function createMockTikTokOrder(orderId: string = 'TT-123456'): TikTokOrder {
       tax: 5.4,
       total_amount: 60.38,
     },
-    delivery_option: 'Standard Shipping',
+    delivery_option_name: 'Standard Shipping',
     buyer_message: 'Please leave at front door',
     seller_note: '',
     packages: [],
@@ -178,8 +174,9 @@ function createMockConnector(): {
         awsSecretKey: 'test-secret-key',
       },
       connector: {
-        orderPollingIntervalMinutes: 5,
+        orderPollIntervalMinutes: 5,
         trackingSyncIntervalMinutes: 30,
+        inventorySyncIntervalMinutes: 60,
         retry: {
           maxRetries: 3,
           initialDelay: 1000,
@@ -188,11 +185,7 @@ function createMockConnector(): {
         },
       },
       database: {
-        host: 'localhost',
-        port: 5432,
-        database: 'test_mcf',
-        username: 'test_user',
-        password: 'test_pass',
+        enabled: false,
       },
     },
     enableInventorySync: true,
@@ -280,8 +273,8 @@ describe('Order Flow Integration Tests', () => {
       expect(mocks.amazonClient.createFulfillmentOrder).toHaveBeenCalled();
 
       if (result.success) {
-        expect(result.mcfOrder).toBeDefined();
-        expect(result.mcfOrder?.sellerFulfillmentOrderId).toBe('TT-12345');
+        expect(result.successResult?.mcfOrder).toBeDefined();
+        expect(result.successResult?.mcfOrder?.sellerFulfillmentOrderId).toBe('TT-12345');
       }
     });
 
@@ -300,8 +293,8 @@ describe('Order Flow Integration Tests', () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error).toBeDefined();
-        expect(result.stage).toBe('validate');
-        expect(result.error.code).toBe(ErrorCode.INVALID_ORDER_DATA);
+        expect(result.error?.stage).toBe('validate');
+        expect(result.error?.code).toBe(ErrorCode.INVALID_ORDER_DATA);
       }
     });
 
@@ -337,7 +330,7 @@ describe('Order Flow Integration Tests', () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error?.code).toBe(ErrorCode.INSUFFICIENT_INVENTORY);
-        expect(result.stage).toBe('check_inventory');
+        expect(result.error?.stage).toBe('check_inventory');
       }
     });
 
@@ -353,8 +346,8 @@ describe('Order Flow Integration Tests', () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error).toBeDefined();
-        expect(result.stage).toBe('fetch');
-        expect(result.error.message).toContain('TikTok API Error');
+        expect(result.error?.stage).toBe('fetch');
+        expect(result.error?.message).toContain('TikTok API Error');
       }
     });
 
@@ -364,7 +357,7 @@ describe('Order Flow Integration Tests', () => {
       const mockMCFOrder = createMockMCFFulfillmentOrder('TT-WARNINGS');
 
       // Order with missing seller_sku (should generate warning)
-      mockOrder.item_list[0].seller_sku = '';
+      mockOrder.items[0].seller_sku = '';
 
       mocks.tiktokClient.getOrderDetail.mockResolvedValue(mockOrder);
       mocks.amazonClient.createFulfillmentOrder.mockResolvedValue({ fulfillmentOrder: mockMCFOrder });
@@ -380,8 +373,8 @@ describe('Order Flow Integration Tests', () => {
 
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.warnings).toBeDefined();
-        expect(result.warnings.length).toBeGreaterThan(0);
+        expect(result.successResult?.warnings).toBeDefined();
+        expect(result.successResult?.warnings?.length).toBeGreaterThan(0);
       }
     });
   });
@@ -410,9 +403,9 @@ describe('Order Flow Integration Tests', () => {
 
       const result = await connector.routeOrders(orderIds);
 
-      expect(result.total).toBe(3);
-      expect(result.successful).toBe(3);
-      expect(result.failed).toBe(0);
+      expect(result.totalOrders).toBe(3);
+      expect(result.successCount).toBe(3);
+      expect(result.failureCount).toBe(0);
       expect(result.results.length).toBe(3);
       expect(result.results.every((r) => r.success)).toBe(true);
     });
@@ -458,9 +451,9 @@ describe('Order Flow Integration Tests', () => {
 
       const result = await connector.routeOrders(orderIds);
 
-      expect(result.total).toBe(3);
-      expect(result.successful).toBe(2);
-      expect(result.failed).toBe(1);
+      expect(result.totalOrders).toBe(3);
+      expect(result.successCount).toBe(2);
+      expect(result.failureCount).toBe(1);
     });
   });
 
@@ -609,7 +602,7 @@ describe('Order Flow Integration Tests', () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error).toBeDefined();
-        expect(result.error.message).toContain('MCF API Error');
+        expect(result.error?.message).toContain('MCF API Error');
       }
     });
 
