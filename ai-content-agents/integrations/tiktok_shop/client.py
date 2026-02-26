@@ -57,6 +57,10 @@ class TikTokShopClient:
     INITIAL_BACKOFF_SECONDS = 1.0
     MAX_BACKOFF_SECONDS = 32.0
 
+    # Retry configuration for server and network errors
+    MAX_SERVER_ERROR_RETRIES = 2
+    MAX_NETWORK_ERROR_RETRIES = 2
+
     def __init__(
         self,
         app_key: str,
@@ -144,6 +148,74 @@ class TikTokShopClient:
         """
         return self.oauth.generate_signature(path, params)
 
+    def _handle_error(
+        self,
+        error: Exception,
+        retry_count: int
+    ) -> tuple[bool, float]:
+        """
+        Determine if an error should be retried and calculate backoff time
+
+        This method analyzes errors to determine if they are transient and
+        should be retried. It implements different retry strategies for
+        different error types:
+        - Rate limit errors: Retry with API-provided wait time or exponential backoff
+        - Server errors (5xx): Retry with exponential backoff
+        - Network errors: Retry with exponential backoff
+        - Other errors: Do not retry
+
+        Args:
+            error: The exception that was raised
+            retry_count: Current retry attempt number
+
+        Returns:
+            Tuple of (should_retry, wait_seconds):
+                - should_retry: Boolean indicating if the error should be retried
+                - wait_seconds: Number of seconds to wait before retrying
+
+        Example:
+            >>> should_retry, wait_time = client._handle_error(error, 1)
+            >>> if should_retry:
+            ...     time.sleep(wait_time)
+            ...     # retry request
+        """
+        # Handle rate limit errors
+        if isinstance(error, TikTokShopRateLimitError):
+            if retry_count > self.MAX_RETRY_ATTEMPTS:
+                return False, 0
+
+            # Use retry_after from API if available
+            if error.retry_after:
+                return True, error.retry_after
+
+            # Otherwise use exponential backoff
+            backoff = self.INITIAL_BACKOFF_SECONDS * (2 ** retry_count)
+            wait_time = min(backoff, self.MAX_BACKOFF_SECONDS)
+            return True, wait_time
+
+        # Handle server errors (5xx) - these are often transient
+        if isinstance(error, TikTokShopServerError):
+            if retry_count > self.MAX_SERVER_ERROR_RETRIES:
+                return False, 0
+
+            # Use exponential backoff for server errors
+            backoff = self.INITIAL_BACKOFF_SECONDS * (2 ** retry_count)
+            wait_time = min(backoff, self.MAX_BACKOFF_SECONDS)
+            return True, wait_time
+
+        # Handle network errors - these might be transient
+        if isinstance(error, TikTokShopNetworkError):
+            if retry_count > self.MAX_NETWORK_ERROR_RETRIES:
+                return False, 0
+
+            # Use exponential backoff for network errors
+            backoff = self.INITIAL_BACKOFF_SECONDS * (2 ** retry_count)
+            wait_time = min(backoff, self.MAX_BACKOFF_SECONDS)
+            return True, wait_time
+
+        # Non-retryable errors (auth, validation, not found, etc.)
+        return False, 0
+
     def _make_request(
         self,
         method: str,
@@ -195,11 +267,11 @@ class TikTokShopClient:
                 "Set it using set_access_token() or during initialization."
             )
 
-        # Implement automatic backoff retry logic for rate limit errors
+        # Implement automatic retry logic for transient errors
         retry_count = 0
-        backoff_seconds = self.INITIAL_BACKOFF_SECONDS
+        last_error = None
 
-        while retry_count <= self.MAX_RETRY_ATTEMPTS:
+        while True:
             try:
                 # Acquire token from rate limiter before making request
                 # This prevents hitting API rate limits proactively
@@ -253,54 +325,88 @@ class TikTokShopClient:
                 # Check for API-level errors
                 return self._handle_api_response(response_data)
 
-            except TikTokShopRateLimitError as e:
-                # Handle rate limit errors with exponential backoff
-                retry_count += 1
+            except (TikTokShopRateLimitError, TikTokShopServerError, TikTokShopNetworkError) as e:
+                # These are potentially transient errors that may be retried
+                last_error = e
 
-                if retry_count > self.MAX_RETRY_ATTEMPTS:
-                    # Max retries reached, re-raise the error
+                # Determine if we should retry using the error handler
+                should_retry, wait_time = self._handle_error(e, retry_count)
+
+                if not should_retry:
+                    # Max retries reached or non-retryable error
                     raise
-
-                # Use retry_after from API if available, otherwise use exponential backoff
-                if e.retry_after:
-                    wait_time = e.retry_after
-                else:
-                    wait_time = min(backoff_seconds, self.MAX_BACKOFF_SECONDS)
 
                 # Wait before retrying
                 time.sleep(wait_time)
-
-                # Double the backoff for next iteration (exponential backoff)
-                backoff_seconds *= 2
+                retry_count += 1
 
             except requests.exceptions.Timeout as e:
-                raise TikTokShopNetworkError(
+                # Convert to TikTokShopNetworkError and check if retryable
+                network_error = TikTokShopNetworkError(
                     f"Request timeout after {request_timeout}s",
                     original_exception=e
                 )
+                last_error = network_error
+
+                should_retry, wait_time = self._handle_error(network_error, retry_count)
+
+                if not should_retry:
+                    raise network_error
+
+                time.sleep(wait_time)
+                retry_count += 1
+
             except requests.exceptions.ConnectionError as e:
-                raise TikTokShopNetworkError(
+                # Convert to TikTokShopNetworkError and check if retryable
+                network_error = TikTokShopNetworkError(
                     "Failed to connect to TikTok Shop API",
                     original_exception=e
                 )
+                last_error = network_error
+
+                should_retry, wait_time = self._handle_error(network_error, retry_count)
+
+                if not should_retry:
+                    raise network_error
+
+                time.sleep(wait_time)
+                retry_count += 1
+
             except requests.exceptions.HTTPError as e:
+                # Convert to appropriate TikTokShop exception
                 self._handle_http_error(e, response)
+
             except requests.exceptions.RequestException as e:
-                raise TikTokShopNetworkError(
+                # Convert to TikTokShopNetworkError and check if retryable
+                network_error = TikTokShopNetworkError(
                     f"Network error during API request: {str(e)}",
                     original_exception=e
                 )
+                last_error = network_error
+
+                should_retry, wait_time = self._handle_error(network_error, retry_count)
+
+                if not should_retry:
+                    raise network_error
+
+                time.sleep(wait_time)
+                retry_count += 1
+
             except ValueError as e:
+                # JSON parsing error - not retryable
                 raise TikTokShopAPIError(
                     "Failed to parse JSON response from API"
                 )
+
+            except (TikTokShopAuthError, TikTokShopValidationError, TikTokShopNotFoundError):
+                # These errors are not retryable - immediately re-raise
+                raise
+
             except Exception as e:
+                # Unexpected error - not retryable
                 raise TikTokShopAPIError(
                     f"Unexpected error during API request: {str(e)}"
                 )
-
-        # This should never be reached due to the raise in the except block
-        raise TikTokShopAPIError("Unexpected error in request retry logic")
 
     def _handle_api_response(self, response_data: Dict[str, Any]) -> Dict[str, Any]:
         """
