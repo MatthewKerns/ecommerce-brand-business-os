@@ -397,3 +397,105 @@ class CompetitorCitation(Base):
 
     def __repr__(self):
         return f"<CompetitorCitation(id={self.id}, competitor='{self.competitor_name}', platform='{self.ai_platform}', mentioned={self.competitor_mentioned})>"
+
+
+class OptimizationRecommendation(Base):
+    """
+    Stores AI-generated optimization recommendations for improving citation rates.
+
+    Attributes:
+        id: Primary key
+        recommendation_type: Type of recommendation (content, keyword, structure, technical, other)
+        title: Short title of the recommendation
+        description: Detailed description of the recommendation
+        priority: Priority level (high, medium, low)
+        status: Implementation status (pending, implemented, dismissed, archived)
+        citation_record_id: Optional foreign key to related citation record
+        ai_platform: Optional AI platform this targets (chatgpt, claude, perplexity, all)
+        expected_impact: Expected impact score (0-100)
+        actual_impact: Measured impact score after implementation (0-100)
+        implementation_effort: Estimated effort (low, medium, high)
+        recommendation_metadata: JSON metadata about the recommendation (maps to 'metadata' column)
+        created_at: Timestamp when recommendation was created
+        updated_at: Timestamp when recommendation was last updated
+        implemented_at: Timestamp when recommendation was implemented
+        dismissed_at: Timestamp when recommendation was dismissed
+        dismissal_reason: Reason for dismissal if status is dismissed
+        campaign_id: Optional campaign identifier
+        user_id: Optional user identifier
+    """
+    __tablename__ = "optimization_recommendations"
+
+    # Primary Key
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
+    # Recommendation Classification
+    recommendation_type = Column(String(20), nullable=False, index=True)
+    title = Column(String(255), nullable=False)
+    description = Column(Text, nullable=False)
+
+    # Priority and Status
+    priority = Column(String(10), nullable=False, default="medium", index=True)
+    status = Column(String(20), nullable=False, default="pending", index=True)
+
+    # Cross-Reference
+    citation_record_id = Column(Integer, ForeignKey("citation_records.id", ondelete="SET NULL"))
+    ai_platform = Column(String(20), index=True)
+
+    # Impact Metrics
+    expected_impact = Column(Integer)
+    actual_impact = Column(Integer)
+    implementation_effort = Column(String(10))
+
+    # Metadata
+    recommendation_metadata = Column("metadata", Text)  # JSON stored as text, mapped from 'metadata' column
+
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    implemented_at = Column(DateTime)
+    dismissed_at = Column(DateTime)
+
+    # Dismissal Details
+    dismissal_reason = Column(Text)
+
+    # Optional Context
+    campaign_id = Column(String(50), index=True)
+    user_id = Column(String(50), index=True)
+
+    # Table constraints
+    __table_args__ = (
+        CheckConstraint(
+            "recommendation_type IN ('content', 'keyword', 'structure', 'technical', 'other')",
+            name="check_recommendation_type"
+        ),
+        CheckConstraint(
+            "priority IN ('high', 'medium', 'low')",
+            name="check_priority"
+        ),
+        CheckConstraint(
+            "status IN ('pending', 'implemented', 'dismissed', 'archived')",
+            name="check_recommendation_status"
+        ),
+        CheckConstraint(
+            "ai_platform IN ('chatgpt', 'claude', 'perplexity', 'all') OR ai_platform IS NULL",
+            name="check_recommendation_ai_platform"
+        ),
+        CheckConstraint(
+            "implementation_effort IN ('low', 'medium', 'high') OR implementation_effort IS NULL",
+            name="check_implementation_effort"
+        ),
+        CheckConstraint(
+            "expected_impact >= 0 AND expected_impact <= 100 OR expected_impact IS NULL",
+            name="check_expected_impact"
+        ),
+        CheckConstraint(
+            "actual_impact >= 0 AND actual_impact <= 100 OR actual_impact IS NULL",
+            name="check_actual_impact"
+        ),
+        Index("idx_recommendation_status_priority", "status", "priority", "created_at"),
+        Index("idx_recommendation_type_platform", "recommendation_type", "ai_platform"),
+    )
+
+    def __repr__(self):
+        return f"<OptimizationRecommendation(id={self.id}, type='{self.recommendation_type}', priority='{self.priority}', status='{self.status}')>"
