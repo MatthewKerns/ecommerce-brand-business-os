@@ -1,10 +1,10 @@
 import { notFound } from 'next/navigation';
 import { getPostBySlug, getAllPosts, getRelatedPosts } from '@/lib/cms';
+import { generatePostMetadata } from '@/lib/seo';
 import {
-  generatePostMetadata,
-  generateBlogPostStructuredData,
-  generateBreadcrumbStructuredData,
-} from '@/lib/seo';
+  generateArticleSchema,
+  generateBreadcrumbSchema,
+} from '@/lib/structuredData';
 import { BlogPost } from '@/components/BlogPost';
 import { TableOfContents } from '@/components/TableOfContents';
 import { ShareButtons } from '@/components/ShareButtons';
@@ -54,19 +54,20 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
 
   const relatedPosts = getRelatedPosts(params.slug, 3);
 
-  // Generate structured data for SEO
-  const blogPostStructuredData = generateBlogPostStructuredData(post);
-  const breadcrumbStructuredData = generateBreadcrumbStructuredData(post);
+  // Generate structured data for SEO (Schema.org JSON-LD)
+  const articleStructuredData = generateArticleSchema(post);
+  const breadcrumbStructuredData = generateBreadcrumbSchema(post);
 
   return (
     <>
-      {/* JSON-LD Structured Data */}
+      {/* JSON-LD Structured Data - Article Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(blogPostStructuredData),
+          __html: JSON.stringify(articleStructuredData),
         }}
       />
+      {/* JSON-LD Structured Data - Breadcrumb Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
