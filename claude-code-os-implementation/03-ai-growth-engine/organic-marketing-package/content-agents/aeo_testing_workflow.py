@@ -7,6 +7,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 import json
+import argparse
 
 from logging_config import get_logger
 from config.config import AEO_OUTPUT_DIR
@@ -411,3 +412,71 @@ EVALUATION CHECKLIST:
                 self.logger.error(f"Error loading test result {test_file}: {e}")
 
         return sorted(results, key=lambda x: x['date'], reverse=True)
+
+    def test_ai_assistant(
+        self,
+        query: str,
+        assistant: str = "chatgpt"
+    ) -> Dict[str, Any]:
+        """
+        Test an AI assistant with a query and output citation check instructions
+
+        This is the primary method for manual AEO testing. It generates detailed
+        testing instructions and evaluation criteria for checking if an AI assistant
+        mentions/recommends the brand.
+
+        Args:
+            query: The query to test with the AI assistant
+            assistant: AI assistant to test (chatgpt, claude, perplexity, gemini, copilot)
+
+        Returns:
+            Dictionary containing test instructions and evaluation criteria
+        """
+        self.logger.info(f"Testing AI assistant: query='{query}', assistant={assistant}")
+
+        # Generate testing instructions
+        instructions_data = self.generate_test_instructions(query, assistant)
+
+        # Output instructions to console for manual testing
+        print("\n" + "="*80)
+        print(f"AEO MANUAL TEST: {assistant.upper()}")
+        print("="*80)
+        print(instructions_data["instructions"])
+        print("\n" + "="*80)
+        print("EVALUATION CRITERIA")
+        print("="*80)
+        for criterion, description in instructions_data["evaluation_criteria"].items():
+            print(f"  • {criterion}: {description}")
+        print("="*80 + "\n")
+
+        return instructions_data
+
+
+def main():
+    """Command-line interface for AEO testing workflow"""
+    parser = argparse.ArgumentParser(
+        description="AEO Testing Workflow - Test AI assistants with target queries"
+    )
+    parser.add_argument(
+        '--query',
+        type=str,
+        required=True,
+        help='Query to test with the AI assistant'
+    )
+    parser.add_argument(
+        '--assistant',
+        type=str,
+        default='chatgpt',
+        choices=['chatgpt', 'claude', 'perplexity', 'gemini', 'copilot'],
+        help='AI assistant to test (default: chatgpt)'
+    )
+
+    args = parser.parse_args()
+
+    # Initialize workflow and run test
+    workflow = AEOTestingWorkflow()
+    workflow.test_ai_assistant(query=args.query, assistant=args.assistant)
+
+
+if __name__ == "__main__":
+    main()
