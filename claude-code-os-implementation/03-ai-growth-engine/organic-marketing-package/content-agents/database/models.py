@@ -257,3 +257,108 @@ class PerformanceMetrics(Base):
 
     def __repr__(self):
         return f"<PerformanceMetrics(id={self.id}, request_id='{self.request_id}', duration={self.total_duration_ms}ms)>"
+
+
+class TikTokChannel(Base):
+    """
+    Stores TikTok channel configurations for the 4-element content strategy.
+
+    Attributes:
+        id: Primary key
+        channel_name: Name of the channel
+        element_theme: Element theme (air, water, fire, earth)
+        description: Channel description and purpose
+        target_audience: Target audience description
+        posting_schedule: JSON posting schedule configuration
+        branding_guidelines: JSON branding guidelines
+        is_active: Whether the channel is active
+        created_at: Timestamp when channel was created
+        updated_at: Timestamp when channel was last updated
+    """
+    __tablename__ = "tiktok_channels"
+
+    # Primary Key
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
+    # Channel Identification
+    channel_name = Column(String(100), unique=True, nullable=False, index=True)
+    element_theme = Column(String(20), nullable=False, index=True)
+
+    # Channel Details
+    description = Column(Text)
+    target_audience = Column(Text)
+    posting_schedule = Column(Text)  # JSON stored as text
+    branding_guidelines = Column(Text)  # JSON stored as text
+
+    # Status
+    is_active = Column(Boolean, default=True, index=True)
+
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    channel_content = relationship("ChannelContent", back_populates="channel", cascade="all, delete-orphan")
+
+    # Table constraints
+    __table_args__ = (
+        CheckConstraint(
+            "element_theme IN ('air', 'water', 'fire', 'earth')",
+            name="check_element_theme"
+        ),
+        Index("idx_tiktok_channel_element_active", "element_theme", "is_active"),
+    )
+
+    def __repr__(self):
+        return f"<TikTokChannel(id={self.id}, name='{self.channel_name}', element='{self.element_theme}')>"
+
+
+class ChannelContent(Base):
+    """
+    Tracks content posted to TikTok channels with performance metrics.
+
+    Attributes:
+        id: Primary key
+        channel_id: Foreign key to tiktok_channels
+        content_id: Foreign key to content_history
+        post_date: Date/time when content was posted
+        save_count: Number of saves (primary metric)
+        view_count: Number of views
+        engagement_rate: Calculated engagement rate
+        created_at: Timestamp when record was created
+    """
+    __tablename__ = "channel_content"
+
+    # Primary Key
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
+    # Foreign Keys
+    channel_id = Column(Integer, ForeignKey("tiktok_channels.id", ondelete="CASCADE"), nullable=False, index=True)
+    content_id = Column(Integer, ForeignKey("content_history.id", ondelete="SET NULL"), index=True)
+
+    # Post Details
+    post_date = Column(DateTime, index=True)
+
+    # Performance Metrics
+    save_count = Column(Integer, default=0)
+    view_count = Column(Integer, default=0)
+    engagement_rate = Column(Numeric(5, 2))  # Percentage with 2 decimal places
+
+    # Timestamp
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+
+    # Relationships
+    channel = relationship("TikTokChannel", back_populates="channel_content")
+    content = relationship("ContentHistory")
+
+    # Table constraints
+    __table_args__ = (
+        CheckConstraint("save_count >= 0", name="check_save_count"),
+        CheckConstraint("view_count >= 0", name="check_view_count"),
+        CheckConstraint("engagement_rate >= 0 AND engagement_rate <= 100", name="check_engagement_rate"),
+        Index("idx_channel_content_channel_date", "channel_id", "post_date"),
+        Index("idx_channel_content_performance", "save_count", "view_count"),
+    )
+
+    def __repr__(self):
+        return f"<ChannelContent(id={self.id}, channel_id={self.channel_id}, saves={self.save_count}, views={self.view_count})>"
