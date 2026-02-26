@@ -189,7 +189,7 @@ def verify_database() -> bool:
         inspector = inspect(engine)
         tables = inspector.get_table_names()
 
-        expected_tables = ['content_history', 'api_usage', 'performance_metrics']
+        expected_tables = ['content_history', 'api_usage', 'performance_metrics', 'scheduled_content', 'publish_log']
         missing_tables = [t for t in expected_tables if t not in tables]
 
         if missing_tables:
