@@ -611,3 +611,371 @@ class TikTokShopClient:
             path='/api/products/inventory',
             params={'product_id': product_id}
         )
+
+    # ========================================================================
+    # CONTENT API METHODS - Videos, Posts
+    # ========================================================================
+
+    def get_videos(
+        self,
+        page_size: int = 20,
+        page_number: int = 1,
+        video_status: Optional[str] = None,
+        start_time: Optional[int] = None,
+        end_time: Optional[int] = None
+    ) -> Dict[str, Any]:
+        """
+        Get list of videos from TikTok Shop
+
+        Args:
+            page_size: Number of videos per page (max 100)
+            page_number: Page number to retrieve (starts at 1)
+            video_status: Filter by video status ('PUBLISHED', 'DRAFT', 'PROCESSING', 'FAILED')
+            start_time: Start timestamp for video creation time (Unix timestamp)
+            end_time: End timestamp for video creation time (Unix timestamp)
+
+        Returns:
+            Dictionary containing:
+                - videos: List of video objects
+                - total: Total number of videos
+                - more: Boolean indicating if more pages exist
+
+        Raises:
+            TikTokShopAuthError: If authentication fails
+            TikTokShopValidationError: If parameters are invalid
+            TikTokShopAPIError: If API request fails
+
+        Example:
+            >>> client = TikTokShopClient('app_key', 'app_secret', 'access_token')
+            >>> response = client.get_videos(page_size=10, video_status='PUBLISHED')
+            >>> videos = response['data']['videos']
+        """
+        params = {
+            'page_size': min(page_size, 100),  # Cap at 100 per API limits
+            'page_number': page_number
+        }
+
+        if video_status:
+            params['video_status'] = video_status
+
+        if start_time:
+            params['start_time'] = start_time
+
+        if end_time:
+            params['end_time'] = end_time
+
+        return self._make_request(
+            method='GET',
+            path='/api/content/videos',
+            params=params
+        )
+
+    def get_video(self, video_id: str) -> Dict[str, Any]:
+        """
+        Get detailed information for a specific video
+
+        Args:
+            video_id: TikTok Shop video ID
+
+        Returns:
+            Dictionary containing detailed video information including:
+                - video_id: Video identifier
+                - title: Video title
+                - description: Video description
+                - status: Video status
+                - url: Video URL
+                - thumbnail_url: Thumbnail image URL
+                - duration: Video duration in seconds
+                - view_count: Number of views
+                - like_count: Number of likes
+                - share_count: Number of shares
+                - created_time: Creation timestamp
+
+        Raises:
+            TikTokShopAuthError: If authentication fails
+            TikTokShopNotFoundError: If video not found
+            TikTokShopAPIError: If API request fails
+
+        Example:
+            >>> client = TikTokShopClient('app_key', 'app_secret', 'access_token')
+            >>> video = client.get_video('VIDEO123456')
+            >>> video_url = video['data']['url']
+        """
+        return self._make_request(
+            method='GET',
+            path='/api/content/video/detail',
+            params={'video_id': video_id}
+        )
+
+    def upload_video(
+        self,
+        video_url: str,
+        title: str,
+        description: Optional[str] = None,
+        product_ids: Optional[list] = None,
+        tags: Optional[list] = None
+    ) -> Dict[str, Any]:
+        """
+        Upload a video to TikTok Shop
+
+        Args:
+            video_url: URL of the video to upload (must be accessible)
+            title: Video title (max 150 characters)
+            description: Video description (max 1000 characters)
+            product_ids: List of product IDs to tag in the video
+            tags: List of hashtags (without # symbol)
+
+        Returns:
+            Dictionary containing:
+                - video_id: ID of the uploaded video
+                - status: Upload status
+                - processing_time: Estimated processing time in seconds
+
+        Raises:
+            TikTokShopAuthError: If authentication fails
+            TikTokShopValidationError: If parameters are invalid
+            TikTokShopAPIError: If API request fails
+
+        Example:
+            >>> client = TikTokShopClient('app_key', 'app_secret', 'access_token')
+            >>> result = client.upload_video(
+            ...     video_url='https://example.com/video.mp4',
+            ...     title='New Product Showcase',
+            ...     product_ids=['1234567890']
+            ... )
+            >>> video_id = result['data']['video_id']
+        """
+        if not title or len(title) > 150:
+            raise TikTokShopValidationError(
+                "Video title is required and must be 150 characters or less",
+                status_code=400
+            )
+
+        data = {
+            'video_url': video_url,
+            'title': title
+        }
+
+        if description:
+            if len(description) > 1000:
+                raise TikTokShopValidationError(
+                    "Video description must be 1000 characters or less",
+                    status_code=400
+                )
+            data['description'] = description
+
+        if product_ids:
+            data['product_ids'] = product_ids
+
+        if tags:
+            data['tags'] = tags
+
+        return self._make_request(
+            method='POST',
+            path='/api/content/video/upload',
+            data=data
+        )
+
+    def delete_video(self, video_id: str) -> Dict[str, Any]:
+        """
+        Delete a video from TikTok Shop
+
+        Args:
+            video_id: TikTok Shop video ID to delete
+
+        Returns:
+            Dictionary containing deletion confirmation
+
+        Raises:
+            TikTokShopAuthError: If authentication fails
+            TikTokShopNotFoundError: If video not found
+            TikTokShopAPIError: If API request fails
+
+        Example:
+            >>> client = TikTokShopClient('app_key', 'app_secret', 'access_token')
+            >>> result = client.delete_video('VIDEO123456')
+        """
+        return self._make_request(
+            method='DELETE',
+            path='/api/content/video/delete',
+            params={'video_id': video_id}
+        )
+
+    def get_posts(
+        self,
+        page_size: int = 20,
+        page_number: int = 1,
+        post_status: Optional[str] = None,
+        start_time: Optional[int] = None,
+        end_time: Optional[int] = None
+    ) -> Dict[str, Any]:
+        """
+        Get list of posts from TikTok Shop
+
+        Args:
+            page_size: Number of posts per page (max 100)
+            page_number: Page number to retrieve (starts at 1)
+            post_status: Filter by post status ('PUBLISHED', 'DRAFT', 'SCHEDULED')
+            start_time: Start timestamp for post creation time (Unix timestamp)
+            end_time: End timestamp for post creation time (Unix timestamp)
+
+        Returns:
+            Dictionary containing:
+                - posts: List of post objects
+                - total: Total number of posts
+                - more: Boolean indicating if more pages exist
+
+        Raises:
+            TikTokShopAuthError: If authentication fails
+            TikTokShopValidationError: If parameters are invalid
+            TikTokShopAPIError: If API request fails
+
+        Example:
+            >>> client = TikTokShopClient('app_key', 'app_secret', 'access_token')
+            >>> response = client.get_posts(page_size=10, post_status='PUBLISHED')
+            >>> posts = response['data']['posts']
+        """
+        params = {
+            'page_size': min(page_size, 100),  # Cap at 100 per API limits
+            'page_number': page_number
+        }
+
+        if post_status:
+            params['post_status'] = post_status
+
+        if start_time:
+            params['start_time'] = start_time
+
+        if end_time:
+            params['end_time'] = end_time
+
+        return self._make_request(
+            method='GET',
+            path='/api/content/posts',
+            params=params
+        )
+
+    def get_post(self, post_id: str) -> Dict[str, Any]:
+        """
+        Get detailed information for a specific post
+
+        Args:
+            post_id: TikTok Shop post ID
+
+        Returns:
+            Dictionary containing detailed post information including:
+                - post_id: Post identifier
+                - content: Post content/text
+                - status: Post status
+                - media: List of attached media (images/videos)
+                - product_tags: Tagged products
+                - engagement: Engagement metrics (likes, comments, shares)
+                - created_time: Creation timestamp
+                - scheduled_time: Scheduled publish time (if applicable)
+
+        Raises:
+            TikTokShopAuthError: If authentication fails
+            TikTokShopNotFoundError: If post not found
+            TikTokShopAPIError: If API request fails
+
+        Example:
+            >>> client = TikTokShopClient('app_key', 'app_secret', 'access_token')
+            >>> post = client.get_post('POST123456')
+            >>> content = post['data']['content']
+        """
+        return self._make_request(
+            method='GET',
+            path='/api/content/post/detail',
+            params={'post_id': post_id}
+        )
+
+    def create_post(
+        self,
+        content: str,
+        media_urls: Optional[list] = None,
+        product_ids: Optional[list] = None,
+        tags: Optional[list] = None,
+        scheduled_time: Optional[int] = None
+    ) -> Dict[str, Any]:
+        """
+        Create a new post on TikTok Shop
+
+        Args:
+            content: Post content/text (max 2000 characters)
+            media_urls: List of media URLs (images/videos) to attach
+            product_ids: List of product IDs to tag in the post
+            tags: List of hashtags (without # symbol)
+            scheduled_time: Unix timestamp for scheduled publishing (optional)
+
+        Returns:
+            Dictionary containing:
+                - post_id: ID of the created post
+                - status: Post status ('PUBLISHED' or 'SCHEDULED')
+                - url: Post URL
+
+        Raises:
+            TikTokShopAuthError: If authentication fails
+            TikTokShopValidationError: If parameters are invalid
+            TikTokShopAPIError: If API request fails
+
+        Example:
+            >>> client = TikTokShopClient('app_key', 'app_secret', 'access_token')
+            >>> result = client.create_post(
+            ...     content='Check out our new products!',
+            ...     product_ids=['1234567890'],
+            ...     tags=['newarrivals', 'shopping']
+            ... )
+            >>> post_id = result['data']['post_id']
+        """
+        if not content or len(content) > 2000:
+            raise TikTokShopValidationError(
+                "Post content is required and must be 2000 characters or less",
+                status_code=400
+            )
+
+        data = {
+            'content': content
+        }
+
+        if media_urls:
+            data['media_urls'] = media_urls
+
+        if product_ids:
+            data['product_ids'] = product_ids
+
+        if tags:
+            data['tags'] = tags
+
+        if scheduled_time:
+            data['scheduled_time'] = scheduled_time
+
+        return self._make_request(
+            method='POST',
+            path='/api/content/post/create',
+            data=data
+        )
+
+    def delete_post(self, post_id: str) -> Dict[str, Any]:
+        """
+        Delete a post from TikTok Shop
+
+        Args:
+            post_id: TikTok Shop post ID to delete
+
+        Returns:
+            Dictionary containing deletion confirmation
+
+        Raises:
+            TikTokShopAuthError: If authentication fails
+            TikTokShopNotFoundError: If post not found
+            TikTokShopAPIError: If API request fails
+
+        Example:
+            >>> client = TikTokShopClient('app_key', 'app_secret', 'access_token')
+            >>> result = client.delete_post('POST123456')
+        """
+        return self._make_request(
+            method='DELETE',
+            path='/api/content/post/delete',
+            params={'post_id': post_id}
+        )
