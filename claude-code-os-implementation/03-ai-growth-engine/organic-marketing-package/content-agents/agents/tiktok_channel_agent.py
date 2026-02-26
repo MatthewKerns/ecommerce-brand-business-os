@@ -571,12 +571,332 @@ PRIMARY SUCCESS METRIC: Save rate (saves/views)
         self.logger.info(f"Successfully generated multi-channel {time_period} strategy: {path}")
         return content, path
 
+    def list_channels(self) -> List[Dict[str, Any]]:
+        """
+        List all available TikTok channels with comprehensive information
+
+        Returns:
+            List of dictionaries containing channel information including:
+            - element: Channel element identifier
+            - channel_name: Display name of the channel
+            - description: Channel description
+            - target_audience: Target audience description
+            - content_focus: Main content focus areas
+            - posting_frequency: How often to post
+            - tone: Channel tone/voice
+            - content_types: List of content types for the channel
+
+        Example:
+            >>> agent = TikTokChannelAgent()
+            >>> channels = agent.list_channels()
+            >>> print(f"Found {len(channels)} channels")
+            Found 4 channels
+            >>> for channel in channels:
+            ...     print(f"{channel['element']}: {channel['channel_name']}")
+            air: Infinity Vault - Air
+            water: Infinity Vault - Water
+            fire: Infinity Vault - Fire
+            earth: Infinity Vault - Earth
+        """
+        self.logger.debug("Listing all TikTok channels")
+
+        channels = []
+        required_elements = ["air", "water", "fire", "earth"]
+
+        for element in required_elements:
+            if element not in self.channels:
+                self.logger.warning(f"Channel '{element}' not found in configuration")
+                continue
+
+            channel_config = self.channels[element]
+            theme_config = self.channel_themes.get(element, {})
+
+            channels.append({
+                "element": element,
+                "channel_name": channel_config["channel_name"],
+                "description": channel_config["description"],
+                "target_audience": channel_config["target_audience"],
+                "content_focus": channel_config["content_focus"],
+                "posting_frequency": channel_config["posting_schedule"]["frequency"],
+                "posting_days": channel_config["posting_schedule"]["days"],
+                "best_times": channel_config["posting_schedule"]["best_times"],
+                "tone": theme_config.get("tone", ""),
+                "content_types": theme_config.get("content_types", []),
+                "visual_style": channel_config["branding_guidelines"]["visual_style"],
+                "hashtags": channel_config["branding_guidelines"]["hashtags"]
+            })
+
+        self.logger.info(f"Found {len(channels)} TikTok channels")
+        return channels
+
+    def get_channel(self, channel_element: str) -> Dict[str, Any]:
+        """
+        Get detailed information for a specific channel
+
+        Args:
+            channel_element: Channel element identifier (air, water, fire, earth)
+
+        Returns:
+            Dictionary containing comprehensive channel information
+
+        Raises:
+            ValueError: If channel_element is not valid
+
+        Example:
+            >>> agent = TikTokChannelAgent()
+            >>> channel = agent.get_channel('air')
+            >>> print(channel['channel_name'])
+            Infinity Vault - Air
+        """
+        if channel_element not in self.channels:
+            valid_channels = ", ".join(self.channels.keys())
+            error_msg = (
+                f"Invalid channel element: '{channel_element}'. "
+                f"Valid channels: {valid_channels}"
+            )
+            self.logger.error(error_msg)
+            raise ValueError(error_msg)
+
+        self.logger.debug(f"Getting channel information for '{channel_element}'")
+
+        channel_config = self.channels[channel_element]
+        theme_config = self.channel_themes.get(channel_element, {})
+
+        return {
+            "element": channel_element,
+            "channel_name": channel_config["channel_name"],
+            "description": channel_config["description"],
+            "target_audience": channel_config["target_audience"],
+            "content_focus": channel_config["content_focus"],
+            "posting_schedule": channel_config["posting_schedule"],
+            "tone": theme_config.get("tone", ""),
+            "content_types": theme_config.get("content_types", []),
+            "key_messages": theme_config.get("key_messages", []),
+            "content_pillars": theme_config.get("content_pillars", []),
+            "video_length": theme_config.get("video_length", ""),
+            "hook_style": theme_config.get("hook_style", ""),
+            "branding_guidelines": channel_config["branding_guidelines"],
+            "hashtags": channel_config["branding_guidelines"]["hashtags"],
+            "visual_style": channel_config["branding_guidelines"]["visual_style"]
+        }
+
+    def create_channel(
+        self,
+        element: str,
+        channel_name: str,
+        description: str,
+        target_audience: str,
+        content_focus: str,
+        posting_schedule: Dict[str, Any],
+        branding_guidelines: Dict[str, Any],
+        theme_config: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
+        """
+        Create a new TikTok channel configuration
+
+        Args:
+            element: Channel element identifier (must be unique)
+            channel_name: Display name for the channel
+            description: Channel description
+            target_audience: Target audience description
+            content_focus: Main content focus areas
+            posting_schedule: Dictionary with frequency, days, and best_times
+            branding_guidelines: Dictionary with visual_style and hashtags
+            theme_config: Optional theme configuration with tone, content_types, etc.
+
+        Returns:
+            Dictionary containing the created channel configuration
+
+        Raises:
+            ValueError: If element already exists or required fields are invalid
+
+        Example:
+            >>> agent = TikTokChannelAgent()
+            >>> channel = agent.create_channel(
+            ...     element='metal',
+            ...     channel_name='Infinity Vault - Metal',
+            ...     description='Premium collecting and rare cards',
+            ...     target_audience='High-value collectors',
+            ...     content_focus='Rare cards, premium products',
+            ...     posting_schedule={
+            ...         'frequency': '3x per week',
+            ...         'days': ['monday', 'wednesday', 'friday'],
+            ...         'best_times': ['6:00 PM']
+            ...     },
+            ...     branding_guidelines={
+            ...         'visual_style': 'Premium, elegant',
+            ...         'hashtags': ['#PremiumTCG', '#RareCards']
+            ...     }
+            ... )
+        """
+        self.logger.info(f"Creating new channel: '{element}'")
+
+        # Validate element doesn't already exist
+        if element in self.channels:
+            error_msg = f"Channel '{element}' already exists. Use update_channel() to modify."
+            self.logger.error(error_msg)
+            raise ValueError(error_msg)
+
+        # Validate required fields
+        if not element or not isinstance(element, str):
+            raise ValueError("Element must be a non-empty string")
+
+        if not channel_name or not isinstance(channel_name, str):
+            raise ValueError("Channel name must be a non-empty string")
+
+        if not isinstance(posting_schedule, dict):
+            raise ValueError("Posting schedule must be a dictionary")
+
+        required_schedule_keys = ["frequency", "days", "best_times"]
+        for key in required_schedule_keys:
+            if key not in posting_schedule:
+                raise ValueError(f"Posting schedule must include '{key}'")
+
+        if not isinstance(branding_guidelines, dict):
+            raise ValueError("Branding guidelines must be a dictionary")
+
+        required_branding_keys = ["visual_style", "hashtags"]
+        for key in required_branding_keys:
+            if key not in branding_guidelines:
+                raise ValueError(f"Branding guidelines must include '{key}'")
+
+        # Create channel configuration
+        channel_config = {
+            "channel_name": channel_name,
+            "element_theme": element,
+            "description": description,
+            "target_audience": target_audience,
+            "content_focus": content_focus,
+            "posting_schedule": posting_schedule,
+            "branding_guidelines": branding_guidelines
+        }
+
+        # Add to channels dictionary
+        self.channels[element] = channel_config
+
+        # Add theme configuration if provided
+        if theme_config:
+            self.channel_themes[element] = theme_config
+
+        self.logger.info(f"Successfully created channel '{element}'")
+
+        return {
+            "element": element,
+            "status": "created",
+            "channel_config": channel_config,
+            "theme_config": theme_config
+        }
+
+    def update_channel(
+        self,
+        element: str,
+        **updates: Any
+    ) -> Dict[str, Any]:
+        """
+        Update an existing TikTok channel configuration
+
+        Args:
+            element: Channel element identifier to update
+            **updates: Keyword arguments for fields to update. Supported fields:
+                - channel_name: str
+                - description: str
+                - target_audience: str
+                - content_focus: str
+                - posting_schedule: Dict[str, Any]
+                - branding_guidelines: Dict[str, Any]
+                - tone: str (updates theme_config)
+                - content_types: List[str] (updates theme_config)
+                - key_messages: List[str] (updates theme_config)
+                - video_length: str (updates theme_config)
+                - hook_style: str (updates theme_config)
+
+        Returns:
+            Dictionary containing updated channel information
+
+        Raises:
+            ValueError: If element doesn't exist or update fields are invalid
+
+        Example:
+            >>> agent = TikTokChannelAgent()
+            >>> result = agent.update_channel(
+            ...     'air',
+            ...     posting_schedule={
+            ...         'frequency': 'daily',
+            ...         'days': ['monday', 'wednesday', 'friday'],
+            ...         'best_times': ['8:00 AM', '5:00 PM']
+            ...     },
+            ...     description='Updated: Quick tips and tournament prep'
+            ... )
+            >>> print(result['status'])
+            updated
+        """
+        self.logger.info(f"Updating channel: '{element}'")
+
+        # Validate element exists
+        if element not in self.channels:
+            error_msg = f"Channel '{element}' does not exist. Use create_channel() to create it."
+            self.logger.error(error_msg)
+            raise ValueError(error_msg)
+
+        if not updates:
+            self.logger.warning(f"No updates provided for channel '{element}'")
+            return {
+                "element": element,
+                "status": "no_changes",
+                "message": "No updates provided"
+            }
+
+        # Define which fields belong to channel config vs theme config
+        channel_fields = {
+            "channel_name", "description", "target_audience",
+            "content_focus", "posting_schedule", "branding_guidelines"
+        }
+        theme_fields = {
+            "tone", "content_types", "key_messages", "content_pillars",
+            "video_length", "hook_style"
+        }
+
+        updated_fields = []
+
+        # Update channel configuration
+        for field, value in updates.items():
+            if field in channel_fields:
+                self.channels[element][field] = value
+                updated_fields.append(field)
+                self.logger.debug(f"Updated channel field '{field}' for '{element}'")
+
+            elif field in theme_fields:
+                if element not in self.channel_themes:
+                    self.channel_themes[element] = {}
+                self.channel_themes[element][field] = value
+                updated_fields.append(field)
+                self.logger.debug(f"Updated theme field '{field}' for '{element}'")
+
+            else:
+                self.logger.warning(
+                    f"Unknown field '{field}' provided for channel update. Ignoring."
+                )
+
+        self.logger.info(
+            f"Successfully updated channel '{element}'. "
+            f"Updated fields: {', '.join(updated_fields)}"
+        )
+
+        return {
+            "element": element,
+            "status": "updated",
+            "updated_fields": updated_fields,
+            "channel_info": self.get_channel(element)
+        }
+
     def list_available_channels(self) -> List[Dict[str, str]]:
         """
         List all available channels with basic information
 
+        DEPRECATED: Use list_channels() instead for more comprehensive information.
+
         Returns:
-            List of dictionaries containing channel information
+            List of dictionaries containing basic channel information
 
         Example:
             >>> agent = TikTokChannelAgent()
@@ -584,6 +904,10 @@ PRIMARY SUCCESS METRIC: Save rate (saves/views)
             >>> for channel in channels:
             ...     print(f"{channel['element']}: {channel['name']}")
         """
+        self.logger.warning(
+            "list_available_channels() is deprecated. Use list_channels() instead."
+        )
+
         channels = []
         for element in ["air", "water", "fire", "earth"]:
             if element in self.channels:
