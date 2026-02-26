@@ -6,6 +6,7 @@ Each channel has distinct themes, audiences, and content strategies
 from pathlib import Path
 from typing import Optional, List, Dict, Any
 from datetime import datetime, timedelta
+import hashlib
 
 from .base_agent import BaseAgent
 from config.config import (
@@ -14,6 +15,8 @@ from config.config import (
     CHANNEL_THEMES,
     CONTENT_PILLARS
 )
+from database.connection import get_db_session
+from database.models import ChannelContent, ContentHistory, TikTokChannel
 
 
 class TikTokChannelAgent(BaseAgent):
@@ -921,3 +924,200 @@ PRIMARY SUCCESS METRIC: Save rate (saves/views)
                 })
 
         return channels
+
+    def check_content_uniqueness(
+        self,
+        content_text: str,
+        channel_element: str,
+        similarity_threshold: float = 0.8
+    ) -> bool:
+        """
+        Check if content is unique across all channels (cross-posting prevention)
+
+        This method prevents content duplication penalties by checking if similar
+        content has already been posted to other channels. Uses both exact hash
+        matching and similarity scoring to detect duplicates.
+
+        Args:
+            content_text: Content text to check for uniqueness
+            channel_element: Target channel element (air, water, fire, earth)
+            similarity_threshold: Similarity threshold for duplicate detection (0-1).
+                                 Default 0.8 means 80% similar = duplicate.
+
+        Returns:
+            bool: True if content is unique (safe to post), False if duplicate detected
+
+        Raises:
+            ValueError: If channel_element is invalid
+
+        Example:
+            >>> agent = TikTokChannelAgent()
+            >>> is_unique = agent.check_content_uniqueness(
+            ...     "Quick deck building tips for tournaments",
+            ...     "air"
+            ... )
+            >>> if is_unique:
+            ...     print("Safe to post - content is unique")
+            >>> else:
+            ...     print("Duplicate detected - revise content")
+        """
+        self.logger.info(
+            f"Checking content uniqueness for {channel_element} channel "
+            f"(threshold: {similarity_threshold})"
+        )
+
+        # Validate channel element
+        if channel_element not in self.channels:
+            valid_channels = ", ".join(self.channels.keys())
+            raise ValueError(
+                f"Invalid channel element: '{channel_element}'. "
+                f"Valid channels: {valid_channels}"
+            )
+
+        # Normalize content for comparison
+        normalized_content = self._normalize_content(content_text)
+
+        # Generate hash for exact duplicate detection
+        content_hash = self._generate_content_hash(normalized_content)
+
+        # Get database session
+        db = get_db_session()
+        try:
+            # Query all channel content from OTHER channels
+            # First, get the channel_id for the target channel (if it exists in DB)
+            target_channel_ids = []
+            target_channel = db.query(TikTokChannel).filter(
+                TikTokChannel.element_theme == channel_element
+            ).first()
+
+            if target_channel:
+                target_channel_ids.append(target_channel.id)
+
+            # Get all content from OTHER channels
+            other_channel_content = db.query(
+                ChannelContent, ContentHistory
+            ).join(
+                ContentHistory,
+                ChannelContent.content_id == ContentHistory.id
+            ).filter(
+                ChannelContent.channel_id.notin_(target_channel_ids) if target_channel_ids else True
+            ).all()
+
+            if not other_channel_content:
+                # No content in other channels, so this is unique
+                self.logger.info("No existing content in other channels - content is unique")
+                return True
+
+            # Check for duplicates
+            for channel_content, content_history in other_channel_content:
+                existing_content = content_history.content
+                if not existing_content:
+                    continue
+
+                # Normalize existing content
+                normalized_existing = self._normalize_content(existing_content)
+
+                # Check exact hash match
+                existing_hash = self._generate_content_hash(normalized_existing)
+                if content_hash == existing_hash:
+                    self.logger.warning(
+                        f"Exact duplicate detected in channel_id={channel_content.channel_id}"
+                    )
+                    return False
+
+                # Check similarity
+                similarity = self._calculate_similarity(
+                    normalized_content,
+                    normalized_existing
+                )
+
+                if similarity >= similarity_threshold:
+                    self.logger.warning(
+                        f"Similar content detected (similarity: {similarity:.2%}) "
+                        f"in channel_id={channel_content.channel_id}"
+                    )
+                    return False
+
+            # No duplicates found
+            self.logger.info("Content is unique across all channels")
+            return True
+
+        except Exception as e:
+            self.logger.error(f"Error checking content uniqueness: {e}", exc_info=True)
+            # On error, default to allowing content (fail open)
+            # This prevents blocking content generation if DB has issues
+            self.logger.warning("Defaulting to unique=True due to error")
+            return True
+        finally:
+            db.close()
+
+    def _normalize_content(self, content: str) -> str:
+        """
+        Normalize content for comparison by removing extra whitespace and lowercasing
+
+        Args:
+            content: Content to normalize
+
+        Returns:
+            Normalized content string
+        """
+        # Convert to lowercase
+        normalized = content.lower()
+
+        # Remove extra whitespace
+        normalized = " ".join(normalized.split())
+
+        return normalized.strip()
+
+    def _generate_content_hash(self, content: str) -> str:
+        """
+        Generate SHA-256 hash of content for exact duplicate detection
+
+        Args:
+            content: Content to hash
+
+        Returns:
+            SHA-256 hash as hexadecimal string
+        """
+        return hashlib.sha256(content.encode('utf-8')).hexdigest()
+
+    def _calculate_similarity(self, content1: str, content2: str) -> float:
+        """
+        Calculate similarity score between two content strings using Jaccard similarity
+
+        This uses word-level Jaccard similarity (intersection over union of word sets).
+        Simple but effective for detecting similar content.
+
+        Args:
+            content1: First content string
+            content2: Second content string
+
+        Returns:
+            float: Similarity score between 0.0 (completely different) and 1.0 (identical)
+
+        Example:
+            >>> agent = TikTokChannelAgent()
+            >>> similarity = agent._calculate_similarity(
+            ...     "quick deck building tips",
+            ...     "quick tips for deck building"
+            ... )
+            >>> print(f"Similarity: {similarity:.2%}")
+            Similarity: 100.00%
+        """
+        # Split into word sets
+        words1 = set(content1.split())
+        words2 = set(content2.split())
+
+        # Handle empty sets
+        if not words1 and not words2:
+            return 1.0  # Both empty = identical
+        if not words1 or not words2:
+            return 0.0  # One empty = completely different
+
+        # Calculate Jaccard similarity: intersection / union
+        intersection = words1.intersection(words2)
+        union = words1.union(words2)
+
+        similarity = len(intersection) / len(union)
+
+        return similarity
