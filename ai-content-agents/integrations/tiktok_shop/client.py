@@ -374,3 +374,240 @@ class TikTokShopClient:
                 status_code=status_code,
                 response=response_data
             )
+
+    # ========================================================================
+    # SHOP API METHODS - Products, Orders, Inventory
+    # ========================================================================
+
+    def get_products(
+        self,
+        page_size: int = 20,
+        page_number: int = 1,
+        status: Optional[str] = None,
+        search_query: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Get list of products from TikTok Shop
+
+        Args:
+            page_size: Number of products per page (max 100)
+            page_number: Page number to retrieve (starts at 1)
+            status: Filter by product status ('ACTIVE', 'INACTIVE', 'DRAFT')
+            search_query: Optional search query to filter products
+
+        Returns:
+            Dictionary containing:
+                - products: List of product objects
+                - total: Total number of products
+                - more: Boolean indicating if more pages exist
+
+        Raises:
+            TikTokShopAuthError: If authentication fails
+            TikTokShopValidationError: If parameters are invalid
+            TikTokShopAPIError: If API request fails
+
+        Example:
+            >>> client = TikTokShopClient('app_key', 'app_secret', 'access_token')
+            >>> response = client.get_products(page_size=10, status='ACTIVE')
+            >>> products = response['data']['products']
+        """
+        params = {
+            'page_size': min(page_size, 100),  # Cap at 100 per API limits
+            'page_number': page_number
+        }
+
+        if status:
+            params['status'] = status
+
+        if search_query:
+            params['search_query'] = search_query
+
+        return self._make_request(
+            method='GET',
+            path='/api/products/search',
+            params=params
+        )
+
+    def get_product(self, product_id: str) -> Dict[str, Any]:
+        """
+        Get detailed information for a specific product
+
+        Args:
+            product_id: TikTok Shop product ID
+
+        Returns:
+            Dictionary containing detailed product information
+
+        Raises:
+            TikTokShopAuthError: If authentication fails
+            TikTokShopNotFoundError: If product not found
+            TikTokShopAPIError: If API request fails
+
+        Example:
+            >>> client = TikTokShopClient('app_key', 'app_secret', 'access_token')
+            >>> product = client.get_product('1234567890')
+            >>> product_name = product['data']['title']
+        """
+        return self._make_request(
+            method='GET',
+            path='/api/products/details',
+            params={'product_id': product_id}
+        )
+
+    def get_orders(
+        self,
+        page_size: int = 20,
+        page_number: int = 1,
+        order_status: Optional[str] = None,
+        start_time: Optional[int] = None,
+        end_time: Optional[int] = None
+    ) -> Dict[str, Any]:
+        """
+        Get list of orders from TikTok Shop
+
+        Args:
+            page_size: Number of orders per page (max 100)
+            page_number: Page number to retrieve (starts at 1)
+            order_status: Filter by order status ('UNPAID', 'AWAITING_SHIPMENT',
+                         'AWAITING_COLLECTION', 'IN_TRANSIT', 'DELIVERED', 'COMPLETED', 'CANCELLED')
+            start_time: Start timestamp for order creation time (Unix timestamp)
+            end_time: End timestamp for order creation time (Unix timestamp)
+
+        Returns:
+            Dictionary containing:
+                - orders: List of order objects
+                - total: Total number of orders
+                - more: Boolean indicating if more pages exist
+
+        Raises:
+            TikTokShopAuthError: If authentication fails
+            TikTokShopValidationError: If parameters are invalid
+            TikTokShopAPIError: If API request fails
+
+        Example:
+            >>> client = TikTokShopClient('app_key', 'app_secret', 'access_token')
+            >>> response = client.get_orders(page_size=10, order_status='AWAITING_SHIPMENT')
+            >>> orders = response['data']['orders']
+        """
+        params = {
+            'page_size': min(page_size, 100),  # Cap at 100 per API limits
+            'page_number': page_number
+        }
+
+        if order_status:
+            params['order_status'] = order_status
+
+        if start_time:
+            params['start_time'] = start_time
+
+        if end_time:
+            params['end_time'] = end_time
+
+        return self._make_request(
+            method='GET',
+            path='/api/orders/search',
+            params=params
+        )
+
+    def get_order(self, order_id: str) -> Dict[str, Any]:
+        """
+        Get detailed information for a specific order
+
+        Args:
+            order_id: TikTok Shop order ID
+
+        Returns:
+            Dictionary containing detailed order information
+
+        Raises:
+            TikTokShopAuthError: If authentication fails
+            TikTokShopNotFoundError: If order not found
+            TikTokShopAPIError: If API request fails
+
+        Example:
+            >>> client = TikTokShopClient('app_key', 'app_secret', 'access_token')
+            >>> order = client.get_order('ORDER123456')
+            >>> order_total = order['data']['payment']['total_amount']
+        """
+        return self._make_request(
+            method='GET',
+            path='/api/orders/detail',
+            params={'order_id': order_id}
+        )
+
+    def update_inventory(
+        self,
+        product_id: str,
+        quantity: int,
+        sku_id: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Update inventory quantity for a product or specific SKU
+
+        Args:
+            product_id: TikTok Shop product ID
+            quantity: New inventory quantity (must be >= 0)
+            sku_id: Optional SKU ID if updating specific variant
+
+        Returns:
+            Dictionary containing updated inventory information
+
+        Raises:
+            TikTokShopAuthError: If authentication fails
+            TikTokShopValidationError: If parameters are invalid (e.g., negative quantity)
+            TikTokShopNotFoundError: If product or SKU not found
+            TikTokShopAPIError: If API request fails
+
+        Example:
+            >>> client = TikTokShopClient('app_key', 'app_secret', 'access_token')
+            >>> result = client.update_inventory('1234567890', quantity=100)
+            >>> new_quantity = result['data']['available_quantity']
+        """
+        if quantity < 0:
+            raise TikTokShopValidationError(
+                "Inventory quantity must be non-negative",
+                status_code=400
+            )
+
+        data = {
+            'product_id': product_id,
+            'available_quantity': quantity
+        }
+
+        if sku_id:
+            data['sku_id'] = sku_id
+
+        return self._make_request(
+            method='POST',
+            path='/api/products/inventory/update',
+            data=data
+        )
+
+    def get_inventory(self, product_id: str) -> Dict[str, Any]:
+        """
+        Get current inventory information for a product
+
+        Args:
+            product_id: TikTok Shop product ID
+
+        Returns:
+            Dictionary containing inventory information including:
+                - available_quantity: Current available inventory
+                - reserved_quantity: Quantity reserved for orders
+                - sku_inventory: Inventory breakdown by SKU (if applicable)
+
+        Raises:
+            TikTokShopAuthError: If authentication fails
+            TikTokShopNotFoundError: If product not found
+            TikTokShopAPIError: If API request fails
+
+        Example:
+            >>> client = TikTokShopClient('app_key', 'app_secret', 'access_token')
+            >>> inventory = client.get_inventory('1234567890')
+            >>> available = inventory['data']['available_quantity']
+        """
+        return self._make_request(
+            method='GET',
+            path='/api/products/inventory',
+            params={'product_id': product_id}
+        )
