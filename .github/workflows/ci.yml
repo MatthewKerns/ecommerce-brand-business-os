@@ -28,6 +28,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r ai-content-agents/requirements.txt
 
+    - name: Run linting with flake8
+      run: |
+        flake8 ai-content-agents/ --config .flake8
+
     - name: Run tests with pytest
       env:
         ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
