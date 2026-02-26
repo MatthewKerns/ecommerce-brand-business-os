@@ -979,3 +979,156 @@ class TikTokShopClient:
             path='/api/content/post/delete',
             params={'post_id': post_id}
         )
+
+    # ========================================================================
+    # DATA API METHODS - Analytics, Performance Metrics
+    # ========================================================================
+
+    def get_analytics(
+        self,
+        start_time: int,
+        end_time: int,
+        metrics: Optional[list] = None,
+        dimension: Optional[str] = None,
+        page_size: int = 20,
+        page_number: int = 1
+    ) -> Dict[str, Any]:
+        """
+        Get analytics data from TikTok Shop
+
+        Args:
+            start_time: Start timestamp for analytics period (Unix timestamp)
+            end_time: End timestamp for analytics period (Unix timestamp)
+            metrics: List of metrics to retrieve (e.g., ['views', 'clicks', 'conversions'])
+                    If not specified, returns all available metrics
+            dimension: Dimension to group analytics by ('product', 'video', 'post', 'daily')
+            page_size: Number of records per page (max 100)
+            page_number: Page number to retrieve (starts at 1)
+
+        Returns:
+            Dictionary containing:
+                - analytics: List of analytics records
+                - metrics: Metrics definitions and values
+                - total: Total number of records
+                - more: Boolean indicating if more pages exist
+
+        Raises:
+            TikTokShopAuthError: If authentication fails
+            TikTokShopValidationError: If parameters are invalid
+            TikTokShopAPIError: If API request fails
+
+        Example:
+            >>> client = TikTokShopClient('app_key', 'app_secret', 'access_token')
+            >>> import time
+            >>> end = int(time.time())
+            >>> start = end - (7 * 24 * 60 * 60)  # Last 7 days
+            >>> analytics = client.get_analytics(
+            ...     start_time=start,
+            ...     end_time=end,
+            ...     metrics=['views', 'clicks', 'conversions'],
+            ...     dimension='daily'
+            ... )
+            >>> data = analytics['data']['analytics']
+        """
+        if start_time >= end_time:
+            raise TikTokShopValidationError(
+                "start_time must be earlier than end_time",
+                status_code=400
+            )
+
+        params = {
+            'start_time': start_time,
+            'end_time': end_time,
+            'page_size': min(page_size, 100),  # Cap at 100 per API limits
+            'page_number': page_number
+        }
+
+        if metrics:
+            params['metrics'] = ','.join(metrics)
+
+        if dimension:
+            params['dimension'] = dimension
+
+        return self._make_request(
+            method='GET',
+            path='/api/data/analytics',
+            params=params
+        )
+
+    def get_performance_metrics(
+        self,
+        resource_type: str,
+        resource_id: str,
+        start_time: Optional[int] = None,
+        end_time: Optional[int] = None,
+        metrics: Optional[list] = None
+    ) -> Dict[str, Any]:
+        """
+        Get performance metrics for a specific resource (product, video, or post)
+
+        Args:
+            resource_type: Type of resource ('product', 'video', 'post')
+            resource_id: ID of the resource to get metrics for
+            start_time: Start timestamp for metrics period (Unix timestamp)
+                       If not specified, returns all-time metrics
+            end_time: End timestamp for metrics period (Unix timestamp)
+                     If not specified, uses current time
+            metrics: List of specific metrics to retrieve
+                    (e.g., ['views', 'clicks', 'conversion_rate', 'revenue'])
+                    If not specified, returns all available metrics
+
+        Returns:
+            Dictionary containing:
+                - resource_id: ID of the resource
+                - resource_type: Type of resource
+                - metrics: Dictionary of metric names to values
+                - period: Time period for the metrics
+                - summary: Summary statistics
+
+        Raises:
+            TikTokShopAuthError: If authentication fails
+            TikTokShopValidationError: If parameters are invalid
+            TikTokShopNotFoundError: If resource not found
+            TikTokShopAPIError: If API request fails
+
+        Example:
+            >>> client = TikTokShopClient('app_key', 'app_secret', 'access_token')
+            >>> metrics = client.get_performance_metrics(
+            ...     resource_type='product',
+            ...     resource_id='1234567890',
+            ...     metrics=['views', 'clicks', 'conversion_rate', 'revenue']
+            ... )
+            >>> conversion_rate = metrics['data']['metrics']['conversion_rate']
+        """
+        valid_resource_types = ['product', 'video', 'post']
+        if resource_type not in valid_resource_types:
+            raise TikTokShopValidationError(
+                f"resource_type must be one of {valid_resource_types}",
+                status_code=400
+            )
+
+        if start_time and end_time and start_time >= end_time:
+            raise TikTokShopValidationError(
+                "start_time must be earlier than end_time",
+                status_code=400
+            )
+
+        params = {
+            'resource_type': resource_type,
+            'resource_id': resource_id
+        }
+
+        if start_time:
+            params['start_time'] = start_time
+
+        if end_time:
+            params['end_time'] = end_time
+
+        if metrics:
+            params['metrics'] = ','.join(metrics)
+
+        return self._make_request(
+            method='GET',
+            path='/api/data/performance',
+            params=params
+        )
