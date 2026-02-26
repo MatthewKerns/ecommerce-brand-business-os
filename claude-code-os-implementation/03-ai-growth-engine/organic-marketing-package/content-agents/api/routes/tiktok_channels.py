@@ -126,6 +126,55 @@ class UpdateChannelRequest(BaseModel):
         }
 
 
+class ContentGenerationRequest(BaseModel):
+    """Request model for generating channel-specific content."""
+    channel_element: str = Field(
+        ...,
+        pattern="^(air|water|fire|earth)$",
+        description="Channel element (air, water, fire, earth)"
+    )
+    topic: str = Field(
+        ...,
+        min_length=10,
+        max_length=500,
+        description="Content topic/theme"
+    )
+    content_type: str = Field(
+        ...,
+        pattern="^(video_script|content_calendar|multi_channel_strategy)$",
+        description="Type of content to generate"
+    )
+    product: Optional[str] = Field(
+        None,
+        description="Optional product to feature (for video scripts)"
+    )
+    include_product_link: bool = Field(
+        default=False,
+        description="Include product CTA (for video scripts)"
+    )
+    num_days: int = Field(
+        default=7,
+        ge=1,
+        le=30,
+        description="Number of days for content calendar"
+    )
+    include_topics: bool = Field(
+        default=True,
+        description="Include specific topics in calendar"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "channel_element": "air",
+                "topic": "Quick deck building tips",
+                "content_type": "video_script",
+                "product": "Tournament Deck Box",
+                "include_product_link": False
+            }
+        }
+
+
 # ============================================================================
 # Response Models
 # ============================================================================
@@ -179,6 +228,30 @@ class ChannelMutationResponse(BaseModel):
     channel: Optional[Dict[str, Any]] = Field(
         None,
         description="Updated channel information"
+    )
+    status: str = Field(
+        default="success",
+        description="Status of the request"
+    )
+
+
+class ContentGenerationResponse(BaseModel):
+    """Response model for content generation."""
+    request_id: str = Field(
+        ...,
+        description="Unique identifier for the request"
+    )
+    content: str = Field(
+        ...,
+        description="The generated content"
+    )
+    file_path: str = Field(
+        ...,
+        description="Path where the content was saved"
+    )
+    metadata: Dict[str, Any] = Field(
+        ...,
+        description="Content metadata"
     )
     status: str = Field(
         default="success",
@@ -462,4 +535,102 @@ async def deactivate_channel(
         raise HTTPException(
             status_code=500,
             detail=f"Failed to deactivate channel: {str(e)}"
+        )
+
+
+@router.post("/content/generate", response_model=ContentGenerationResponse)
+async def generate_channel_content(
+    request: ContentGenerationRequest,
+    request_id: str = Depends(get_request_id)
+) -> ContentGenerationResponse:
+    """
+    Generate channel-specific content (video scripts, calendars, or multi-channel strategy).
+
+    Args:
+        request: Content generation request with channel element, topic, and content type
+        request_id: Unique request identifier
+
+    Returns:
+        ContentGenerationResponse with generated content and file path
+
+    Raises:
+        HTTPException: If generation fails or channel not found
+    """
+    logger.info(
+        f"[{request_id}] Generating content: "
+        f"channel='{request.channel_element}', topic='{request.topic}', "
+        f"type='{request.content_type}'"
+    )
+
+    try:
+        # Initialize agent
+        agent = TikTokChannelAgent()
+
+        # Generate content based on content_type
+        if request.content_type == "video_script":
+            content, file_path = agent.generate_channel_video_script(
+                channel_element=request.channel_element,
+                topic=request.topic,
+                product=request.product,
+                include_product_link=request.include_product_link
+            )
+            metadata = {
+                "content_type": "video_script",
+                "channel_element": request.channel_element,
+                "topic": request.topic,
+                "product": request.product,
+                "include_product_link": request.include_product_link
+            }
+
+        elif request.content_type == "content_calendar":
+            content, file_path = agent.generate_channel_content_calendar(
+                channel_element=request.channel_element,
+                num_days=request.num_days,
+                include_topics=request.include_topics
+            )
+            metadata = {
+                "content_type": "content_calendar",
+                "channel_element": request.channel_element,
+                "num_days": request.num_days,
+                "include_topics": request.include_topics
+            }
+
+        elif request.content_type == "multi_channel_strategy":
+            content, file_path = agent.generate_multi_channel_strategy(
+                time_period="weekly"
+            )
+            metadata = {
+                "content_type": "multi_channel_strategy",
+                "time_period": "weekly"
+            }
+
+        else:
+            raise ValueError(f"Unknown content_type: {request.content_type}")
+
+        # Create response
+        response = ContentGenerationResponse(
+            request_id=request_id,
+            content=content,
+            file_path=str(file_path),
+            metadata=metadata,
+            status="success"
+        )
+
+        logger.info(
+            f"[{request_id}] Successfully generated {request.content_type} "
+            f"for '{request.channel_element}': {file_path}"
+        )
+        return response
+
+    except ValueError as e:
+        logger.warning(f"[{request_id}] Invalid request: {e}")
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid request: {str(e)}"
+        )
+    except Exception as e:
+        logger.error(f"[{request_id}] Error generating content: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to generate content: {str(e)}"
         )
