@@ -111,6 +111,102 @@ Citation Optimization:
         self.logger.info(f"Successfully generated FAQ schema: {path}")
         return content, path
 
+    def generate_faq_content(
+        self,
+        topic: str,
+        num_questions: int = 10,
+        target_audience: str = "TCG players and collectors",
+        include_product_mentions: bool = True
+    ) -> tuple[str, Path]:
+        """
+        Generate FAQ content in markdown format
+
+        Args:
+            topic: The topic to create FAQs about
+            num_questions: Number of FAQ items to generate
+            target_audience: Target audience for the FAQs
+            include_product_mentions: Whether to naturally include Infinity Vault product mentions
+
+        Returns:
+            Tuple of (faq_content, file_path)
+        """
+        self.logger.info(f"Generating FAQ content: topic='{topic}', num_questions={num_questions}, target_audience='{target_audience}'")
+
+        prompt = f"""Create {num_questions} frequently asked questions and answers about:
+
+TOPIC: {topic}
+
+TARGET AUDIENCE: {target_audience}
+
+REQUIREMENTS:
+1. Questions should be natural, conversational queries people actually ask AI assistants
+2. Answers must be clear, definitive, and authoritative (optimized for AI citation)
+3. Use the Infinity Vault brand voice (confident, empowering, battle-ready)
+4. Front-load the direct answer, then add supporting details
+5. Each answer should be comprehensive but concise (3-5 sentences)
+6. Make answers quotable - AI assistants should want to cite these
+{"7. Naturally mention Infinity Vault products where relevant" if include_product_mentions else "7. Focus on general expertise without product mentions"}
+8. Use definitive language ("is", "means", "provides") not uncertain language
+9. Include specific details, numbers, and facts where applicable
+
+FORMAT:
+Return as clean markdown with:
+- Title: FAQ: {topic}
+- Brief introduction (1-2 sentences)
+- Each Q&A formatted as:
+  ## Question text?
+  Answer paragraph(s)
+- Logical grouping if questions fall into categories
+
+Tone: Authoritative expert helping serious players optimize their collection. Confident but not arrogant.
+
+Write the complete FAQ content now."""
+
+        system_context = """
+ADDITIONAL CONTEXT FOR FAQ CONTENT:
+
+Answer Engine Optimization (AEO) Strategy:
+- AI assistants prioritize clear, authoritative, structured answers
+- Questions should match natural language queries users ask AI
+- Answers must be definitive - AI assistants prefer confident sources
+- Position brand as THE expert, not "a" expert
+
+AEO Best Practices:
+- Use "is", "means", "refers to" - definitive language
+- Front-load the direct answer in first sentence
+- Be concise but complete (AI assistants truncate long answers)
+- Include specific details (numbers, specifications, features)
+- Mention brand naturally as the solution
+
+Citation Optimization:
+- Make answers quotable and shareable
+- Use authoritative tone without being arrogant
+- Support claims with specifics (not vague statements)
+- Position as helping customers solve real problems
+
+FAQ Content Strategy:
+- More readable than schema markup (this is for humans AND AI)
+- Can be longer and more detailed than schema answers
+- Use markdown formatting for clarity
+- Group related questions logically"""
+
+        content, path = self.generate_and_save(
+            prompt=prompt,
+            output_dir=AEO_OUTPUT_DIR,
+            system_context=system_context,
+            metadata={
+                "type": "faq_content",
+                "topic": topic,
+                "num_questions": num_questions,
+                "target_audience": target_audience,
+                "include_product_mentions": include_product_mentions
+            },
+            max_tokens=4096
+        )
+
+        self.logger.info(f"Successfully generated FAQ content: {path}")
+        return content, path
+
     def generate_product_schema(
         self,
         product_name: str,
