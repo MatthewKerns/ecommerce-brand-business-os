@@ -573,6 +573,156 @@ class ComparisonResponse(BaseModel):
         }
 
 
+class AlertRecordResponse(BaseModel):
+    """Response model for a single alert record."""
+    id: int = Field(
+        ...,
+        description="Alert record ID"
+    )
+    alert_type: str = Field(
+        ...,
+        description="Type (citation_drop, competitor_gain, threshold_breach, other)"
+    )
+    alert_severity: str = Field(
+        ...,
+        description="Severity level (critical, high, medium, low)"
+    )
+    status: str = Field(
+        ...,
+        description="Status (active, acknowledged, resolved, dismissed)"
+    )
+    title: str = Field(
+        ...,
+        description="Short title of the alert"
+    )
+    message: str = Field(
+        ...,
+        description="Detailed alert message"
+    )
+    brand_name: Optional[str] = Field(
+        None,
+        description="Brand name related to alert"
+    )
+    competitor_name: Optional[str] = Field(
+        None,
+        description="Competitor name related to alert"
+    )
+    ai_platform: Optional[str] = Field(
+        None,
+        description="AI platform (chatgpt, claude, perplexity, all)"
+    )
+    metric_name: Optional[str] = Field(
+        None,
+        description="Name of metric that triggered alert"
+    )
+    previous_value: Optional[float] = Field(
+        None,
+        description="Previous metric value"
+    )
+    current_value: Optional[float] = Field(
+        None,
+        description="Current metric value"
+    )
+    threshold_value: Optional[float] = Field(
+        None,
+        description="Threshold value that was breached"
+    )
+    change_percentage: Optional[float] = Field(
+        None,
+        description="Percentage change in metric"
+    )
+    triggered_at: datetime = Field(
+        ...,
+        description="When alert was triggered"
+    )
+    acknowledged_at: Optional[datetime] = Field(
+        None,
+        description="When alert was acknowledged"
+    )
+    resolved_at: Optional[datetime] = Field(
+        None,
+        description="When alert was resolved"
+    )
+    dismissed_at: Optional[datetime] = Field(
+        None,
+        description="When alert was dismissed"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "id": 123,
+                "alert_type": "citation_drop",
+                "alert_severity": "high",
+                "status": "active",
+                "title": "Citation rate dropped on ChatGPT",
+                "message": "Citation rate on ChatGPT dropped from 75% to 45% (30% decrease)",
+                "brand_name": "BattlBox",
+                "competitor_name": None,
+                "ai_platform": "chatgpt",
+                "metric_name": "citation_rate",
+                "previous_value": 0.75,
+                "current_value": 0.45,
+                "threshold_value": 0.20,
+                "change_percentage": -30.0,
+                "triggered_at": "2024-02-26T10:30:45Z",
+                "acknowledged_at": None,
+                "resolved_at": None,
+                "dismissed_at": None
+            }
+        }
+
+
+class AlertListResponse(BaseModel):
+    """Response model for list of alert records."""
+    request_id: str = Field(
+        ...,
+        description="Unique identifier for the request"
+    )
+    alerts: List[AlertRecordResponse] = Field(
+        ...,
+        description="List of alert records"
+    )
+    total_count: int = Field(
+        ...,
+        description="Total number of alerts"
+    )
+    by_severity: Dict[str, int] = Field(
+        ...,
+        description="Count by severity level"
+    )
+    by_type: Dict[str, int] = Field(
+        ...,
+        description="Count by alert type"
+    )
+    by_status: Dict[str, int] = Field(
+        ...,
+        description="Count by status"
+    )
+    by_platform: Dict[str, int] = Field(
+        ...,
+        description="Count by platform"
+    )
+    active_count: int = Field(
+        ...,
+        description="Number of active alerts"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "request_id": "req_abc123def456",
+                "alerts": [],
+                "total_count": 15,
+                "by_severity": {"high": 5, "medium": 7, "low": 3},
+                "by_type": {"citation_drop": 8, "competitor_gain": 7},
+                "by_status": {"active": 10, "acknowledged": 3, "resolved": 2},
+                "by_platform": {"chatgpt": 5, "claude": 4, "perplexity": 3, "all": 3},
+                "active_count": 10
+            }
+        }
+
+
 # ============================================================================
 # Route Handlers
 # ============================================================================
@@ -1142,9 +1292,215 @@ async def get_recommendations(
         )
 
 
-# ============================================================================
-# Additional Route Handlers (to be implemented in subsequent subtasks)
-# ============================================================================
+@router.get(
+    "/alerts",
+    response_model=AlertListResponse,
+    summary="Get alert records",
+    description="Retrieve alert records with optional filtering by severity, status, type, and platform"
+)
+async def get_alerts(
+    days: Optional[int] = Query(
+        default=30,
+        ge=1,
+        le=365,
+        description="Number of days to retrieve (from today backwards)"
+    ),
+    severity: Optional[str] = Query(
+        default=None,
+        pattern="^(critical|high|medium|low)$",
+        description="Filter by severity level"
+    ),
+    status: Optional[str] = Query(
+        default=None,
+        pattern="^(active|acknowledged|resolved|dismissed)$",
+        description="Filter by alert status"
+    ),
+    alert_type: Optional[str] = Query(
+        default=None,
+        pattern="^(citation_drop|competitor_gain|threshold_breach|other)$",
+        description="Filter by alert type"
+    ),
+    platform: Optional[str] = Query(
+        default=None,
+        pattern="^(chatgpt|claude|perplexity|all)$",
+        description="Filter by AI platform"
+    ),
+    brand_name: Optional[str] = Query(
+        default=None,
+        description="Filter by brand name"
+    ),
+    limit: Optional[int] = Query(
+        default=100,
+        ge=1,
+        le=1000,
+        description="Maximum number of records to return"
+    ),
+    request_id: str = Depends(get_request_id)
+) -> Dict[str, Any]:
+    """
+    Get alert records with optional filtering.
 
-# Placeholder comment: Additional route handlers will be implemented in:
-# - subtask-6-3: GET /alerts endpoint
+    Args:
+        days: Number of days to retrieve (from today backwards)
+        severity: Filter by severity level
+        status: Filter by alert status
+        alert_type: Filter by alert type
+        platform: Filter by AI platform
+        brand_name: Filter by brand name
+        limit: Maximum number of records to return
+        request_id: Unique request identifier
+
+    Returns:
+        Alert list response with alert records and statistics
+
+    Raises:
+        HTTPException: If database query fails
+    """
+    logger.info(
+        f"[{request_id}] Retrieving alerts: days={days}, "
+        f"severity={severity}, status={status}, type={alert_type}, "
+        f"platform={platform}, brand_name={brand_name}, limit={limit}"
+    )
+    start_time = time.time()
+
+    try:
+        # Import database dependencies
+        from database.models import AlertRecord
+        from database.connection import get_db_session
+        from datetime import timedelta
+
+        # Get database session
+        db_session = get_db_session()
+
+        try:
+            # Build query
+            query = db_session.query(AlertRecord)
+
+            # Apply severity filter
+            if severity:
+                query = query.filter(AlertRecord.alert_severity == severity.lower())
+
+            # Apply status filter
+            if status:
+                query = query.filter(AlertRecord.status == status.lower())
+
+            # Apply type filter
+            if alert_type:
+                query = query.filter(AlertRecord.alert_type == alert_type.lower())
+
+            # Apply platform filter
+            if platform:
+                query = query.filter(AlertRecord.ai_platform == platform.lower())
+
+            # Apply brand filter
+            if brand_name:
+                query = query.filter(AlertRecord.brand_name == brand_name)
+
+            # Apply date filter
+            if days:
+                cutoff_date = datetime.utcnow() - timedelta(days=days)
+                query = query.filter(AlertRecord.triggered_at >= cutoff_date)
+
+            # Order by triggered_at descending (most recent first)
+            query = query.order_by(AlertRecord.triggered_at.desc())
+
+            # Apply limit
+            query = query.limit(limit)
+
+            # Execute query
+            records = query.all()
+
+            # Convert to response models
+            alerts = []
+            for record in records:
+                # Convert Decimal to float for numeric fields
+                previous_value = float(record.previous_value) if record.previous_value is not None else None
+                current_value = float(record.current_value) if record.current_value is not None else None
+                threshold_value = float(record.threshold_value) if record.threshold_value is not None else None
+                change_percentage = float(record.change_percentage) if record.change_percentage is not None else None
+
+                alert = AlertRecordResponse(
+                    id=record.id,
+                    alert_type=record.alert_type,
+                    alert_severity=record.alert_severity,
+                    status=record.status,
+                    title=record.title,
+                    message=record.message,
+                    brand_name=record.brand_name,
+                    competitor_name=record.competitor_name,
+                    ai_platform=record.ai_platform,
+                    metric_name=record.metric_name,
+                    previous_value=previous_value,
+                    current_value=current_value,
+                    threshold_value=threshold_value,
+                    change_percentage=change_percentage,
+                    triggered_at=record.triggered_at,
+                    acknowledged_at=record.acknowledged_at,
+                    resolved_at=record.resolved_at,
+                    dismissed_at=record.dismissed_at
+                )
+                alerts.append(alert)
+
+            # Calculate statistics
+            total_count = len(alerts)
+
+            # Count by severity
+            by_severity = {}
+            for alert in alerts:
+                by_severity[alert.alert_severity] = by_severity.get(alert.alert_severity, 0) + 1
+
+            # Count by type
+            by_type = {}
+            for alert in alerts:
+                by_type[alert.alert_type] = by_type.get(alert.alert_type, 0) + 1
+
+            # Count by status
+            by_status = {}
+            for alert in alerts:
+                by_status[alert.status] = by_status.get(alert.status, 0) + 1
+
+            # Count by platform (including null values)
+            by_platform = {}
+            for alert in alerts:
+                platform_key = alert.ai_platform if alert.ai_platform else "unknown"
+                by_platform[platform_key] = by_platform.get(platform_key, 0) + 1
+
+            # Count active alerts
+            active_count = by_status.get("active", 0)
+
+            # Calculate query time
+            query_time_ms = int((time.time() - start_time) * 1000)
+
+            # Build response
+            response = {
+                "request_id": request_id,
+                "alerts": [a.dict() for a in alerts],
+                "total_count": total_count,
+                "by_severity": by_severity,
+                "by_type": by_type,
+                "by_status": by_status,
+                "by_platform": by_platform,
+                "active_count": active_count
+            }
+
+            logger.info(
+                f"[{request_id}] Retrieved {total_count} alerts in {query_time_ms}ms: "
+                f"active={active_count}, by_severity={by_severity}, by_status={by_status}"
+            )
+            return response
+
+        finally:
+            # Close database session
+            db_session.close()
+
+    except Exception as e:
+        logger.error(f"[{request_id}] Error retrieving alerts: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": "AlertRetrievalError",
+                "message": f"Failed to retrieve alerts: {str(e)}",
+                "request_id": request_id,
+                "timestamp": datetime.utcnow().isoformat() + "Z"
+            }
+        )
