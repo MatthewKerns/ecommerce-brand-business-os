@@ -328,9 +328,9 @@ describeE2E('End-to-End Order Routing', () => {
       console.log('\nStep 2: Checking inventory...');
       const testSku = 'TEST-SKU-001';
       try {
-        const inventoryResult = await connector.checkInventory([testSku]);
-        if (inventoryResult.success) {
-          console.log(`  ✓ SKU ${testSku}: ${inventoryResult.summaries[0].fulfillableQuantity} units available`);
+        const inventoryResult = await connector.checkInventory(testSku, 1);
+        if (inventoryResult.sufficient) {
+          console.log(`  ✓ SKU ${testSku}: ${inventoryResult.available} units available`);
         } else {
           console.log(`  ℹ Inventory check completed (SKU may not exist in sandbox)`);
         }

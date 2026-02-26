@@ -109,9 +109,16 @@ function createMockMCFShipment() {
   return {
     amazonShipmentId: 'SHIP-001',
     fulfillmentCenterId: 'PHX6',
-    fulfillmentShipmentStatus: 'SHIPPED',
+    fulfillmentShipmentStatus: 'SHIPPED' as const,
     shippingDate: new Date().toISOString(),
     estimatedArrivalDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
+    fulfillmentShipmentItem: [
+      {
+        sellerSku: 'AMAZON-SKU-001',
+        sellerFulfillmentOrderItemId: 'item-1',
+        quantity: 2,
+      },
+    ],
     fulfillmentShipmentPackage: [
       {
         packageNumber: 1,
@@ -251,8 +258,14 @@ describe('Order Flow Integration Tests', () => {
 
       // Setup mocks
       mocks.tiktokClient.getOrderDetail.mockResolvedValue(mockOrder);
-      mocks.amazonClient.createFulfillmentOrder.mockResolvedValue(mockMCFOrder);
-      mocks.amazonClient.getFulfillmentOrder.mockResolvedValue(mockMCFOrder);
+      mocks.amazonClient.createFulfillmentOrder.mockResolvedValue({ fulfillmentOrder: mockMCFOrder });
+      mocks.amazonClient.getFulfillmentOrder.mockResolvedValue({
+        fulfillmentOrder: mockMCFOrder,
+        fulfillmentOrderItems: [],
+        fulfillmentShipments: [],
+        returnItems: [],
+        returnAuthorizations: []
+      });
 
       // Add SKU mapping
       connector.addSkuMapping('TIKTOK-SKU-001', 'AMAZON-SKU-001');
@@ -288,7 +301,7 @@ describe('Order Flow Integration Tests', () => {
       if (!result.success) {
         expect(result.error).toBeDefined();
         expect(result.stage).toBe('validate');
-        expect(result.error.code).toBe(ErrorCode.VALIDATION_FAILED);
+        expect(result.error.code).toBe(ErrorCode.INVALID_ORDER_DATA);
       }
     });
 
@@ -354,8 +367,14 @@ describe('Order Flow Integration Tests', () => {
       mockOrder.item_list[0].seller_sku = '';
 
       mocks.tiktokClient.getOrderDetail.mockResolvedValue(mockOrder);
-      mocks.amazonClient.createFulfillmentOrder.mockResolvedValue(mockMCFOrder);
-      mocks.amazonClient.getFulfillmentOrder.mockResolvedValue(mockMCFOrder);
+      mocks.amazonClient.createFulfillmentOrder.mockResolvedValue({ fulfillmentOrder: mockMCFOrder });
+      mocks.amazonClient.getFulfillmentOrder.mockResolvedValue({
+        fulfillmentOrder: mockMCFOrder,
+        fulfillmentOrderItems: [],
+        fulfillmentShipments: [],
+        returnItems: [],
+        returnAuthorizations: []
+      });
 
       const result = await connector.routeOrder('TT-WARNINGS');
 
@@ -375,12 +394,16 @@ describe('Order Flow Integration Tests', () => {
       // Setup mocks for all orders
       orderIds.forEach((orderId) => {
         mocks.tiktokClient.getOrderDetail.mockResolvedValueOnce(createMockTikTokOrder(orderId));
-        mocks.amazonClient.createFulfillmentOrder.mockResolvedValueOnce(
-          createMockMCFFulfillmentOrder(orderId)
-        );
-        mocks.amazonClient.getFulfillmentOrder.mockResolvedValueOnce(
-          createMockMCFFulfillmentOrder(orderId)
-        );
+        mocks.amazonClient.createFulfillmentOrder.mockResolvedValueOnce({
+          fulfillmentOrder: createMockMCFFulfillmentOrder(orderId)
+        });
+        mocks.amazonClient.getFulfillmentOrder.mockResolvedValueOnce({
+          fulfillmentOrder: createMockMCFFulfillmentOrder(orderId),
+          fulfillmentOrderItems: [],
+          fulfillmentShipments: [],
+          returnItems: [],
+          returnAuthorizations: []
+        });
       });
 
       connector.addSkuMapping('TIKTOK-SKU-001', 'AMAZON-SKU-001');
@@ -402,12 +425,16 @@ describe('Order Flow Integration Tests', () => {
       mocks.tiktokClient.getOrderDetail.mockResolvedValueOnce(
         createMockTikTokOrder('TT-SUCCESS')
       );
-      mocks.amazonClient.createFulfillmentOrder.mockResolvedValueOnce(
-        createMockMCFFulfillmentOrder('TT-SUCCESS')
-      );
-      mocks.amazonClient.getFulfillmentOrder.mockResolvedValueOnce(
-        createMockMCFFulfillmentOrder('TT-SUCCESS')
-      );
+      mocks.amazonClient.createFulfillmentOrder.mockResolvedValueOnce({
+        fulfillmentOrder: createMockMCFFulfillmentOrder('TT-SUCCESS')
+      });
+      mocks.amazonClient.getFulfillmentOrder.mockResolvedValueOnce({
+        fulfillmentOrder: createMockMCFFulfillmentOrder('TT-SUCCESS'),
+        fulfillmentOrderItems: [],
+        fulfillmentShipments: [],
+        returnItems: [],
+        returnAuthorizations: []
+      });
 
       // Second order fails
       mocks.tiktokClient.getOrderDetail.mockRejectedValueOnce(new Error('API Error'));
@@ -416,12 +443,16 @@ describe('Order Flow Integration Tests', () => {
       mocks.tiktokClient.getOrderDetail.mockResolvedValueOnce(
         createMockTikTokOrder('TT-SUCCESS-2')
       );
-      mocks.amazonClient.createFulfillmentOrder.mockResolvedValueOnce(
-        createMockMCFFulfillmentOrder('TT-SUCCESS-2')
-      );
-      mocks.amazonClient.getFulfillmentOrder.mockResolvedValueOnce(
-        createMockMCFFulfillmentOrder('TT-SUCCESS-2')
-      );
+      mocks.amazonClient.createFulfillmentOrder.mockResolvedValueOnce({
+        fulfillmentOrder: createMockMCFFulfillmentOrder('TT-SUCCESS-2')
+      });
+      mocks.amazonClient.getFulfillmentOrder.mockResolvedValueOnce({
+        fulfillmentOrder: createMockMCFFulfillmentOrder('TT-SUCCESS-2'),
+        fulfillmentOrderItems: [],
+        fulfillmentShipments: [],
+        returnItems: [],
+        returnAuthorizations: []
+      });
 
       connector.addSkuMapping('TIKTOK-SKU-001', 'AMAZON-SKU-001');
 
@@ -445,25 +476,29 @@ describe('Order Flow Integration Tests', () => {
       mocks.tiktokClient.getOrders.mockResolvedValue({
         orders: pendingOrders,
         total: 2,
-        hasMore: false,
+        more: false,
       });
 
       pendingOrders.forEach((order) => {
         mocks.tiktokClient.getOrderDetail.mockResolvedValueOnce(order);
-        mocks.amazonClient.createFulfillmentOrder.mockResolvedValueOnce(
-          createMockMCFFulfillmentOrder(order.id)
-        );
-        mocks.amazonClient.getFulfillmentOrder.mockResolvedValueOnce(
-          createMockMCFFulfillmentOrder(order.id)
-        );
+        mocks.amazonClient.createFulfillmentOrder.mockResolvedValueOnce({
+          fulfillmentOrder: createMockMCFFulfillmentOrder(order.id)
+        });
+        mocks.amazonClient.getFulfillmentOrder.mockResolvedValueOnce({
+          fulfillmentOrder: createMockMCFFulfillmentOrder(order.id),
+          fulfillmentOrderItems: [],
+          fulfillmentShipments: [],
+          returnItems: [],
+          returnAuthorizations: []
+        });
       });
 
       connector.addSkuMapping('TIKTOK-SKU-001', 'AMAZON-SKU-001');
 
       const result = await connector.routePendingOrders();
 
-      expect(result.total).toBe(2);
-      expect(result.successful).toBe(2);
+      expect(result.totalOrders).toBe(2);
+      expect(result.successCount).toBe(2);
       expect(mocks.tiktokClient.getOrders).toHaveBeenCalled();
     });
 
@@ -474,31 +509,35 @@ describe('Order Flow Integration Tests', () => {
       mocks.tiktokClient.getOrders.mockResolvedValueOnce({
         orders: [createMockTikTokOrder('TT-PAGE-1')],
         total: 2,
-        hasMore: true,
+        more: true,
       });
 
       // Second page
       mocks.tiktokClient.getOrders.mockResolvedValueOnce({
         orders: [createMockTikTokOrder('TT-PAGE-2')],
         total: 2,
-        hasMore: false,
+        more: false,
       });
 
       ['TT-PAGE-1', 'TT-PAGE-2'].forEach((orderId) => {
         mocks.tiktokClient.getOrderDetail.mockResolvedValueOnce(createMockTikTokOrder(orderId));
-        mocks.amazonClient.createFulfillmentOrder.mockResolvedValueOnce(
-          createMockMCFFulfillmentOrder(orderId)
-        );
-        mocks.amazonClient.getFulfillmentOrder.mockResolvedValueOnce(
-          createMockMCFFulfillmentOrder(orderId)
-        );
+        mocks.amazonClient.createFulfillmentOrder.mockResolvedValueOnce({
+          fulfillmentOrder: createMockMCFFulfillmentOrder(orderId)
+        });
+        mocks.amazonClient.getFulfillmentOrder.mockResolvedValueOnce({
+          fulfillmentOrder: createMockMCFFulfillmentOrder(orderId),
+          fulfillmentOrderItems: [],
+          fulfillmentShipments: [],
+          returnItems: [],
+          returnAuthorizations: []
+        });
       });
 
       connector.addSkuMapping('TIKTOK-SKU-001', 'AMAZON-SKU-001');
 
       const result = await connector.routePendingOrders();
 
-      expect(result.total).toBe(2);
+      expect(result.totalOrders).toBe(2);
       expect(mocks.tiktokClient.getOrders).toHaveBeenCalledTimes(2);
     });
   });
@@ -514,9 +553,14 @@ describe('Order Flow Integration Tests', () => {
 
       // Mock MCF responses
       mocks.amazonClient.getFulfillmentOrder.mockResolvedValue({
-        ...mockMCFOrder,
-        fulfillmentOrderStatus: MCFFulfillmentStatus.COMPLETE,
-        fulfillmentShipment: [mockShipment],
+        fulfillmentOrder: {
+          ...mockMCFOrder,
+          fulfillmentOrderStatus: MCFFulfillmentStatus.COMPLETE,
+        },
+        fulfillmentOrderItems: [],
+        fulfillmentShipments: [mockShipment],
+        returnItems: [],
+        returnAuthorizations: []
       });
 
       mocks.amazonClient.getPackageTracking.mockResolvedValue({
@@ -535,7 +579,7 @@ describe('Order Flow Integration Tests', () => {
         trackingEvents: [],
       });
 
-      mocks.tiktokClient.updateTrackingInfo.mockResolvedValue({ success: true });
+      mocks.tiktokClient.updateTrackingInfo.mockResolvedValue({ order_id: 'TT-TRACKING', updated: true });
 
       const result = await connector.syncTracking('TT-TRACKING');
 
@@ -579,9 +623,14 @@ describe('Order Flow Integration Tests', () => {
       const mockShipment = createMockMCFShipment();
 
       mocks.amazonClient.getFulfillmentOrder.mockResolvedValue({
-        ...mockMCFOrder,
-        fulfillmentOrderStatus: MCFFulfillmentStatus.COMPLETE,
-        fulfillmentShipment: [mockShipment],
+        fulfillmentOrder: {
+          ...mockMCFOrder,
+          fulfillmentOrderStatus: MCFFulfillmentStatus.COMPLETE,
+        },
+        fulfillmentOrderItems: [],
+        fulfillmentShipments: [mockShipment],
+        returnItems: [],
+        returnAuthorizations: []
       });
 
       mocks.amazonClient.getPackageTracking.mockResolvedValue({
@@ -600,7 +649,7 @@ describe('Order Flow Integration Tests', () => {
         trackingEvents: [],
       });
 
-      mocks.tiktokClient.updateTrackingInfo.mockResolvedValue({ success: true });
+      mocks.tiktokClient.updateTrackingInfo.mockResolvedValue({ order_id: 'TT-TRACKING', updated: true });
 
       // First sync
       const result1 = await connector.syncTracking('TT-SYNCED');
@@ -609,12 +658,12 @@ describe('Order Flow Integration Tests', () => {
       // Reset mocks
       mocks.tiktokClient.updateTrackingInfo.mockClear();
 
-      // Second sync attempt - should skip
+      // Second sync attempt - should skip (returns success: true but doesn't call API)
       const result2 = await connector.syncTracking('TT-SYNCED');
-      expect(result2.success).toBe(false);
-      if (!result2.success) {
-        expect(result2.error.code).toBe(ErrorCode.TRACKING_ALREADY_SYNCED);
-      }
+      expect(result2.success).toBe(true);
+
+      // Verify TikTok API wasn't called again
+      expect(mocks.tiktokClient.updateTrackingInfo).not.toHaveBeenCalled();
     });
   });
 
@@ -646,12 +695,16 @@ describe('Order Flow Integration Tests', () => {
         });
       }
 
-      mocks.amazonClient.createFulfillmentOrder.mockResolvedValue(
-        createMockMCFFulfillmentOrder('TT-INV-CHECK')
-      );
-      mocks.amazonClient.getFulfillmentOrder.mockResolvedValue(
-        createMockMCFFulfillmentOrder('TT-INV-CHECK')
-      );
+      mocks.amazonClient.createFulfillmentOrder.mockResolvedValue({
+        fulfillmentOrder: createMockMCFFulfillmentOrder('TT-INV-CHECK')
+      });
+      mocks.amazonClient.getFulfillmentOrder.mockResolvedValue({
+        fulfillmentOrder: createMockMCFFulfillmentOrder('TT-INV-CHECK'),
+        fulfillmentOrderItems: [],
+        fulfillmentShipments: [],
+        returnItems: [],
+        returnAuthorizations: []
+      });
 
       const result = await connector.routeOrder('TT-INV-CHECK');
 
@@ -688,12 +741,16 @@ describe('Order Flow Integration Tests', () => {
         });
       }
 
-      mocks.amazonClient.createFulfillmentOrder.mockResolvedValue(
-        createMockMCFFulfillmentOrder('TT-LOW-STOCK')
-      );
-      mocks.amazonClient.getFulfillmentOrder.mockResolvedValue(
-        createMockMCFFulfillmentOrder('TT-LOW-STOCK')
-      );
+      mocks.amazonClient.createFulfillmentOrder.mockResolvedValue({
+        fulfillmentOrder: createMockMCFFulfillmentOrder('TT-LOW-STOCK')
+      });
+      mocks.amazonClient.getFulfillmentOrder.mockResolvedValue({
+        fulfillmentOrder: createMockMCFFulfillmentOrder('TT-LOW-STOCK'),
+        fulfillmentOrderItems: [],
+        fulfillmentShipments: [],
+        returnItems: [],
+        returnAuthorizations: []
+      });
 
       connector.addSkuMapping('TIKTOK-SKU-001', 'AMAZON-SKU-001');
 
@@ -701,8 +758,8 @@ describe('Order Flow Integration Tests', () => {
 
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.warnings).toBeDefined();
-        const lowStockWarning = result.warnings?.find((w) => w.message.includes('low stock'));
+        expect(result.successResult?.warnings).toBeDefined();
+        const lowStockWarning = result.successResult?.warnings?.find((w: any) => w.message.includes('low stock'));
         expect(lowStockWarning).toBeDefined();
       }
     });
@@ -743,10 +800,16 @@ describe('Order Flow Integration Tests', () => {
       mocks.tiktokClient.getOrderDetail.mockResolvedValue(mockOrder);
       mocks.amazonClient.createFulfillmentOrder.mockImplementation((params) => {
         // Verify SKU mapping was applied
-        expect(params.items[0].sellerSku).toBe('AMAZON-MAPPED-SKU');
-        return Promise.resolve(mockMCFOrder);
+        expect(params.items[0].sku).toBe('AMAZON-MAPPED-SKU');
+        return Promise.resolve({ fulfillmentOrder: mockMCFOrder });
       });
-      mocks.amazonClient.getFulfillmentOrder.mockResolvedValue(mockMCFOrder);
+      mocks.amazonClient.getFulfillmentOrder.mockResolvedValue({
+        fulfillmentOrder: mockMCFOrder,
+        fulfillmentOrderItems: [],
+        fulfillmentShipments: [],
+        returnItems: [],
+        returnAuthorizations: []
+      });
 
       // Add SKU mapping
       connector.addSkuMapping('TIKTOK-SKU-001', 'AMAZON-MAPPED-SKU');
