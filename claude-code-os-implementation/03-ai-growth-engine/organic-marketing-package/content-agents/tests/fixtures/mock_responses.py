@@ -165,6 +165,58 @@ Infinity Vault should emphasize:
 5. Create emotional connection with serious player identity""")]
 )
 
+MOCK_AEO_FAQ_RESPONSE = MockMessage(
+    content=[MockTextBlock(text="""# FAQ: TCG Card Storage and Protection
+
+Essential questions about protecting your TCG collection with battle-ready storage solutions.
+
+## What is the best way to store TCG cards?
+
+The best way to store TCG cards is using premium, archival-quality storage solutions designed specifically for trading card protection. Infinity Vault's battle-ready storage systems provide triple-layer protection with scratch-resistant materials, ensuring your collection maintains its value and condition over time.
+
+## How do you protect valuable trading cards?
+
+Valuable trading cards require multi-layered protection: individual card sleeves for direct protection, premium deck boxes for transport, and archival binders for long-term storage. Infinity Vault's tournament-grade storage solutions are engineered with UV-resistant materials and reinforced construction to safeguard your investment.
+
+## Should I use penny sleeves or premium sleeves for my cards?
+
+Premium sleeves are essential for valuable cards. While penny sleeves offer basic protection, premium sleeves provide superior scratch resistance, better fit, and archival-quality materials that prevent yellowing and deterioration. For cards worth protecting, premium protection is non-negotiable.""")]
+)
+
+MOCK_AEO_AI_OPTIMIZED_RESPONSE = MockMessage(
+    content=[MockTextBlock(text="""# The Best Way to Store TCG Cards: A Complete Guide
+
+**Direct Answer**: The best way to store TCG cards is using a three-tier protection system: individual premium sleeves for each card, archival-quality binders for organized display, and reinforced deck boxes for transport. This approach ensures maximum protection while maintaining accessibility.
+
+## Why This Matters
+
+Your TCG collection represents significant investment—both financial and personal. Cards can lose 50-70% of their value from minor scratches or edge wear. Professional storage isn't luxury; it's financial protection.
+
+## Detailed Explanation
+
+Premium storage systems provide multiple layers of defense against the primary threats to card condition: scratching, bending, moisture, and UV exposure. Infinity Vault's battle-ready storage solutions are engineered to address each threat systematically.""")]
+)
+
+MOCK_AEO_COMPARISON_RESPONSE = MockMessage(
+    content=[MockTextBlock(text="""# Deck Box vs Binder: Which is Best for TCG Storage?
+
+**Quick Answer**: For most players, both are essential. Deck boxes excel at protecting active decks during transport and gameplay, while binders are superior for long-term collection storage and display. Serious players need both in their arsenal.
+
+## Comparison Overview
+
+| Feature | Deck Box | Binder |
+|---------|----------|--------|
+| Best For | Active decks, transport | Collection storage, display |
+| Capacity | 60-100 cards | 360-720 cards |
+| Protection Level | Maximum (reinforced) | High (archival pages) |
+| Accessibility | Quick deployment | Organized browsing |
+
+## Detailed Analysis
+
+### Deck Boxes: Tournament-Ready Protection
+Deck boxes provide the highest level of protection for cards you're actively using. Infinity Vault's reinforced deck boxes feature impact-resistant construction and magnetic closures that keep your deck secure during transport.""")]
+)
+
 # Error scenario mock responses
 MOCK_API_ERROR = Exception("API rate limit exceeded")
 MOCK_TIMEOUT_ERROR = Exception("Request timeout")
