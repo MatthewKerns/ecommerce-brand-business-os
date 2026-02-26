@@ -208,35 +208,248 @@ This document tracks manual validation and testing results for the TikTok Shop A
 ## Phase 3: Order Retrieval Testing
 
 ### Test: Order Listing and Processing
-**Status**: ⏳ Pending
+**Status**: ⏳ Pending / ✅ Completed / ❌ Failed
 
-**Test Script**: `test_order_sync.py` (to be created)
+**Test Script**: `test_order_analytics.py`
 
 #### Prerequisites Checklist
 - [ ] OAuth flow completed
 - [ ] Valid access token
 - [ ] Orders exist in TikTok Shop for testing
+- [ ] Shop API scope approved
 
 #### Test Steps
-[To be filled during testing]
+
+1. **Credential and Token Validation**
+   - [ ] App Key configured
+   - [ ] App Secret configured
+   - [ ] Access token configured
+   - [ ] Token is valid (not expired)
+
+2. **Agent Initialization**
+   - [ ] TikTokShopAgent initialized successfully
+   - [ ] Agent configured with credentials
+   - [ ] API client created successfully
+
+3. **Order Listing (Basic)**
+   - [ ] `get_orders()` executed successfully
+   - [ ] Orders returned from API
+   - [ ] Response structure is correct
+   - [ ] Order count matches expected
+
+4. **Order Data Structure Validation**
+
+   **Required Fields Present**:
+   - [ ] `order_id` - Unique order identifier
+   - [ ] `status` - Order status (UNPAID/AWAITING_SHIPMENT/etc.)
+   - [ ] `create_time` - Order creation timestamp
+
+   **Optional Fields Present**:
+   - [ ] `buyer_info` - Buyer information
+   - [ ] `items` - Ordered items array
+   - [ ] `payment` - Payment information (total_amount, currency)
+   - [ ] `shipping` - Shipping address and details
+   - [ ] `update_time` - Last update timestamp
+
+   **Sample Order Data**:
+   ```json
+   [Paste sample order JSON here]
+   ```
+
+5. **Order Status Filtering**
+   - [ ] Filter by UNPAID status works
+   - [ ] Filter by AWAITING_SHIPMENT status works
+   - [ ] Filter by IN_TRANSIT status works
+   - [ ] Filter by DELIVERED status works
+   - [ ] Filter by COMPLETED status works
+   - [ ] Filter by CANCELLED status works
+   - [ ] Returned orders match requested status
+
+6. **Order Details**
+   - [ ] `get_order_details()` retrieves specific order
+   - [ ] Detailed order information returned
+   - [ ] Order ID validation works
+   - [ ] Error handling for invalid order ID
+
+7. **Full Order Sync**
+   - [ ] `sync_orders()` executed successfully
+   - [ ] Automatic pagination works
+   - [ ] All orders retrieved
+   - [ ] Orders saved to JSON file
+   - [ ] File location: `output/tiktok/orders/`
+   - [ ] File format is valid JSON
+   - [ ] Timestamp in filename
+
+8. **Order Data Processing**
+   - [ ] `process_order_data()` executes successfully
+   - [ ] Total orders counted correctly
+   - [ ] Orders grouped by status
+   - [ ] Total revenue calculated correctly
+   - [ ] Top products identified
+   - [ ] Order value statistics calculated (min, max, average)
+
+#### Test Results
+
+**Date Tested**: [To be filled]
+
+**Shop Statistics**:
+- Total Orders in Shop: [Number]
+- Unpaid Orders: [Number]
+- Awaiting Shipment: [Number]
+- In Transit: [Number]
+- Delivered: [Number]
+- Completed: [Number]
+- Cancelled: [Number]
+
+**Performance Metrics**:
+- Time to fetch 1 page (10 orders): [Time]
+- Time to sync all orders: [Time]
+- Average response time: [Time]
+- Rate limit errors: [Number]
+
+**Order Analytics**:
+- Total Revenue: $[Amount]
+- Average Order Value: $[Amount]
+- Min Order Value: $[Amount]
+- Max Order Value: $[Amount]
+- Top Products: [List]
+
+**Order Data Sample**:
+```json
+[Paste first order data here]
+```
+
+**Outcome**:
+```
+[Test output to be pasted here]
+```
+
+**Issues Encountered**:
+- [List any issues]
+
+**API Compatibility Notes**:
+- [ ] Order data structure matches TikTok Shop API documentation
+- [ ] All expected fields are present
+- [ ] Data types are correct
+- [ ] Enum values match documentation (status, etc.)
+
+**Notes**:
+- [Any additional observations]
 
 ---
 
 ## Phase 4: Analytics Testing
 
 ### Test: Analytics and Performance Metrics
-**Status**: ⏳ Pending
+**Status**: ⏳ Pending / ✅ Completed / ❌ Failed
 
-**Test Script**: `test_analytics.py` (to be created)
+**Test Script**: `test_order_analytics.py`
 
 #### Prerequisites Checklist
 - [ ] OAuth flow completed
 - [ ] Valid access token
 - [ ] Data API scope approved
-- [ ] Shop has historical data
+- [ ] Shop has historical data (at least 7-30 days)
+- [ ] Shop has sales/traffic data
 
 #### Test Steps
-[To be filled during testing]
+
+1. **Shop Analytics Retrieval**
+   - [ ] `get_analytics()` executes successfully
+   - [ ] Default date range works (last 30 days)
+   - [ ] Custom date range works
+   - [ ] Metrics data returned
+   - [ ] Period information is correct
+
+   **Expected Metrics**:
+   - [ ] Total sales/revenue
+   - [ ] Views/impressions
+   - [ ] Clicks
+   - [ ] Conversion rate
+   - [ ] Average order value
+   - [ ] Total orders
+   - [ ] Other shop-level metrics
+
+2. **Product Analytics Retrieval**
+   - [ ] `get_product_analytics()` executes successfully
+   - [ ] Product-specific metrics returned
+   - [ ] Date range filtering works
+   - [ ] Product ID validation works
+
+   **Expected Product Metrics**:
+   - [ ] Product views
+   - [ ] Product clicks
+   - [ ] Conversions (purchases)
+   - [ ] Conversion rate
+   - [ ] Revenue from product
+   - [ ] Units sold
+   - [ ] Average selling price
+
+3. **Shop Performance Metrics**
+   - [ ] `get_shop_performance()` executes successfully (if available)
+   - [ ] Performance indicators returned
+   - [ ] Historical trends available
+   - [ ] Comparison data available
+
+4. **Data Accuracy Validation**
+   - [ ] Analytics data matches TikTok Shop dashboard
+   - [ ] Revenue calculations are correct
+   - [ ] Metrics are within expected ranges
+   - [ ] Time periods align correctly
+   - [ ] Currency values are correct
+
+5. **Date Range Handling**
+   - [ ] Default date range (30 days) works
+   - [ ] Custom start_date works
+   - [ ] Custom end_date works
+   - [ ] Date format validation works (YYYY-MM-DD)
+   - [ ] Invalid date ranges handled gracefully
+
+#### Test Results
+
+**Date Tested**: [To be filled]
+
+**Analytics Period**: [Start Date] to [End Date]
+
+**Shop Analytics**:
+- Total Revenue: $[Amount]
+- Total Orders: [Number]
+- Total Views: [Number]
+- Total Clicks: [Number]
+- Conversion Rate: [Percentage]%
+- Average Order Value: $[Amount]
+
+**Product Analytics** (Sample Product):
+- Product ID: [ID]
+- Product Name: [Name]
+- Views: [Number]
+- Clicks: [Number]
+- Conversions: [Number]
+- Conversion Rate: [Percentage]%
+- Revenue: $[Amount]
+- Units Sold: [Number]
+
+**Data Accuracy Check**:
+- [ ] Analytics revenue matches order sync revenue
+- [ ] Metrics align with TikTok Shop dashboard
+- [ ] Calculation methods are correct
+- [ ] No data anomalies detected
+
+**Performance Metrics**:
+- Time to fetch shop analytics: [Time]
+- Time to fetch product analytics: [Time]
+- Average API response time: [Time]
+
+**Outcome**:
+```
+[Test output to be pasted here]
+```
+
+**Issues Encountered**:
+- [List any issues]
+
+**Notes**:
+- [Any additional observations]
 
 ---
 
@@ -375,11 +588,8 @@ python test_oauth_flow.py
 # Test product sync
 python test_product_sync.py
 
-# Test order sync (when created)
-python test_order_sync.py
-
-# Test analytics (when created)
-python test_analytics.py
+# Test order retrieval and analytics
+python test_order_analytics.py
 ```
 
 ### Environment Setup
