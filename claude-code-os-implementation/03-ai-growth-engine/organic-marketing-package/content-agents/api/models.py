@@ -376,3 +376,350 @@ class ErrorResponse(BaseModel):
                 "timestamp": "2024-02-26T10:30:45Z"
             }
         }
+
+
+# ============================================================================
+# TikTok Scheduling Models
+# ============================================================================
+
+class VideoContentData(BaseModel):
+    """
+    Content data for TikTok video uploads.
+
+    This model defines the structure for video content to be scheduled.
+    """
+    video_url: str = Field(
+        ...,
+        description="URL of the video to upload (must be accessible)"
+    )
+    title: str = Field(
+        ...,
+        min_length=1,
+        max_length=150,
+        description="Video title (max 150 characters)"
+    )
+    description: Optional[str] = Field(
+        None,
+        max_length=1000,
+        description="Video description (max 1000 characters)"
+    )
+    product_ids: Optional[List[str]] = Field(
+        default_factory=list,
+        description="List of product IDs to tag in the video"
+    )
+    tags: Optional[List[str]] = Field(
+        default_factory=list,
+        description="List of hashtags (without # symbol)"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "video_url": "https://example.com/videos/product-demo.mp4",
+                "title": "Check out our new tactical backpack!",
+                "description": "Perfect for urban professionals who need battle-ready gear",
+                "product_ids": ["prod_12345", "prod_67890"],
+                "tags": ["tactical", "edc", "backpack"]
+            }
+        }
+
+
+class PostContentData(BaseModel):
+    """
+    Content data for TikTok posts.
+
+    This model defines the structure for post content to be scheduled.
+    """
+    content: str = Field(
+        ...,
+        min_length=1,
+        max_length=2000,
+        description="Post content/text (max 2000 characters)"
+    )
+    media_urls: Optional[List[str]] = Field(
+        default_factory=list,
+        description="List of media URLs (images/videos) to attach"
+    )
+    product_ids: Optional[List[str]] = Field(
+        default_factory=list,
+        description="List of product IDs to tag in the post"
+    )
+    tags: Optional[List[str]] = Field(
+        default_factory=list,
+        description="List of hashtags (without # symbol)"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "content": "New arrival! Our tactical EDC backpack is perfect for the modern urban warrior.",
+                "media_urls": ["https://example.com/images/backpack-1.jpg"],
+                "product_ids": ["prod_12345"],
+                "tags": ["newarrival", "tactical", "edc"]
+            }
+        }
+
+
+class ScheduleContentRequest(BaseModel):
+    """
+    Request model for scheduling TikTok content.
+
+    This model handles single content scheduling requests.
+    """
+    content_type: str = Field(
+        ...,
+        pattern="^(video|post)$",
+        description="Type of content: video or post"
+    )
+    content_data: Dict[str, Any] = Field(
+        ...,
+        description="Content data (VideoContentData for video, PostContentData for post)"
+    )
+    scheduled_time: datetime = Field(
+        ...,
+        description="When the content should be published (ISO 8601 format)"
+    )
+    max_retries: int = Field(
+        default=3,
+        ge=0,
+        le=10,
+        description="Maximum number of retry attempts (0-10)"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "content_type": "video",
+                "content_data": {
+                    "video_url": "https://example.com/videos/product-demo.mp4",
+                    "title": "Check out our new tactical backpack!",
+                    "description": "Perfect for urban professionals",
+                    "product_ids": ["prod_12345"],
+                    "tags": ["tactical", "edc"]
+                },
+                "scheduled_time": "2024-12-31T12:00:00Z",
+                "max_retries": 3
+            }
+        }
+
+
+class ScheduleContentResponse(BaseModel):
+    """
+    Response model for content scheduling.
+
+    This model provides the response after successfully scheduling content.
+    """
+    id: int = Field(
+        ...,
+        description="Unique identifier for the scheduled content"
+    )
+    content_type: str = Field(
+        ...,
+        description="Type of content (video or post)"
+    )
+    status: str = Field(
+        ...,
+        description="Current status (pending, published, failed)"
+    )
+    scheduled_time: datetime = Field(
+        ...,
+        description="When the content will be published"
+    )
+    created_at: datetime = Field(
+        ...,
+        description="When the schedule was created"
+    )
+    max_retries: int = Field(
+        ...,
+        description="Maximum number of retry attempts"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "id": 123,
+                "content_type": "video",
+                "status": "pending",
+                "scheduled_time": "2024-12-31T12:00:00Z",
+                "created_at": "2024-12-20T10:30:00Z",
+                "max_retries": 3
+            }
+        }
+
+
+class ScheduledContentDetail(BaseModel):
+    """
+    Detailed model for scheduled content.
+
+    This model provides full details about scheduled content including
+    publish status, error messages, and TikTok video ID.
+    """
+    id: int = Field(
+        ...,
+        description="Unique identifier for the scheduled content"
+    )
+    content_type: str = Field(
+        ...,
+        description="Type of content (video or post)"
+    )
+    content_data: Dict[str, Any] = Field(
+        ...,
+        description="Full content data"
+    )
+    scheduled_time: datetime = Field(
+        ...,
+        description="When the content will be/was published"
+    )
+    status: str = Field(
+        ...,
+        description="Current status (pending, published, failed)"
+    )
+    retry_count: int = Field(
+        ...,
+        description="Number of publish attempts made"
+    )
+    max_retries: int = Field(
+        ...,
+        description="Maximum number of retry attempts allowed"
+    )
+    tiktok_video_id: Optional[str] = Field(
+        None,
+        description="TikTok video/post ID after successful publish"
+    )
+    error_message: Optional[str] = Field(
+        None,
+        description="Error details if publishing failed"
+    )
+    created_at: datetime = Field(
+        ...,
+        description="When the schedule was created"
+    )
+    updated_at: datetime = Field(
+        ...,
+        description="When the record was last updated"
+    )
+    published_at: Optional[datetime] = Field(
+        None,
+        description="When the content was successfully published"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "id": 123,
+                "content_type": "video",
+                "content_data": {
+                    "video_url": "https://example.com/videos/product-demo.mp4",
+                    "title": "Check out our new tactical backpack!",
+                    "description": "Perfect for urban professionals",
+                    "product_ids": ["prod_12345"],
+                    "tags": ["tactical", "edc"]
+                },
+                "scheduled_time": "2024-12-31T12:00:00Z",
+                "status": "published",
+                "retry_count": 0,
+                "max_retries": 3,
+                "tiktok_video_id": "7123456789012345678",
+                "error_message": None,
+                "created_at": "2024-12-20T10:30:00Z",
+                "updated_at": "2024-12-31T12:01:00Z",
+                "published_at": "2024-12-31T12:00:30Z"
+            }
+        }
+
+
+class BulkScheduleRequest(BaseModel):
+    """
+    Request model for bulk content scheduling.
+
+    This model handles multiple content scheduling requests in a single API call.
+    """
+    items: List[ScheduleContentRequest] = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        description="List of content items to schedule (1-100 items)"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "items": [
+                    {
+                        "content_type": "video",
+                        "content_data": {
+                            "video_url": "https://example.com/videos/video1.mp4",
+                            "title": "Product Demo 1",
+                            "product_ids": ["prod_12345"]
+                        },
+                        "scheduled_time": "2024-12-31T12:00:00Z",
+                        "max_retries": 3
+                    },
+                    {
+                        "content_type": "post",
+                        "content_data": {
+                            "content": "Check out our new products!",
+                            "product_ids": ["prod_67890"]
+                        },
+                        "scheduled_time": "2024-12-31T18:00:00Z",
+                        "max_retries": 3
+                    }
+                ]
+            }
+        }
+
+
+class BulkScheduleResponse(BaseModel):
+    """
+    Response model for bulk content scheduling.
+
+    This model provides the results of bulk scheduling operations.
+    """
+    scheduled: List[ScheduleContentResponse] = Field(
+        ...,
+        description="Successfully scheduled content items"
+    )
+    failed: List[Dict[str, Any]] = Field(
+        default_factory=list,
+        description="Failed items with error details"
+    )
+    total_requested: int = Field(
+        ...,
+        description="Total number of items in the request"
+    )
+    total_scheduled: int = Field(
+        ...,
+        description="Number of successfully scheduled items"
+    )
+    total_failed: int = Field(
+        ...,
+        description="Number of failed items"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "scheduled": [
+                    {
+                        "id": 123,
+                        "content_type": "video",
+                        "status": "pending",
+                        "scheduled_time": "2024-12-31T12:00:00Z",
+                        "created_at": "2024-12-20T10:30:00Z",
+                        "max_retries": 3
+                    },
+                    {
+                        "id": 124,
+                        "content_type": "post",
+                        "status": "pending",
+                        "scheduled_time": "2024-12-31T18:00:00Z",
+                        "created_at": "2024-12-20T10:30:00Z",
+                        "max_retries": 3
+                    }
+                ],
+                "failed": [],
+                "total_requested": 2,
+                "total_scheduled": 2,
+                "total_failed": 0
+            }
+        }
