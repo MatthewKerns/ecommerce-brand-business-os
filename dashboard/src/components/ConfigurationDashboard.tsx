@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ApiKeyManager } from "@/components/ApiKeyManager";
+import { ServiceConfigForm, ServiceType } from "@/components/ServiceConfigForm";
 import { cn } from "@/lib/utils";
 
 /**
@@ -10,7 +11,7 @@ import { cn } from "@/lib/utils";
  * Features:
  * - Tabbed interface with API Keys, Services, and Workspace sections
  * - API key management with secure storage
- * - Service configuration forms (TikTok, Blog, Email) - placeholder
+ * - Service configuration forms (TikTok, Blog, Email)
  * - Workspace settings (name, members, invites) - placeholder
  * - Tab state management with active highlighting
  * - Responsive design
@@ -41,6 +42,22 @@ export function ConfigurationDashboard({
   className,
 }: ConfigurationDashboardProps) {
   const [activeTab, setActiveTab] = useState<ConfigTab>(defaultTab);
+  const [activeService, setActiveService] = useState<ServiceType>("tiktok");
+
+  const services: Array<{ id: ServiceType; label: string }> = [
+    { id: "tiktok", label: "TikTok" },
+    { id: "blog", label: "Blog Engine" },
+    { id: "email", label: "Email Automation" },
+  ];
+
+  // Handle service configuration save
+  const handleSaveConfig = async (config: Record<string, string | number>) => {
+    // TODO: Implement API call in future subtask
+    // For now, just log the config
+    // console.log(`Saving ${activeService} config:`, config);
+    // Simulate API delay
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  };
 
   return (
     <div className={cn("space-y-6", className)}>
@@ -79,14 +96,32 @@ export function ConfigurationDashboard({
       )}
 
       {activeTab === "services" && (
-        <div className="rounded-lg border border-slate-200 bg-white p-6">
-          <h2 className="mb-4 text-lg font-semibold text-slate-900">
-            Service Configuration
-          </h2>
-          <p className="text-sm text-slate-600">
-            Configure settings for TikTok, Blog Engine, Email Automation, and other services.
-            Configuration forms will be displayed here in a future subtask.
-          </p>
+        <div className="space-y-6">
+          {/* Service Selection */}
+          <div className="flex gap-3 rounded-lg border border-slate-200 bg-white p-2">
+            {services.map((service) => (
+              <button
+                key={service.id}
+                onClick={() => setActiveService(service.id)}
+                className={cn(
+                  "flex-1 rounded-md px-4 py-2 text-sm font-medium transition-colors",
+                  activeService === service.id
+                    ? "bg-blue-100 text-blue-700"
+                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                )}
+              >
+                {service.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Service Configuration Form */}
+          <div className="rounded-lg border border-slate-200 bg-white p-6">
+            <ServiceConfigForm
+              service={activeService}
+              onSave={handleSaveConfig}
+            />
+          </div>
         </div>
       )}
 
