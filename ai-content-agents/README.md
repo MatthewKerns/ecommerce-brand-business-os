@@ -17,6 +17,52 @@ All content is automatically infused with:
 - Fantasy/gaming language
 - Customer identity focus (serious players, not casual hobbyists)
 
+## 🏗️ Architecture
+
+This system uses an **inheritance-based agent design** where all specialized agents extend a common `BaseAgent` class.
+
+### Design Patterns
+
+**1. Template Method Pattern**
+
+The `BaseAgent` class defines the skeleton of content generation:
+- `_load_brand_context()`: Loads brand voice, strategy, and positioning from markdown files
+- `_build_system_prompt()`: Constructs AI system prompt with brand context
+- `generate_content()`: Core generation method using Anthropic API
+- `save_output()`: Standardized file saving with metadata
+
+**2. Configuration Centralization**
+
+All paths, API keys, and brand constants are defined in `config/config.py`:
+```python
+# Brand knowledge paths
+BRAND_VOICE_PATH = "../claude-code-os-implementation/04-content-team/brand-voice-guide.md"
+BRAND_STRATEGY_PATH = "../claude-code-os-implementation/03-ai-growth-engine/positioning/brand-strategy.md"
+
+# Brand identity
+BRAND_NAME = "Infinity Vault"
+BRAND_TAGLINE = "Show Up Battle Ready"
+```
+
+**3. Agent Hierarchy**
+
+```
+BaseAgent
+    ├── BlogAgent (SEO-optimized blog content)
+    ├── SocialAgent (Platform-specific social media)
+    ├── AmazonAgent (E-commerce optimization)
+    └── CompetitorAgent (Market analysis)
+```
+
+### Data Flow
+
+```
+Brand Markdown Files → config.py → BaseAgent._load_brand_context()
+    → Specialized Agent Methods → Anthropic API → Generated Content + Metadata
+```
+
+**Read more:** [`../docs/ARCHITECTURE.md`](../docs/ARCHITECTURE.md)
+
 ## 🚀 Quick Start
 
 ### 1. Install Dependencies
@@ -367,6 +413,159 @@ content, path = agent.generate_content_calendar(
 - Look for review patterns (pain points)
 - Identify positioning white space
 - Test and iterate based on insights
+
+## 🧪 Testing
+
+The system maintains **70% minimum test coverage** to ensure reliability and prevent regressions.
+
+### Running Tests
+
+```bash
+# Run all tests
+pytest
+
+# Run with coverage report
+pytest --cov=ai-content-agents --cov-report=term-missing
+
+# Generate HTML coverage report
+pytest --cov=ai-content-agents --cov-report=html
+open htmlcov/index.html
+
+# Fail if coverage is below 70%
+pytest --cov=ai-content-agents --cov-report=term-missing --cov-fail-under=70
+```
+
+### Test Structure
+
+```
+tests/
+├── conftest.py                 # Shared fixtures (mock API clients, brand context)
+├── fixtures/
+│   └── mock_responses.py       # Mock Anthropic API responses
+├── test_base_agent.py          # BaseAgent initialization and methods
+├── test_blog_agent.py          # BlogAgent content generation
+├── test_social_agent.py        # SocialAgent platform-specific tests
+├── test_amazon_agent.py        # AmazonAgent listing optimization
+├── test_competitor_agent.py    # CompetitorAgent analysis tests
+└── test_api.py                 # API integration tests (future)
+```
+
+### Writing Tests
+
+All tests mock the Anthropic API to avoid real API calls:
+
+```python
+import pytest
+from unittest.mock import Mock, patch
+from agents.blog_agent import BlogAgent
+
+@pytest.fixture
+def mock_anthropic_client():
+    """Mock Anthropic API client"""
+    mock = Mock()
+    mock.messages.create.return_value = Mock(
+        content=[Mock(text="Generated blog content")]
+    )
+    return mock
+
+def test_generate_blog_post(mock_anthropic_client):
+    with patch('agents.base_agent.anthropic.Anthropic', return_value=mock_anthropic_client):
+        agent = BlogAgent()
+        content, path = agent.generate_blog_post(
+            topic="Test Topic",
+            content_pillar="Battle-Ready Lifestyle"
+        )
+        assert "Generated blog content" in content
+        assert path.exists()
+```
+
+### Testing Philosophy
+
+- **Test First**: Write tests before implementing new features
+- **Isolated Tests**: Mock all external dependencies (API calls, file I/O)
+- **Fast Feedback**: All tests should run in under 10 seconds
+- **Real Scenarios**: Test actual usage patterns, not implementation details
+
+**Read more:** [`../docs/TESTING_GUIDE.md`](../docs/TESTING_GUIDE.md)
+
+## 🔌 API Usage
+
+### Current: CLI and Python API
+
+**Command Line Interface:**
+```bash
+# Universal generation
+python generate_content.py blog post "Topic" --pillar "Battle-Ready Lifestyle"
+python generate_content.py social instagram "Topic" --image "Description"
+python generate_content.py amazon title "Product" --features "feature1,feature2"
+```
+
+**Python API:**
+```python
+from agents import BlogAgent, SocialAgent, AmazonAgent, CompetitorAgent
+
+# Blog content
+blog_agent = BlogAgent()
+content, path = blog_agent.generate_blog_post(
+    topic="Your Topic",
+    content_pillar="Battle-Ready Lifestyle",
+    word_count=1500
+)
+
+# Social content
+social_agent = SocialAgent()
+content, path = social_agent.generate_instagram_post(
+    topic="Your Topic",
+    content_pillar="Battle-Ready Lifestyle",
+    image_description="Description of visual"
+)
+
+# Amazon optimization
+amazon_agent = AmazonAgent()
+content, path = amazon_agent.generate_product_title(
+    product_name="Product Name",
+    key_features=["feature1", "feature2"],
+    target_keywords=["keyword1", "keyword2"]
+)
+
+# Competitor analysis
+competitor_agent = CompetitorAgent()
+content, path = competitor_agent.analyze_competitor_listing(
+    competitor_name="Competitor Name",
+    product_title="Their Product Title",
+    bullet_points=["bullet1", "bullet2"],
+    description="Their description",
+    price=29.99,
+    rating=4.5,
+    review_count=1000
+)
+```
+
+### Future: REST API (Planned)
+
+A FastAPI-based REST API is planned for Phase 2:
+
+**Endpoints:**
+- `POST /api/content/generate` - Universal content generation
+- `POST /api/blog/generate` - Blog-specific generation
+- `POST /api/social/generate` - Social media generation
+- `POST /api/amazon/generate` - Amazon listing optimization
+
+**Example Request:**
+```bash
+curl -X POST http://localhost:8000/api/content/generate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "content_type": "blog",
+    "prompt": "Write a blog post about tournament preparation",
+    "parameters": {
+      "pillar": "Battle-Ready Lifestyle",
+      "word_count": 1500
+    }
+  }'
+```
+
+**Read more:** [`../docs/API_DESIGN.md`](../docs/API_DESIGN.md)
 
 ## 🔒 Security
 
