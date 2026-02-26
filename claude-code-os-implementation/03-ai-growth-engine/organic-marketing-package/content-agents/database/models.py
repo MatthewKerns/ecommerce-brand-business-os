@@ -257,3 +257,71 @@ class PerformanceMetrics(Base):
 
     def __repr__(self):
         return f"<PerformanceMetrics(id={self.id}, request_id='{self.request_id}', duration={self.total_duration_ms}ms)>"
+
+
+class CitationRecord(Base):
+    """
+    Tracks brand mentions and citations from AI assistants for monitoring and optimization.
+
+    Attributes:
+        id: Primary key
+        query: The test query sent to AI assistant
+        ai_platform: AI platform queried (chatgpt, claude, perplexity)
+        response_text: Full response from AI assistant
+        brand_mentioned: Whether brand was cited in response
+        citation_context: Snippet showing how brand was mentioned
+        position_in_response: Position of brand mention (1st, 2nd, etc.)
+        brand_name: Name of the brand being tracked
+        competitor_mentioned: Whether competitors were also mentioned
+        response_metadata: JSON metadata about the response (maps to 'metadata' column)
+        query_timestamp: When the query was executed
+        response_time_ms: Time taken to receive response
+        created_at: Timestamp when record was created
+        updated_at: Timestamp when record was last updated
+        campaign_id: Optional campaign identifier
+    """
+    __tablename__ = "citation_records"
+
+    # Primary Key
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
+    # Query Details
+    query = Column(Text, nullable=False)
+    ai_platform = Column(String(20), nullable=False, index=True)
+
+    # Response Details
+    response_text = Column(Text, nullable=False)
+    response_time_ms = Column(Integer)
+
+    # Citation Analysis
+    brand_mentioned = Column(Boolean, default=False, index=True)
+    citation_context = Column(Text)
+    position_in_response = Column(Integer)
+    brand_name = Column(String(100), nullable=False, index=True)
+    competitor_mentioned = Column(Boolean, default=False)
+
+    # Metadata
+    response_metadata = Column("metadata", Text)  # JSON stored as text, mapped from 'metadata' column
+
+    # Timestamps
+    query_timestamp = Column(DateTime, nullable=False, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Optional Context
+    campaign_id = Column(String(50), index=True)
+
+    # Table constraints
+    __table_args__ = (
+        CheckConstraint(
+            "ai_platform IN ('chatgpt', 'claude', 'perplexity')",
+            name="check_ai_platform"
+        ),
+        CheckConstraint("response_time_ms >= 0", name="check_response_time"),
+        CheckConstraint("position_in_response >= 0", name="check_position"),
+        Index("idx_citation_platform_date", "ai_platform", "query_timestamp"),
+        Index("idx_citation_brand_mentioned", "brand_name", "brand_mentioned", "query_timestamp"),
+    )
+
+    def __repr__(self):
+        return f"<CitationRecord(id={self.id}, brand='{self.brand_name}', platform='{self.ai_platform}', mentioned={self.brand_mentioned})>"
