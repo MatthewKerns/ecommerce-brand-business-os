@@ -1,0 +1,599 @@
+"""
+TikTok 4-Channel Content Strategy Agent
+Manages content generation for the 4 elemental TikTok channels (Air, Water, Fire, Earth)
+Each channel has distinct themes, audiences, and content strategies
+"""
+from pathlib import Path
+from typing import Optional, List, Dict, Any
+from datetime import datetime, timedelta
+
+from .base_agent import BaseAgent
+from config.config import (
+    TIKTOK_CHANNELS_OUTPUT_DIR,
+    TIKTOK_CHANNELS,
+    CHANNEL_THEMES,
+    CONTENT_PILLARS
+)
+
+
+class TikTokChannelAgent(BaseAgent):
+    """Agent specialized in multi-channel TikTok content strategy"""
+
+    def __init__(self):
+        """
+        Initialize the TikTok Channel agent with 4-channel strategy
+
+        The agent manages content for 4 elemental channels:
+        - Air: Quick tips, fast moves, tournament prep
+        - Water: Strategy, flow, adaptation
+        - Fire: Hype, energy, passion
+        - Earth: Building, collecting, organizing
+        """
+        super().__init__(agent_name="tiktok_channel_agent")
+
+        self.logger.debug("Initializing 4-channel TikTok strategy")
+
+        # Load channel configurations from config
+        self.channels = TIKTOK_CHANNELS
+        self.channel_themes = CHANNEL_THEMES
+
+        # Validate that all 4 channels are configured
+        required_elements = ["air", "water", "fire", "earth"]
+        for element in required_elements:
+            if element not in self.channels:
+                self.logger.warning(f"Channel '{element}' not found in configuration")
+
+        self.logger.info(f"Initialized TikTok Channel Agent with {len(self.channels)} channels")
+
+    def get_channel_specs(self, channel_element: str) -> Dict[str, Any]:
+        """
+        Get specifications for a specific channel
+
+        Args:
+            channel_element: Channel element (air, water, fire, earth)
+
+        Returns:
+            Dictionary containing channel specifications
+
+        Raises:
+            ValueError: If channel_element is not valid
+
+        Example:
+            >>> agent = TikTokChannelAgent()
+            >>> specs = agent.get_channel_specs('air')
+            >>> print(specs['tone'])
+            'Fast-paced, energetic, action-oriented'
+        """
+        if channel_element not in self.channels:
+            valid_channels = ", ".join(self.channels.keys())
+            raise ValueError(
+                f"Invalid channel element: '{channel_element}'. "
+                f"Valid channels: {valid_channels}"
+            )
+
+        channel_config = self.channels[channel_element]
+        theme_config = self.channel_themes[channel_element]
+
+        return {
+            "element": channel_element,
+            "channel_name": channel_config["channel_name"],
+            "description": channel_config["description"],
+            "target_audience": channel_config["target_audience"],
+            "content_focus": channel_config["content_focus"],
+            "posting_schedule": channel_config["posting_schedule"],
+            "tone": theme_config["tone"],
+            "content_types": theme_config["content_types"],
+            "key_messages": theme_config["key_messages"],
+            "content_pillars": theme_config["content_pillars"],
+            "video_length": theme_config["video_length"],
+            "hook_style": theme_config["hook_style"],
+            "hashtags": channel_config["branding_guidelines"]["hashtags"],
+            "visual_style": channel_config["branding_guidelines"]["visual_style"]
+        }
+
+    def validate_content_for_channel(
+        self,
+        content: str,
+        channel_element: str
+    ) -> Dict[str, Any]:
+        """
+        Validate if content aligns with channel theme and specifications
+
+        Args:
+            content: Content text to validate
+            channel_element: Target channel element
+
+        Returns:
+            Dictionary with validation results:
+            - is_valid: bool
+            - alignment_score: float (0-1)
+            - feedback: str
+            - suggestions: List[str]
+
+        Example:
+            >>> agent = TikTokChannelAgent()
+            >>> result = agent.validate_content_for_channel(
+            ...     "Quick deck building tip!",
+            ...     "air"
+            ... )
+            >>> print(result['is_valid'])
+            True
+        """
+        self.logger.info(f"Validating content for {channel_element} channel")
+
+        specs = self.get_channel_specs(channel_element)
+
+        prompt = f"""Validate this TikTok content for the {channel_element.upper()} channel:
+
+CONTENT TO VALIDATE:
+{content}
+
+CHANNEL SPECIFICATIONS:
+- Element Theme: {specs['element']}
+- Target Audience: {specs['target_audience']}
+- Content Focus: {specs['content_focus']}
+- Tone: {specs['tone']}
+- Key Messages: {', '.join(specs['key_messages'])}
+- Hook Style: {specs['hook_style']}
+
+VALIDATION CRITERIA:
+1. Does the tone match the channel's required tone?
+2. Is the content relevant to the target audience?
+3. Does it align with the content focus areas?
+4. Does the hook style match channel expectations?
+5. Are key messages reflected in the content?
+6. Is the content length appropriate for video length {specs['video_length']}?
+
+Provide validation in this format:
+ALIGNMENT_SCORE: [0.0-1.0]
+IS_VALID: [YES/NO]
+FEEDBACK: [Brief assessment]
+SUGGESTIONS:
+- [Suggestion 1]
+- [Suggestion 2]
+- [etc.]
+
+Validate now:"""
+
+        system_context = f"""
+You are a TikTok content strategist for the {channel_element.upper()} channel.
+
+Channel Identity:
+- {specs['description']}
+- Tone: {specs['tone']}
+- Visual Style: {specs['visual_style']}
+
+Your role is to ensure content perfectly aligns with this channel's unique identity and audience expectations."""
+
+        validation_response = self.generate_content(
+            prompt=prompt,
+            system_context=system_context,
+            max_tokens=1000,
+            temperature=0.3  # Lower temperature for more consistent validation
+        )
+
+        # Parse validation response
+        lines = validation_response.strip().split('\n')
+        alignment_score = 0.0
+        is_valid = False
+        feedback = ""
+        suggestions = []
+
+        for line in lines:
+            if line.startswith("ALIGNMENT_SCORE:"):
+                try:
+                    alignment_score = float(line.split(":")[1].strip())
+                except ValueError:
+                    alignment_score = 0.5
+            elif line.startswith("IS_VALID:"):
+                is_valid = "YES" in line.upper()
+            elif line.startswith("FEEDBACK:"):
+                feedback = line.split(":", 1)[1].strip()
+            elif line.startswith("- "):
+                suggestions.append(line[2:].strip())
+
+        return {
+            "is_valid": is_valid,
+            "alignment_score": alignment_score,
+            "feedback": feedback,
+            "suggestions": suggestions,
+            "channel_element": channel_element,
+            "full_response": validation_response
+        }
+
+    def generate_channel_video_script(
+        self,
+        channel_element: str,
+        topic: str,
+        product: Optional[str] = None,
+        include_product_link: bool = False
+    ) -> tuple[str, Path]:
+        """
+        Generate TikTok video script tailored to specific channel element
+
+        Args:
+            channel_element: Channel element (air, water, fire, earth)
+            topic: Video topic/theme
+            product: Optional product to feature
+            include_product_link: Whether to include product CTA
+
+        Returns:
+            Tuple of (script_content, file_path)
+
+        Example:
+            >>> agent = TikTokChannelAgent()
+            >>> script, path = agent.generate_channel_video_script(
+            ...     channel_element='air',
+            ...     topic='Quick deck building for tournaments',
+            ...     product='Tournament Deck Box'
+            ... )
+        """
+        self.logger.info(
+            f"Generating video script: element={channel_element}, "
+            f"topic='{topic}', product={product}"
+        )
+
+        specs = self.get_channel_specs(channel_element)
+
+        product_section = ""
+        if product:
+            product_section = f"""
+PRODUCT TO FEATURE: {product}
+{"INCLUDE PRODUCT LINK: Yes - add Shop Now CTA" if include_product_link else "INCLUDE PRODUCT LINK: No - natural mention only"}
+"""
+
+        prompt = f"""Create a TikTok video script for the {specs['channel_name']} channel:
+
+TOPIC: {topic}
+CHANNEL ELEMENT: {channel_element.upper()}
+TARGET AUDIENCE: {specs['target_audience']}
+VIDEO LENGTH: {specs['video_length']}
+{product_section}
+
+CHANNEL SPECIFICATIONS:
+- Tone: {specs['tone']}
+- Hook Style: {specs['hook_style']}
+- Content Focus: {specs['content_focus']}
+- Key Messages: {', '.join(specs['key_messages'])}
+- Visual Style: {specs['visual_style']}
+
+REQUIREMENTS:
+1. Hook must match {specs['hook_style']}
+2. Stay within {specs['video_length']} video length
+3. Match {specs['tone']} tone throughout
+4. Align with content focus: {specs['content_focus']}
+5. Include visual direction and camera notes
+6. Add text overlay suggestions
+7. Suggest background music style
+8. End with clear call-to-action
+9. Connect to "Battle Ready" brand identity
+10. Include recommended hashtags from: {', '.join(specs['hashtags'])}
+
+Format:
+[HOOK (0-3s)]
+Visual: [Camera direction, what viewer sees]
+Audio: [Exact script to say]
+Text Overlay: [On-screen text]
+
+[MAIN CONTENT]
+Visual: [Camera direction, what viewer sees]
+Audio: [Exact script to say]
+Text Overlay: [On-screen text]
+
+[CALL-TO-ACTION (Last 3-5s)]
+Visual: [Camera direction, what viewer sees]
+Audio: [Exact script to say]
+Text Overlay: [On-screen text]
+
+[PRODUCTION NOTES]
+Music Style: [Recommended music type]
+Pace: [Video pacing notes]
+Transitions: [Transition suggestions]
+
+[CAPTION & HASHTAGS]
+[Complete caption with hashtags]
+
+Write the complete video script now:"""
+
+        system_context = f"""
+You are creating content for the {specs['channel_name']} TikTok channel.
+
+CHANNEL IDENTITY:
+{specs['description']}
+
+This channel is one of 4 elemental channels in Infinity Vault's TikTok strategy:
+- AIR: Quick, fast, tournament-focused
+- WATER: Strategic, analytical, adaptive
+- FIRE: Hyped, passionate, celebratory
+- EARTH: Grounded, methodical, building-focused
+
+The {channel_element.upper()} channel specifically serves: {specs['target_audience']}
+
+Content must be distinct from the other 3 channels while maintaining the overall
+"Show Up Battle Ready" brand identity.
+
+Best Practices for {channel_element.upper()}:
+- Tone: {specs['tone']}
+- Visual Style: {specs['visual_style']}
+- Hook Style: {specs['hook_style']}
+- Key Messages: {', '.join(specs['key_messages'])}
+
+Create content that makes the target audience feel understood and empowered."""
+
+        content, path = self.generate_and_save(
+            prompt=prompt,
+            output_dir=TIKTOK_CHANNELS_OUTPUT_DIR / channel_element,
+            system_context=system_context,
+            metadata={
+                "platform": "tiktok",
+                "channel_element": channel_element,
+                "channel_name": specs['channel_name'],
+                "topic": topic,
+                "product": product,
+                "target_audience": specs['target_audience'],
+                "video_length": specs['video_length']
+            }
+        )
+
+        self.logger.info(
+            f"Successfully generated {channel_element} channel video script: {path}"
+        )
+        return content, path
+
+    def generate_channel_content_calendar(
+        self,
+        channel_element: str,
+        num_days: int = 7,
+        include_topics: bool = True
+    ) -> tuple[str, Path]:
+        """
+        Generate content calendar for a specific channel
+
+        Args:
+            channel_element: Channel element (air, water, fire, earth)
+            num_days: Number of days to plan (default 7)
+            include_topics: Whether to include specific topic suggestions
+
+        Returns:
+            Tuple of (calendar_content, file_path)
+
+        Example:
+            >>> agent = TikTokChannelAgent()
+            >>> calendar, path = agent.generate_channel_content_calendar(
+            ...     channel_element='water',
+            ...     num_days=14
+            ... )
+        """
+        self.logger.info(
+            f"Generating {num_days}-day content calendar for {channel_element} channel"
+        )
+
+        specs = self.get_channel_specs(channel_element)
+        posting_schedule = specs['posting_schedule']
+
+        prompt = f"""Create a {num_days}-day TikTok content calendar for the {specs['channel_name']} channel:
+
+CHANNEL SPECIFICATIONS:
+- Element: {channel_element.upper()}
+- Target Audience: {specs['target_audience']}
+- Content Focus: {specs['content_focus']}
+- Posting Frequency: {posting_schedule['frequency']}
+- Best Posting Times: {', '.join(posting_schedule['best_times'])}
+- Posting Days: {', '.join(posting_schedule['days'])}
+
+CONTENT TYPES FOR THIS CHANNEL:
+{', '.join(specs['content_types'])}
+
+REQUIREMENTS:
+1. Follow the posting schedule (frequency and days)
+2. Use best posting times from the schedule
+3. Ensure all content aligns with {channel_element} theme
+4. Mix different content types throughout the calendar
+5. Each day should have a clear content theme
+6. {"Include specific topic suggestions with brief descriptions" if include_topics else "Include content type only"}
+7. Add recommended hashtag groups for each post
+8. Note which content pillars each post serves
+9. Ensure variety while maintaining channel identity
+10. Include product feature opportunities where natural
+
+Format for each day:
+DATE: [Day, Date]
+TIME: [Best time from schedule]
+CONTENT TYPE: [Type from channel's content types]
+{"TOPIC: [Specific topic/title]" if include_topics else ""}
+{"DESCRIPTION: [2-3 sentence content description]" if include_topics else ""}
+CONTENT PILLAR: [Which pillar(s) this serves]
+HASHTAGS: [Recommended hashtag group]
+PRODUCT OPPORTUNITY: [Yes/No - if yes, which product]
+
+Create the {num_days}-day calendar now:"""
+
+        system_context = f"""
+You are planning content for the {specs['channel_name']} TikTok channel.
+
+CHANNEL MISSION:
+{specs['description']}
+
+This channel serves {specs['target_audience']} with content focused on:
+{specs['content_focus']}
+
+The calendar must respect the posting schedule while maximizing engagement and
+maintaining the unique {channel_element.upper()} identity.
+
+Key Messages to Reinforce:
+{chr(10).join(f"- {msg}" for msg in specs['key_messages'])}
+
+Content Pillars Available:
+{chr(10).join(f"- {pillar}" for pillar in CONTENT_PILLARS)}
+
+Focus on this channel's pillars: {', '.join(specs['content_pillars'])}"""
+
+        content, path = self.generate_and_save(
+            prompt=prompt,
+            output_dir=TIKTOK_CHANNELS_OUTPUT_DIR / channel_element / "calendars",
+            system_context=system_context,
+            metadata={
+                "platform": "tiktok",
+                "channel_element": channel_element,
+                "channel_name": specs['channel_name'],
+                "num_days": num_days,
+                "posting_frequency": posting_schedule['frequency'],
+                "content_types": specs['content_types']
+            }
+        )
+
+        self.logger.info(
+            f"Successfully generated {num_days}-day calendar for {channel_element}: {path}"
+        )
+        return content, path
+
+    def generate_multi_channel_strategy(
+        self,
+        time_period: str = "weekly"
+    ) -> tuple[str, Path]:
+        """
+        Generate coordinated content strategy across all 4 channels
+
+        Args:
+            time_period: Time period for strategy (weekly, monthly)
+
+        Returns:
+            Tuple of (strategy_content, file_path)
+
+        Example:
+            >>> agent = TikTokChannelAgent()
+            >>> strategy, path = agent.generate_multi_channel_strategy('weekly')
+        """
+        self.logger.info(f"Generating {time_period} multi-channel strategy")
+
+        # Get specs for all channels
+        all_specs = {
+            element: self.get_channel_specs(element)
+            for element in ["air", "water", "fire", "earth"]
+        }
+
+        channels_overview = "\n\n".join([
+            f"{element.upper()} - {specs['channel_name']}:\n"
+            f"  Audience: {specs['target_audience']}\n"
+            f"  Focus: {specs['content_focus']}\n"
+            f"  Frequency: {specs['posting_schedule']['frequency']}\n"
+            f"  Tone: {specs['tone']}"
+            for element, specs in all_specs.items()
+        ])
+
+        prompt = f"""Create a coordinated {time_period} content strategy across all 4 TikTok channels:
+
+CHANNEL OVERVIEW:
+{channels_overview}
+
+STRATEGIC GOALS:
+1. Maximize reach across different audience segments
+2. Ensure content diversity while maintaining brand consistency
+3. Prevent content duplication across channels
+4. Create opportunities for cross-channel engagement
+5. Align with "Show Up Battle Ready" brand identity
+6. Focus on 'saves' as primary success metric
+
+REQUIREMENTS:
+1. Coordinate posting schedules to avoid same-day conflicts
+2. Identify unique content angles for each channel
+3. Suggest cross-promotion opportunities
+4. Plan product features across different channels
+5. Ensure each channel maintains distinct identity
+6. Include weekly themes that work across all channels
+7. Suggest A/B testing opportunities
+8. Plan for trending topics adaptation by channel
+
+Format:
+OVERVIEW:
+[Strategic summary of the {time_period} plan]
+
+CHANNEL BREAKDOWN:
+
+AIR CHANNEL:
+[Content themes, posting plan, unique angles]
+
+WATER CHANNEL:
+[Content themes, posting plan, unique angles]
+
+FIRE CHANNEL:
+[Content themes, posting plan, unique angles]
+
+EARTH CHANNEL:
+[Content themes, posting plan, unique angles]
+
+CROSS-CHANNEL OPPORTUNITIES:
+[How channels can work together]
+
+CONTENT COLLISION PREVENTION:
+[Rules to avoid duplication]
+
+PRODUCT FEATURE SCHEDULE:
+[Which products featured on which channels when]
+
+METRICS & TESTING:
+[What to track and test this {time_period}]
+
+Create the complete multi-channel strategy now:"""
+
+        system_context = """
+You are the master strategist for Infinity Vault's 4-channel TikTok presence.
+
+BRAND IDENTITY: Show Up Battle Ready
+MISSION: Help TCG players feel confident, prepared, and respected
+
+The 4-channel strategy is designed to:
+1. Reach different audience segments (competitive, strategic, passionate, methodical)
+2. Test different content approaches simultaneously
+3. Maximize overall reach while maintaining brand consistency
+4. Create a comprehensive brand presence on TikTok
+
+Each channel must feel distinct yet cohesive with the overall brand.
+The strategy should leverage the strengths of each elemental theme while
+creating synergies across the full channel ecosystem.
+
+PRIMARY SUCCESS METRIC: Save rate (saves/views)
+- Saves indicate purchase intent and valuable content
+- Focus on creating "save-worthy" content for each channel"""
+
+        content, path = self.generate_and_save(
+            prompt=prompt,
+            output_dir=TIKTOK_CHANNELS_OUTPUT_DIR / "strategy",
+            system_context=system_context,
+            metadata={
+                "platform": "tiktok",
+                "strategy_type": "multi_channel",
+                "time_period": time_period,
+                "num_channels": 4
+            }
+        )
+
+        self.logger.info(f"Successfully generated multi-channel {time_period} strategy: {path}")
+        return content, path
+
+    def list_available_channels(self) -> List[Dict[str, str]]:
+        """
+        List all available channels with basic information
+
+        Returns:
+            List of dictionaries containing channel information
+
+        Example:
+            >>> agent = TikTokChannelAgent()
+            >>> channels = agent.list_available_channels()
+            >>> for channel in channels:
+            ...     print(f"{channel['element']}: {channel['name']}")
+        """
+        channels = []
+        for element in ["air", "water", "fire", "earth"]:
+            if element in self.channels:
+                config = self.channels[element]
+                channels.append({
+                    "element": element,
+                    "name": config["channel_name"],
+                    "description": config["description"],
+                    "audience": config["target_audience"],
+                    "frequency": config["posting_schedule"]["frequency"]
+                })
+
+        return channels
