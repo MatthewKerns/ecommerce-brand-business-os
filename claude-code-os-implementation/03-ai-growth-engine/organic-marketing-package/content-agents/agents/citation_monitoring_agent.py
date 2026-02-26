@@ -1154,3 +1154,365 @@ class CitationMonitoringAgent(BaseAgent):
             # Close session if we created it
             if not session_provided and db_session:
                 db_session.close()
+
+    def detect_alerts(
+        self,
+        current_period_days: int = 7,
+        comparison_period_days: int = 7,
+        platform: Optional[str] = None,
+        brand_name: Optional[str] = None,
+        competitor_names: Optional[List[str]] = None,
+        citation_drop_threshold: float = 20.0,
+        competitor_advantage_threshold: float = 15.0,
+        db_session: Optional[Session] = None
+    ) -> Dict[str, Any]:
+        """
+        Detect alerts for citation rate drops and competitor citation gains
+
+        This method analyzes citation patterns to identify potential issues requiring
+        attention. It compares current citation rates against historical baselines and
+        competitor performance to detect:
+        1. Citation rate drops - when current citation rate drops significantly vs previous period
+        2. Competitor gains - when competitors have significantly higher citation rates
+
+        Args:
+            current_period_days: Number of days for current analysis period (default: 7)
+            comparison_period_days: Number of days for comparison period (default: 7)
+            platform: Optional AI platform filter (chatgpt, claude, perplexity, or None for all)
+            brand_name: Optional brand name override (uses BRAND_NAME from config if not provided)
+            competitor_names: Optional list of competitor names to monitor
+            citation_drop_threshold: Minimum percentage point drop to trigger alert (default: 20.0)
+            competitor_advantage_threshold: Minimum percentage point advantage to trigger alert (default: 15.0)
+            db_session: Optional database session (creates new session if not provided)
+
+        Returns:
+            Dictionary containing alert analysis:
+            - alerts: List of alert objects
+                - alert_type: Type of alert ("citation_rate_drop" or "competitor_gain")
+                - severity: Severity level ("critical", "high", "medium", "low")
+                - title: Short alert title
+                - description: Detailed description
+                - metrics: Relevant metrics for the alert
+                - detected_at: When alert was detected
+                - platform: Platform where alert was detected (or "all")
+            - summary: Overall summary
+                - total_alerts: Total number of alerts
+                - critical_alerts: Number of critical severity alerts
+                - high_alerts: Number of high severity alerts
+                - medium_alerts: Number of medium severity alerts
+                - low_alerts: Number of low severity alerts
+                - by_type: Breakdown by alert type
+                - by_platform: Breakdown by platform
+            - analysis_periods: Analysis period details
+                - current_period: Start and end dates for current period
+                - comparison_period: Start and end dates for comparison period
+                - platform: Platform filter (or "all")
+
+        Raises:
+            ValueError: If days parameters are invalid or thresholds are out of range
+            ContentGenerationError: For unexpected errors during alert detection
+
+        Example:
+            >>> agent = CitationMonitoringAgent()
+            >>> alerts = agent.detect_alerts(
+            ...     current_period_days=7,
+            ...     comparison_period_days=7,
+            ...     competitor_names=["Competitor A", "Competitor B"],
+            ...     citation_drop_threshold=20.0
+            ... )
+            >>> print(f"Found {alerts['summary']['total_alerts']} alerts")
+        """
+        # Validate parameters
+        if current_period_days <= 0:
+            raise ValueError("current_period_days must be greater than 0")
+        if comparison_period_days <= 0:
+            raise ValueError("comparison_period_days must be greater than 0")
+        if citation_drop_threshold < 0 or citation_drop_threshold > 100:
+            raise ValueError("citation_drop_threshold must be between 0 and 100")
+        if competitor_advantage_threshold < 0 or competitor_advantage_threshold > 100:
+            raise ValueError("competitor_advantage_threshold must be between 0 and 100")
+        if platform and platform.lower() not in ['chatgpt', 'claude', 'perplexity']:
+            raise ValueError("platform must be one of: chatgpt, claude, perplexity")
+
+        # Use brand name from config if not provided
+        if not brand_name:
+            brand_name = BRAND_NAME
+
+        self.logger.info(
+            f"Detecting alerts for {brand_name}: current={current_period_days}d, "
+            f"comparison={comparison_period_days}d, platform={platform or 'all'}"
+        )
+
+        # Track whether we created the session
+        session_provided = db_session is not None
+        if not db_session:
+            db_session = get_db_session()
+
+        try:
+            alerts = []
+            now = datetime.utcnow()
+
+            # Calculate time periods
+            current_start = now - timedelta(days=current_period_days)
+            current_end = now
+            comparison_start = current_start - timedelta(days=comparison_period_days)
+            comparison_end = current_start
+
+            # Build base query for current period
+            current_query = db_session.query(CitationRecord).filter(
+                CitationRecord.brand_name == brand_name,
+                CitationRecord.query_timestamp >= current_start,
+                CitationRecord.query_timestamp <= current_end
+            )
+            if platform:
+                current_query = current_query.filter(CitationRecord.ai_platform == platform.lower())
+
+            current_records = current_query.all()
+
+            # Build base query for comparison period
+            comparison_query = db_session.query(CitationRecord).filter(
+                CitationRecord.brand_name == brand_name,
+                CitationRecord.query_timestamp >= comparison_start,
+                CitationRecord.query_timestamp < comparison_end
+            )
+            if platform:
+                comparison_query = comparison_query.filter(CitationRecord.ai_platform == platform.lower())
+
+            comparison_records = comparison_query.all()
+
+            self.logger.debug(
+                f"Found {len(current_records)} current records, {len(comparison_records)} comparison records"
+            )
+
+            # 1. Detect citation rate drops (overall and per-platform)
+            if len(current_records) >= 5 and len(comparison_records) >= 5:
+                # Calculate overall citation rates
+                current_stats = self._calculate_citation_stats(
+                    current_records, brand_name, "CitationRecord"
+                )
+                comparison_stats = self._calculate_citation_stats(
+                    comparison_records, brand_name, "CitationRecord"
+                )
+
+                current_rate = current_stats['citation_rate']
+                comparison_rate = comparison_stats['citation_rate']
+                rate_drop = comparison_rate - current_rate
+
+                # Alert if citation rate dropped significantly
+                if rate_drop >= citation_drop_threshold:
+                    severity = self._determine_alert_severity(rate_drop, citation_drop_threshold)
+                    alerts.append({
+                        'alert_type': 'citation_rate_drop',
+                        'severity': severity,
+                        'title': f'Citation rate dropped {rate_drop:.1f}% in last {current_period_days} days',
+                        'description': (
+                            f"Brand citation rate decreased from {comparison_rate:.1f}% "
+                            f"({comparison_stats['citations']}/{comparison_stats['total_queries']} queries) "
+                            f"to {current_rate:.1f}% ({current_stats['citations']}/{current_stats['total_queries']} queries). "
+                            f"This represents a {rate_drop:.1f} percentage point drop. "
+                            f"Review recent content changes, algorithm updates, or competitor activity."
+                        ),
+                        'metrics': {
+                            'current_rate': current_rate,
+                            'previous_rate': comparison_rate,
+                            'rate_drop': rate_drop,
+                            'current_citations': current_stats['citations'],
+                            'current_queries': current_stats['total_queries'],
+                            'previous_citations': comparison_stats['citations'],
+                            'previous_queries': comparison_stats['total_queries']
+                        },
+                        'detected_at': now.isoformat(),
+                        'platform': platform or 'all'
+                    })
+                    self.logger.warning(
+                        f"Citation rate drop alert: {rate_drop:.1f}% drop from {comparison_rate:.1f}% to {current_rate:.1f}%"
+                    )
+
+                # Check per-platform citation rate drops (if not already filtered by platform)
+                if not platform:
+                    for platform_name in ['chatgpt', 'claude', 'perplexity']:
+                        platform_current = [r for r in current_records if r.ai_platform == platform_name]
+                        platform_comparison = [r for r in comparison_records if r.ai_platform == platform_name]
+
+                        if len(platform_current) >= 3 and len(platform_comparison) >= 3:
+                            platform_current_stats = self._calculate_citation_stats(
+                                platform_current, brand_name, "CitationRecord"
+                            )
+                            platform_comparison_stats = self._calculate_citation_stats(
+                                platform_comparison, brand_name, "CitationRecord"
+                            )
+
+                            platform_current_rate = platform_current_stats['citation_rate']
+                            platform_comparison_rate = platform_comparison_stats['citation_rate']
+                            platform_drop = platform_comparison_rate - platform_current_rate
+
+                            if platform_drop >= citation_drop_threshold:
+                                severity = self._determine_alert_severity(platform_drop, citation_drop_threshold)
+                                alerts.append({
+                                    'alert_type': 'citation_rate_drop',
+                                    'severity': severity,
+                                    'title': f'{platform_name.title()} citation rate dropped {platform_drop:.1f}%',
+                                    'description': (
+                                        f"Citation rate on {platform_name.title()} decreased from "
+                                        f"{platform_comparison_rate:.1f}% to {platform_current_rate:.1f}%. "
+                                        f"This platform-specific drop may indicate algorithm changes or "
+                                        f"content optimization issues specific to {platform_name.title()}."
+                                    ),
+                                    'metrics': {
+                                        'current_rate': platform_current_rate,
+                                        'previous_rate': platform_comparison_rate,
+                                        'rate_drop': platform_drop,
+                                        'current_citations': platform_current_stats['citations'],
+                                        'current_queries': platform_current_stats['total_queries'],
+                                        'previous_citations': platform_comparison_stats['citations'],
+                                        'previous_queries': platform_comparison_stats['total_queries']
+                                    },
+                                    'detected_at': now.isoformat(),
+                                    'platform': platform_name
+                                })
+                                self.logger.warning(
+                                    f"{platform_name.title()} citation rate drop: {platform_drop:.1f}% drop"
+                                )
+
+            # 2. Detect competitor citation gains
+            if competitor_names and len(competitor_names) > 0 and len(current_records) >= 5:
+                # Get current period competitor citations
+                competitor_query = db_session.query(CompetitorCitation).filter(
+                    CompetitorCitation.competitor_name.in_(competitor_names),
+                    CompetitorCitation.query_timestamp >= current_start,
+                    CompetitorCitation.query_timestamp <= current_end
+                )
+                if platform:
+                    competitor_query = competitor_query.filter(
+                        CompetitorCitation.ai_platform == platform.lower()
+                    )
+
+                competitor_citations = competitor_query.all()
+
+                # Calculate brand citation rate
+                brand_stats = self._calculate_citation_stats(
+                    current_records, brand_name, "CitationRecord"
+                )
+                brand_rate = brand_stats['citation_rate']
+
+                # Calculate citation rate for each competitor
+                for comp_name in competitor_names:
+                    comp_records = [c for c in competitor_citations if c.competitor_name == comp_name]
+
+                    if len(comp_records) >= 5:
+                        comp_stats = self._calculate_citation_stats(
+                            comp_records, comp_name, "CompetitorCitation"
+                        )
+                        comp_rate = comp_stats['citation_rate']
+                        advantage = comp_rate - brand_rate
+
+                        # Alert if competitor has significant advantage
+                        if advantage >= competitor_advantage_threshold:
+                            severity = self._determine_alert_severity(advantage, competitor_advantage_threshold)
+                            alerts.append({
+                                'alert_type': 'competitor_gain',
+                                'severity': severity,
+                                'title': f'{comp_name} has {advantage:.1f}% higher citation rate',
+                                'description': (
+                                    f"Competitor '{comp_name}' is being cited at {comp_rate:.1f}% "
+                                    f"({comp_stats['citations']}/{comp_stats['total_queries']} queries) "
+                                    f"compared to brand's {brand_rate:.1f}% "
+                                    f"({brand_stats['citations']}/{brand_stats['total_queries']} queries). "
+                                    f"This {advantage:.1f} percentage point advantage suggests they have "
+                                    f"stronger content or better positioning for these queries. "
+                                    f"Analyze their content strategy and identify opportunities to improve."
+                                ),
+                                'metrics': {
+                                    'brand_rate': brand_rate,
+                                    'competitor_rate': comp_rate,
+                                    'advantage': advantage,
+                                    'competitor_name': comp_name,
+                                    'brand_citations': brand_stats['citations'],
+                                    'brand_queries': brand_stats['total_queries'],
+                                    'competitor_citations': comp_stats['citations'],
+                                    'competitor_queries': comp_stats['total_queries']
+                                },
+                                'detected_at': now.isoformat(),
+                                'platform': platform or 'all'
+                            })
+                            self.logger.warning(
+                                f"Competitor gain alert: {comp_name} has {advantage:.1f}% advantage "
+                                f"({comp_rate:.1f}% vs {brand_rate:.1f}%)"
+                            )
+
+            # Generate summary
+            summary = {
+                'total_alerts': len(alerts),
+                'critical_alerts': len([a for a in alerts if a['severity'] == 'critical']),
+                'high_alerts': len([a for a in alerts if a['severity'] == 'high']),
+                'medium_alerts': len([a for a in alerts if a['severity'] == 'medium']),
+                'low_alerts': len([a for a in alerts if a['severity'] == 'low']),
+                'by_type': {},
+                'by_platform': {}
+            }
+
+            # Count by type
+            for alert in alerts:
+                alert_type = alert['alert_type']
+                summary['by_type'][alert_type] = summary['by_type'].get(alert_type, 0) + 1
+
+            # Count by platform
+            for alert in alerts:
+                alert_platform = alert['platform']
+                summary['by_platform'][alert_platform] = summary['by_platform'].get(alert_platform, 0) + 1
+
+            self.logger.info(
+                f"Detected {len(alerts)} alerts: "
+                f"{summary['critical_alerts']} critical, {summary['high_alerts']} high, "
+                f"{summary['medium_alerts']} medium, {summary['low_alerts']} low"
+            )
+
+            return {
+                'alerts': alerts,
+                'summary': summary,
+                'analysis_periods': {
+                    'current_period': {
+                        'start': current_start.isoformat(),
+                        'end': current_end.isoformat(),
+                        'days': current_period_days
+                    },
+                    'comparison_period': {
+                        'start': comparison_start.isoformat(),
+                        'end': comparison_end.isoformat(),
+                        'days': comparison_period_days
+                    },
+                    'platform': platform or 'all'
+                }
+            }
+
+        except ValueError:
+            # Re-raise validation errors
+            raise
+        except Exception as e:
+            # Log and wrap unexpected errors
+            self.logger.error(f"Error detecting alerts: {e}", exc_info=True)
+            raise ContentGenerationError(f"Failed to detect alerts: {str(e)}")
+        finally:
+            # Close session if we created it
+            if not session_provided and db_session:
+                db_session.close()
+
+    def _determine_alert_severity(self, value: float, threshold: float) -> str:
+        """
+        Determine alert severity based on how much the value exceeds the threshold
+
+        Args:
+            value: The measured value (e.g., citation rate drop percentage)
+            threshold: The minimum threshold for triggering an alert
+
+        Returns:
+            Severity level: "critical", "high", "medium", or "low"
+        """
+        if value >= threshold * 2.5:
+            return "critical"
+        elif value >= threshold * 1.75:
+            return "high"
+        elif value >= threshold * 1.25:
+            return "medium"
+        else:
+            return "low"
