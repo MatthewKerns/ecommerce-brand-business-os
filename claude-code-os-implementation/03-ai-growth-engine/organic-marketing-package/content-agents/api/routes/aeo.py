@@ -12,8 +12,18 @@ import logging
 import time
 
 from api.dependencies import get_request_id
-from api.models import ContentResponse, ContentMetadata, ErrorResponse
-from pydantic import BaseModel, Field
+from api.models import (
+    ContentResponse,
+    ContentMetadata,
+    ErrorResponse,
+    FAQGenerationRequest,
+    FAQSchemaRequest,
+    ProductSchemaRequest,
+    AIOptimizedContentRequest,
+    ComparisonContentRequest,
+    FAQContentResponse,
+    SchemaResponse
+)
 from agents.aeo_agent import AEOAgent
 
 # Configure logging
@@ -27,213 +37,6 @@ router = APIRouter(
         500: {"model": ErrorResponse, "description": "Internal server error"}
     }
 )
-
-
-# ============================================================================
-# Request Models
-# ============================================================================
-
-class FAQGenerationRequest(BaseModel):
-    """Request model for FAQ content generation."""
-    topic: str = Field(
-        ...,
-        min_length=10,
-        max_length=500,
-        description="The topic to create FAQs about"
-    )
-    num_questions: int = Field(
-        default=10,
-        ge=3,
-        le=25,
-        description="Number of FAQ items to generate"
-    )
-    target_audience: str = Field(
-        default="TCG players and collectors",
-        description="Target audience for the FAQs"
-    )
-    include_product_mentions: bool = Field(
-        default=True,
-        description="Whether to include Infinity Vault product mentions"
-    )
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "topic": "Trading Card Storage and Protection",
-                "num_questions": 10,
-                "target_audience": "Competitive TCG players",
-                "include_product_mentions": True
-            }
-        }
-
-
-class FAQSchemaRequest(BaseModel):
-    """Request model for FAQ schema generation."""
-    faq_items: List[Dict[str, str]] = Field(
-        ...,
-        min_length=1,
-        max_length=50,
-        description="List of FAQ items with 'question' and 'answer' keys"
-    )
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "faq_items": [
-                    {
-                        "question": "What is the best way to store trading cards?",
-                        "answer": "The best way to store trading cards is using archival-quality sleeves and binders designed specifically for card protection. Infinity Vault's premium card storage solutions provide museum-grade protection with acid-free materials."
-                    },
-                    {
-                        "question": "How do I protect expensive cards?",
-                        "answer": "Expensive cards should be double-sleeved using inner perfect-fit sleeves and outer standard sleeves, then stored in a rigid holder or premium binder. This prevents damage from handling, moisture, and environmental factors."
-                    }
-                ]
-            }
-        }
-
-
-class ProductSchemaRequest(BaseModel):
-    """Request model for Product schema generation."""
-    product_data: Dict[str, Any] = Field(
-        ...,
-        description="Product information (name, description, price, etc.)"
-    )
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "product_data": {
-                    "name": "Infinity Vault Premium Card Binder",
-                    "description": "Professional-grade trading card binder with 400-card capacity",
-                    "price": "49.99",
-                    "priceCurrency": "USD",
-                    "brand": "Infinity Vault",
-                    "image": "https://example.com/images/premium-binder.jpg",
-                    "sku": "IV-BINDER-400",
-                    "availability": "https://schema.org/InStock",
-                    "aggregateRating": {
-                        "@type": "AggregateRating",
-                        "ratingValue": 4.8,
-                        "reviewCount": 127
-                    }
-                }
-            }
-        }
-
-
-class AIOptimizedContentRequest(BaseModel):
-    """Request model for AI-optimized content generation."""
-    question: str = Field(
-        ...,
-        min_length=10,
-        max_length=500,
-        description="The question this content answers"
-    )
-    content_type: str = Field(
-        default="guide",
-        pattern="^(guide|article|comparison|tutorial)$",
-        description="Type of content to generate"
-    )
-    include_sources: bool = Field(
-        default=True,
-        description="Whether to include source citations"
-    )
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "question": "How do I organize a large trading card collection?",
-                "content_type": "guide",
-                "include_sources": True
-            }
-        }
-
-
-class ComparisonContentRequest(BaseModel):
-    """Request model for comparison content generation."""
-    comparison_topic: str = Field(
-        ...,
-        min_length=10,
-        max_length=500,
-        description="What's being compared"
-    )
-    items_to_compare: List[str] = Field(
-        ...,
-        min_length=2,
-        max_length=10,
-        description="List of items to compare"
-    )
-    include_recommendation: bool = Field(
-        default=True,
-        description="Whether to include a clear recommendation"
-    )
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "comparison_topic": "TCG Storage Solutions",
-                "items_to_compare": [
-                    "Card binders",
-                    "Storage boxes",
-                    "Deck boxes",
-                    "Card sleeves"
-                ],
-                "include_recommendation": True
-            }
-        }
-
-
-# ============================================================================
-# Response Models
-# ============================================================================
-
-class FAQContentResponse(BaseModel):
-    """Response model for FAQ content generation."""
-    request_id: str = Field(
-        ...,
-        description="Unique identifier for the request"
-    )
-    content: str = Field(
-        ...,
-        description="The generated FAQ content"
-    )
-    file_path: str = Field(
-        ...,
-        description="Path where the content was saved"
-    )
-    metadata: ContentMetadata = Field(
-        ...,
-        description="Metadata about the generation process"
-    )
-    status: str = Field(
-        default="success",
-        description="Status of the content generation"
-    )
-
-
-class SchemaResponse(BaseModel):
-    """Response model for schema generation."""
-    request_id: str = Field(
-        ...,
-        description="Unique identifier for the request"
-    )
-    schema: str = Field(
-        ...,
-        description="The generated JSON-LD schema"
-    )
-    schema_type: str = Field(
-        ...,
-        description="Type of schema (FAQPage or Product)"
-    )
-    metadata: ContentMetadata = Field(
-        ...,
-        description="Metadata about the generation process"
-    )
-    status: str = Field(
-        default="success",
-        description="Status of the schema generation"
-    )
 
 
 # ============================================================================
