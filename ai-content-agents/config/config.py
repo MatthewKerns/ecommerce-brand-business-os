@@ -32,9 +32,10 @@ BLOG_OUTPUT_DIR = OUTPUT_DIR / "blog"
 SOCIAL_OUTPUT_DIR = OUTPUT_DIR / "social"
 AMAZON_OUTPUT_DIR = OUTPUT_DIR / "amazon"
 COMPETITOR_OUTPUT_DIR = OUTPUT_DIR / "competitor-analysis"
+TIKTOK_OUTPUT_DIR = OUTPUT_DIR / "tiktok"
 
 # Ensure output directories exist
-for dir_path in [BLOG_OUTPUT_DIR, SOCIAL_OUTPUT_DIR, AMAZON_OUTPUT_DIR, COMPETITOR_OUTPUT_DIR]:
+for dir_path in [BLOG_OUTPUT_DIR, SOCIAL_OUTPUT_DIR, AMAZON_OUTPUT_DIR, COMPETITOR_OUTPUT_DIR, TIKTOK_OUTPUT_DIR]:
     dir_path.mkdir(parents=True, exist_ok=True)
 
 # Brand identity constants
