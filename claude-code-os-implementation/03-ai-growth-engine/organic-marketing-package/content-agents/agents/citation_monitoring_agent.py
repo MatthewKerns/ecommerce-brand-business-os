@@ -137,3 +137,93 @@ class CitationMonitoringAgent(BaseAgent):
         if self.perplexity_client:
             platforms.append("perplexity")
         return platforms
+
+    def query_ai_assistant(
+        self,
+        query: str,
+        platform: str,
+        model: Optional[str] = None,
+        temperature: Optional[float] = None,
+        max_tokens: Optional[int] = None,
+        system_prompt: Optional[str] = None,
+        timeout: Optional[int] = None
+    ) -> Dict[str, Any]:
+        """
+        Query an AI assistant platform with a specific query
+
+        This method queries the specified AI platform (ChatGPT, Claude, or Perplexity)
+        and returns the complete response. It handles platform-specific client
+        initialization and error handling.
+
+        Args:
+            query: The user query/prompt to send to the AI assistant
+            platform: AI platform to query (chatgpt, claude, perplexity)
+            model: Optional model override (uses client default if not provided)
+            temperature: Optional temperature override for response randomness
+            max_tokens: Optional maximum tokens in response
+            system_prompt: Optional system prompt to set context
+            timeout: Optional request timeout in seconds
+
+        Returns:
+            Dictionary containing the full API response from the AI platform.
+            Response structure varies by platform:
+            - ChatGPT/Perplexity: {id, model, choices, usage, created}
+            - Claude: {id, type, role, content, model, stop_reason, usage}
+
+        Raises:
+            ValueError: If query is empty or platform is invalid/not initialized
+            AIAssistantAPIError: If the API request fails
+            ContentGenerationError: For other unexpected errors
+
+        Example:
+            >>> agent = CitationMonitoringAgent()
+            >>> response = agent.query_ai_assistant(
+            ...     query="What are the best TCG storage solutions?",
+            ...     platform="chatgpt"
+            ... )
+            >>> # Process response based on platform
+        """
+        # Validate query parameter
+        if not query or not query.strip():
+            raise ValueError("Query parameter is required and cannot be empty")
+
+        self.logger.info(f"Querying {platform} with query: {query[:100]}...")
+
+        try:
+            # Get the appropriate client for the platform
+            client = self._get_client(platform)
+
+            # Build kwargs for the query method
+            query_kwargs = {}
+            if model is not None:
+                query_kwargs['model'] = model
+            if temperature is not None:
+                query_kwargs['temperature'] = temperature
+            if max_tokens is not None:
+                query_kwargs['max_tokens'] = max_tokens
+            if system_prompt is not None:
+                query_kwargs['system_prompt'] = system_prompt
+            if timeout is not None:
+                query_kwargs['timeout'] = timeout
+
+            # Query the AI assistant
+            response = client.query(query, **query_kwargs)
+
+            self.logger.info(f"Successfully received response from {platform}")
+            return response
+
+        except ValueError as e:
+            # Re-raise ValueError (platform validation errors)
+            self.logger.error(f"Invalid platform or client error for {platform}: {e}")
+            raise
+
+        except AIAssistantAPIError as e:
+            # Log and re-raise AI assistant API errors
+            self.logger.error(f"API error querying {platform}: {e}")
+            raise
+
+        except Exception as e:
+            # Catch any unexpected errors and wrap in ContentGenerationError
+            error_msg = f"Unexpected error querying {platform}: {str(e)}"
+            self.logger.error(error_msg, exc_info=True)
+            raise ContentGenerationError(error_msg)
