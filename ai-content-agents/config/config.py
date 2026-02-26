@@ -43,14 +43,21 @@ AMAZON_SP_API_REFRESH_TOKEN = os.getenv("AMAZON_SP_API_REFRESH_TOKEN", "")
 AMAZON_SP_API_REGION = os.getenv("AMAZON_SP_API_REGION", "us-east-1")
 AMAZON_MARKETPLACE_ID = os.getenv("AMAZON_MARKETPLACE_ID", "ATVPDKIKX0DER")
 
+# TikTok Shop API Configuration
+TIKTOK_SHOP_APP_KEY = os.getenv("TIKTOK_SHOP_APP_KEY", "")
+TIKTOK_SHOP_APP_SECRET = os.getenv("TIKTOK_SHOP_APP_SECRET", "")
+TIKTOK_SHOP_ACCESS_TOKEN = os.getenv("TIKTOK_SHOP_ACCESS_TOKEN", "")
+TIKTOK_SHOP_API_BASE_URL = os.getenv("TIKTOK_SHOP_API_BASE_URL", "https://open-api.tiktokglobalshop.com")
+
 # Output configuration
 BLOG_OUTPUT_DIR = OUTPUT_DIR / "blog"
 SOCIAL_OUTPUT_DIR = OUTPUT_DIR / "social"
 AMAZON_OUTPUT_DIR = OUTPUT_DIR / "amazon"
 COMPETITOR_OUTPUT_DIR = OUTPUT_DIR / "competitor-analysis"
+TIKTOK_OUTPUT_DIR = OUTPUT_DIR / "tiktok"
 
 # Ensure output directories exist
-for dir_path in [BLOG_OUTPUT_DIR, SOCIAL_OUTPUT_DIR, AMAZON_OUTPUT_DIR, COMPETITOR_OUTPUT_DIR]:
+for dir_path in [BLOG_OUTPUT_DIR, SOCIAL_OUTPUT_DIR, AMAZON_OUTPUT_DIR, COMPETITOR_OUTPUT_DIR, TIKTOK_OUTPUT_DIR]:
     dir_path.mkdir(parents=True, exist_ok=True)
 
 # Brand identity constants

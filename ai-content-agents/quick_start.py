@@ -9,7 +9,7 @@ import os
 # Add to path
 sys.path.insert(0, os.path.dirname(__file__))
 
-from agents import BlogAgent, SocialAgent, AmazonAgent, CompetitorAgent
+from agents import BlogAgent, SocialAgent, AmazonAgent, CompetitorAgent, TikTokShopAgent
 
 
 def main():
@@ -158,6 +158,51 @@ def main():
     # print(f"✅ Competitor analysis saved to: {path}\n")
 
     # ============================================================================
+    # TIKTOK SHOP
+    # ============================================================================
+
+    # Example 12: Generate TikTok video script
+    # tiktok_shop_agent = TikTokShopAgent()
+    # content, path = tiktok_shop_agent.generate_video_script(
+    #     product_name="Premium Trading Card Binder",
+    #     product_features=[
+    #         "Scratch-resistant pages protect valuable cards",
+    #         "9-pocket layout for perfect organization",
+    #         "Reinforced binding survives tournament travel",
+    #         "Lifetime warranty for peace of mind"
+    #     ],
+    #     target_audience="TCG collectors and players",
+    #     video_type="product_showcase",
+    #     duration_seconds=60
+    # )
+    # print(f"✅ TikTok video script saved to: {path}\n")
+
+    # Example 13: Sync products from TikTok Shop
+    # tiktok_shop_agent = TikTokShopAgent(access_token='your_access_token_here')
+    # products = tiktok_shop_agent.sync_products(
+    #     status='ACTIVE',
+    #     max_products=50,
+    #     save_to_file=True
+    # )
+    # print(f"✅ Synced {len(products)} products from TikTok Shop\n")
+
+    # Example 14: Get shop analytics
+    # tiktok_shop_agent = TikTokShopAgent(access_token='your_access_token_here')
+    # analytics = tiktok_shop_agent.get_analytics(
+    #     start_date='2024-01-01',
+    #     end_date='2024-01-31'
+    # )
+    # print(f"✅ Shop analytics retrieved\n")
+
+    # Example 15: Sync orders from TikTok Shop
+    # tiktok_shop_agent = TikTokShopAgent(access_token='your_access_token_here')
+    # orders = tiktok_shop_agent.sync_orders(
+    #     order_status='AWAITING_SHIPMENT',
+    #     save_to_file=True
+    # )
+    # print(f"✅ Synced {len(orders)} orders from TikTok Shop\n")
+
+    # ============================================================================
     # QUICK START EXAMPLES - UNCOMMENT ONE TO TRY
     # ============================================================================
 
@@ -175,6 +220,10 @@ def main():
     print("  9. Amazon bullets")
     print("  10. Amazon description")
     print("  11. Competitor analysis")
+    print("  12. TikTok video script")
+    print("  13. TikTok Shop product sync")
+    print("  14. TikTok Shop analytics")
+    print("  15. TikTok Shop order sync")
     print("\n💡 Or use generate_content.py for CLI interface")
     print("   Example: python generate_content.py blog post 'Tournament Prep Tips'\n")
 

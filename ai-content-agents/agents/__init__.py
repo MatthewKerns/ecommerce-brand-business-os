@@ -8,11 +8,13 @@ from .blog_agent import BlogAgent
 from .social_agent import SocialAgent
 from .amazon_agent import AmazonAgent
 from .competitor_agent import CompetitorAgent
+from .tiktok_shop_agent import TikTokShopAgent
 
 __all__ = [
     'BaseAgent',
     'BlogAgent',
     'SocialAgent',
     'AmazonAgent',
-    'CompetitorAgent'
+    'CompetitorAgent',
+    'TikTokShopAgent'
 ]

@@ -9,6 +9,7 @@ This system uses Claude AI to generate high-quality, on-brand content for Infini
 - **Blog Posts**: SEO-optimized articles, listicles, how-to guides
 - **Social Media**: Instagram captions, Reddit posts, content calendars
 - **Amazon Listings**: Titles, bullet points, descriptions, A+ content
+- **TikTok Shop**: Product listings, video scripts, promotional content
 - **Competitor Analysis**: Listing analysis, review mining, content gaps
 
 All content is automatically infused with:
@@ -114,7 +115,7 @@ python generate_content.py social calendar --for-platform instagram --days 7
 **Option C: Use in Your Own Python Scripts**
 
 ```python
-from agents import BlogAgent, SocialAgent, AmazonAgent
+from agents import BlogAgent, SocialAgent, AmazonAgent, TikTokShopAgent
 
 # Generate blog post
 blog_agent = BlogAgent()
@@ -167,6 +168,14 @@ Optimizes Amazon product listings:
 - `generate_a_plus_content()` - A+ content sections
 - `generate_backend_keywords()` - Search term optimization
 - `optimize_existing_listing()` - Analyze and improve current listings
+
+### TikTokShopAgent
+Optimizes TikTok Shop product listings:
+- `generate_product_title()` - SEO-optimized titles for TikTok Shop
+- `generate_product_description()` - Engaging product descriptions
+- `generate_video_script()` - Short-form video scripts for product showcases
+- `generate_promotional_content()` - Hashtags, captions, and hooks
+- `optimize_listing()` - Analyze and improve existing TikTok Shop listings
 
 ### CompetitorAgent
 Analyzes competition:
@@ -239,6 +248,62 @@ python generate_content.py amazon bullets "Ultra-Premium Card Binder" \
 python generate_content.py amazon description "Ultra-Premium Card Binder" \
   --details "Professional 9-pocket binder with scratch-resistant pages and reinforced binding" \
   --usp "Battle-Ready Equipment for Tournament Players"
+```
+
+### TikTok Shop
+
+```bash
+# Product title
+python generate_content.py tiktok title "Battle-Ready Card Binder" \
+  --features "scratch-resistant,tournament-grade,9-pocket" \
+  --keywords "tcg binder,card protection,pokemon storage"
+
+# Product description
+python generate_content.py tiktok description "Battle-Ready Card Binder" \
+  --details "Professional-grade binder with scratch-resistant pages" \
+  --usp "Tournament-tested protection for your valuable cards"
+
+# Video script (15-60 seconds)
+python generate_content.py tiktok video "Showcase binder durability test" \
+  --duration 30 \
+  --hook "POV: Your cards survive tournament weekend" \
+  --cta "Link in bio"
+
+# Promotional content (hashtags + caption)
+python generate_content.py tiktok promo "New binder launch" \
+  --campaign "tournament-ready" \
+  --target-audience "competitive tcg players"
+```
+
+Use Python for advanced TikTok Shop content:
+
+```python
+from agents import TikTokShopAgent
+
+agent = TikTokShopAgent()
+
+# Generate product title
+content, path = agent.generate_product_title(
+    product_name="Ultra-Premium Card Binder",
+    features=["scratch-resistant", "lifetime warranty", "9-pocket"],
+    keywords=["tcg storage", "card binder", "pokemon protection"]
+)
+
+# Generate video script
+content, path = agent.generate_video_script(
+    product_name="Battle-Ready Card Binder",
+    key_features=["Scratch-resistant pages", "Reinforced binding", "Tournament-tested"],
+    duration_seconds=30,
+    hook="POV: You show up to tournament with pristine cards",
+    call_to_action="Shop now - link in bio"
+)
+
+# Generate promotional content
+content, path = agent.generate_promotional_content(
+    campaign_theme="Tournament Season Prep",
+    products=["Card Binder", "Deck Box", "Playmat"],
+    target_audience="Competitive TCG players preparing for tournaments"
+)
 ```
 
 ### Competitor Analysis
@@ -320,6 +385,7 @@ ai-content-agents/output/
 │   ├── instagram/          # Instagram captions
 │   └── reddit/             # Reddit posts
 ├── amazon/                 # Amazon listing content
+├── tiktok-shop/            # TikTok Shop listings and video scripts
 └── competitor-analysis/    # Competitive research
 ```
 
@@ -406,6 +472,16 @@ content, path = agent.generate_content_calendar(
 - Use emotional language (confident, prepared, respected)
 - Emphasize battle-ready positioning
 - Include trust signals (warranty, quality, tournament-tested)
+
+### For TikTok Shop
+- Keep titles concise but keyword-rich (under 50 characters)
+- Lead with eye-catching hooks in video scripts
+- Use trending sounds and formats when appropriate
+- Focus on visual demonstrations and results
+- Include clear CTAs (link in bio, shop now)
+- Leverage hashtags for discoverability
+- Target 15-30 second video scripts for maximum engagement
+- Emphasize quick wins and instant gratification
 
 ### For Competitor Analysis
 - Analyze top 3-5 competitors in each category
@@ -605,7 +681,8 @@ python generate_content.py blog post "Your Topic"
 
 Future enhancements:
 - [ ] Email newsletter generator
-- [ ] Video script writer (YouTube, TikTok)
+- [x] TikTok Shop integration (product listings, video scripts)
+- [ ] YouTube video script writer
 - [ ] Product naming assistant
 - [ ] A/B test variation generator
 - [ ] SEO keyword research automation
