@@ -11,6 +11,7 @@ from urllib.parse import urljoin
 
 from config.config import TIKTOK_SHOP_API_BASE_URL
 from integrations.tiktok_shop.oauth import TikTokShopOAuth
+from integrations.tiktok_shop.rate_limiter import RateLimiter
 from integrations.tiktok_shop.exceptions import (
     TikTokShopAPIError,
     TikTokShopAuthError,
@@ -37,6 +38,7 @@ class TikTokShopClient:
         access_token: Access token for authenticated requests
         api_base_url: Base URL for TikTok Shop API
         oauth: OAuth handler for authentication
+        _rate_limiter: Rate limiter for controlling request rate
     """
 
     # Default request timeout in seconds
@@ -44,6 +46,16 @@ class TikTokShopClient:
 
     # API version
     API_VERSION = "202309"
+
+    # Rate limiting configuration
+    # TikTok Shop API typically allows 10 requests per second
+    DEFAULT_RATE_LIMIT = 10.0  # requests per second
+    DEFAULT_BURST_CAPACITY = 20  # allow burst requests
+
+    # Automatic backoff configuration for rate limit errors
+    MAX_RETRY_ATTEMPTS = 3
+    INITIAL_BACKOFF_SECONDS = 1.0
+    MAX_BACKOFF_SECONDS = 32.0
 
     def __init__(
         self,
@@ -80,6 +92,13 @@ class TikTokShopClient:
 
         # Initialize OAuth handler for authentication
         self.oauth = TikTokShopOAuth(app_key, app_secret, api_base_url)
+
+        # Initialize rate limiter with token bucket algorithm
+        # This prevents hitting TikTok Shop API rate limits
+        self._rate_limiter = RateLimiter(
+            requests_per_second=self.DEFAULT_RATE_LIMIT,
+            bucket_capacity=self.DEFAULT_BURST_CAPACITY
+        )
 
     def set_access_token(self, access_token: str) -> None:
         """
@@ -138,12 +157,13 @@ class TikTokShopClient:
         Make an authenticated request to TikTok Shop API
 
         This is the core request method that handles:
+        - Rate limiting with automatic throttling
         - Adding common parameters
         - Generating signatures
         - Adding authentication headers
         - Making the HTTP request
         - Parsing and validating the response
-        - Error handling
+        - Error handling with automatic backoff for rate limits
 
         Args:
             method: HTTP method (GET, POST, PUT, DELETE)
@@ -158,7 +178,7 @@ class TikTokShopClient:
 
         Raises:
             TikTokShopAuthError: For authentication errors
-            TikTokShopRateLimitError: For rate limit errors
+            TikTokShopRateLimitError: For rate limit errors (after retry attempts)
             TikTokShopValidationError: For validation errors
             TikTokShopNotFoundError: For 404 errors
             TikTokShopServerError: For server errors
@@ -175,80 +195,112 @@ class TikTokShopClient:
                 "Set it using set_access_token() or during initialization."
             )
 
-        # Build the full URL
-        url = urljoin(self.api_base_url, path)
+        # Implement automatic backoff retry logic for rate limit errors
+        retry_count = 0
+        backoff_seconds = self.INITIAL_BACKOFF_SECONDS
 
-        # Initialize parameters
-        if params is None:
-            params = {}
+        while retry_count <= self.MAX_RETRY_ATTEMPTS:
+            try:
+                # Acquire token from rate limiter before making request
+                # This prevents hitting API rate limits proactively
+                self._rate_limiter.acquire()
 
-        # Add common parameters
-        common_params = self._build_common_params()
-        params.update(common_params)
+                # Build the full URL
+                url = urljoin(self.api_base_url, path)
 
-        # Add access token if authentication is required
-        if require_auth:
-            params['access_token'] = self.access_token
+                # Initialize parameters
+                if params is None:
+                    params = {}
 
-        # Generate signature
-        signature = self._generate_request_signature(path, params)
-        params['sign'] = signature
+                # Add common parameters
+                common_params = self._build_common_params()
+                params.update(common_params)
 
-        # Set timeout
-        request_timeout = timeout or self.DEFAULT_TIMEOUT
+                # Add access token if authentication is required
+                if require_auth:
+                    params['access_token'] = self.access_token
 
-        # Make the request
-        try:
-            if method.upper() in ['GET', 'DELETE']:
-                response = requests.request(
-                    method,
-                    url,
-                    params=params,
-                    timeout=request_timeout
+                # Generate signature
+                signature = self._generate_request_signature(path, params)
+                params['sign'] = signature
+
+                # Set timeout
+                request_timeout = timeout or self.DEFAULT_TIMEOUT
+
+                # Make the request
+                if method.upper() in ['GET', 'DELETE']:
+                    response = requests.request(
+                        method,
+                        url,
+                        params=params,
+                        timeout=request_timeout
+                    )
+                else:  # POST, PUT
+                    response = requests.request(
+                        method,
+                        url,
+                        params=params,
+                        json=data,
+                        timeout=request_timeout
+                    )
+
+                # Handle HTTP errors
+                response.raise_for_status()
+
+                # Parse JSON response
+                response_data = response.json()
+
+                # Check for API-level errors
+                return self._handle_api_response(response_data)
+
+            except TikTokShopRateLimitError as e:
+                # Handle rate limit errors with exponential backoff
+                retry_count += 1
+
+                if retry_count > self.MAX_RETRY_ATTEMPTS:
+                    # Max retries reached, re-raise the error
+                    raise
+
+                # Use retry_after from API if available, otherwise use exponential backoff
+                if e.retry_after:
+                    wait_time = e.retry_after
+                else:
+                    wait_time = min(backoff_seconds, self.MAX_BACKOFF_SECONDS)
+
+                # Wait before retrying
+                time.sleep(wait_time)
+
+                # Double the backoff for next iteration (exponential backoff)
+                backoff_seconds *= 2
+
+            except requests.exceptions.Timeout as e:
+                raise TikTokShopNetworkError(
+                    f"Request timeout after {request_timeout}s",
+                    original_exception=e
                 )
-            else:  # POST, PUT
-                response = requests.request(
-                    method,
-                    url,
-                    params=params,
-                    json=data,
-                    timeout=request_timeout
+            except requests.exceptions.ConnectionError as e:
+                raise TikTokShopNetworkError(
+                    "Failed to connect to TikTok Shop API",
+                    original_exception=e
+                )
+            except requests.exceptions.HTTPError as e:
+                self._handle_http_error(e, response)
+            except requests.exceptions.RequestException as e:
+                raise TikTokShopNetworkError(
+                    f"Network error during API request: {str(e)}",
+                    original_exception=e
+                )
+            except ValueError as e:
+                raise TikTokShopAPIError(
+                    "Failed to parse JSON response from API"
+                )
+            except Exception as e:
+                raise TikTokShopAPIError(
+                    f"Unexpected error during API request: {str(e)}"
                 )
 
-            # Handle HTTP errors
-            response.raise_for_status()
-
-            # Parse JSON response
-            response_data = response.json()
-
-            # Check for API-level errors
-            return self._handle_api_response(response_data)
-
-        except requests.exceptions.Timeout as e:
-            raise TikTokShopNetworkError(
-                f"Request timeout after {request_timeout}s",
-                original_exception=e
-            )
-        except requests.exceptions.ConnectionError as e:
-            raise TikTokShopNetworkError(
-                "Failed to connect to TikTok Shop API",
-                original_exception=e
-            )
-        except requests.exceptions.HTTPError as e:
-            self._handle_http_error(e, response)
-        except requests.exceptions.RequestException as e:
-            raise TikTokShopNetworkError(
-                f"Network error during API request: {str(e)}",
-                original_exception=e
-            )
-        except ValueError as e:
-            raise TikTokShopAPIError(
-                "Failed to parse JSON response from API"
-            )
-        except Exception as e:
-            raise TikTokShopAPIError(
-                f"Unexpected error during API request: {str(e)}"
-            )
+        # This should never be reached due to the raise in the except block
+        raise TikTokShopAPIError("Unexpected error in request retry logic")
 
     def _handle_api_response(self, response_data: Dict[str, Any]) -> Dict[str, Any]:
         """
