@@ -218,3 +218,168 @@ TikTok Shop Features:
                 "features": product_features
             }
         )
+
+    def sync_products(
+        self,
+        status: Optional[str] = None,
+        max_products: Optional[int] = None,
+        save_to_file: bool = True
+    ) -> List[Dict[str, Any]]:
+        """
+        Sync products from TikTok Shop
+
+        This method fetches all products from TikTok Shop, handling pagination
+        automatically. It can optionally filter by status and limit the number
+        of products retrieved.
+
+        Args:
+            status: Filter by product status ('ACTIVE', 'INACTIVE', 'DRAFT')
+                   If None, fetches all products regardless of status
+            max_products: Maximum number of products to sync (None for all)
+            save_to_file: Whether to save synced products to a JSON file
+
+        Returns:
+            List of product dictionaries containing product information
+
+        Raises:
+            TikTokShopAuthError: If authentication fails
+            TikTokShopAPIError: If API request fails
+
+        Example:
+            >>> agent = TikTokShopAgent(access_token='token')
+            >>> # Sync all active products
+            >>> products = agent.sync_products(status='ACTIVE')
+            >>> print(f"Synced {len(products)} products")
+            >>>
+            >>> # Sync first 50 products
+            >>> products = agent.sync_products(max_products=50)
+        """
+        client = self._get_client()
+
+        all_products = []
+        page_number = 1
+        page_size = 100  # Maximum allowed by API
+
+        while True:
+            # Fetch page of products
+            response = client.get_products(
+                page_size=page_size,
+                page_number=page_number,
+                status=status
+            )
+
+            # Extract products from response
+            products = response.get('data', {}).get('products', [])
+
+            if not products:
+                break
+
+            # Add products to list
+            all_products.extend(products)
+
+            # Check if we've reached the max limit
+            if max_products and len(all_products) >= max_products:
+                all_products = all_products[:max_products]
+                break
+
+            # Check if there are more pages
+            more_pages = response.get('data', {}).get('more', False)
+            if not more_pages:
+                break
+
+            page_number += 1
+
+        # Save to file if requested
+        if save_to_file:
+            import json
+            output_dir = TIKTOK_OUTPUT_DIR / "products"
+            output_dir.mkdir(parents=True, exist_ok=True)
+
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            status_label = f"_{status.lower()}" if status else "_all"
+            filename = f"products_sync{status_label}_{timestamp}.json"
+            filepath = output_dir / filename
+
+            with open(filepath, 'w') as f:
+                json.dump({
+                    'synced_at': datetime.now().isoformat(),
+                    'status_filter': status,
+                    'total_count': len(all_products),
+                    'products': all_products
+                }, f, indent=2)
+
+        return all_products
+
+    def get_product_details(self, product_id: str) -> Dict[str, Any]:
+        """
+        Get detailed information for a specific product from TikTok Shop
+
+        Args:
+            product_id: TikTok Shop product ID
+
+        Returns:
+            Dictionary containing detailed product information including:
+                - product_id: Product identifier
+                - title: Product title/name
+                - description: Product description
+                - price: Product pricing information
+                - inventory: Inventory/stock information
+                - images: Product images
+                - status: Product status
+                - category: Product category
+                - specifications: Product specifications
+
+        Raises:
+            TikTokShopAuthError: If authentication fails
+            TikTokShopNotFoundError: If product not found
+            TikTokShopAPIError: If API request fails
+
+        Example:
+            >>> agent = TikTokShopAgent(access_token='token')
+            >>> product = agent.get_product_details('1234567890')
+            >>> print(f"Product: {product['data']['title']}")
+            >>> print(f"Price: ${product['data']['price']['amount']}")
+        """
+        client = self._get_client()
+        return client.get_product(product_id)
+
+    def list_products(
+        self,
+        status: Optional[str] = None,
+        page_size: int = 20,
+        page_number: int = 1
+    ) -> Dict[str, Any]:
+        """
+        Get a paginated list of products from TikTok Shop
+
+        This is a simpler method for getting a single page of products,
+        useful for iterative processing or displaying products in a UI.
+
+        Args:
+            status: Filter by product status ('ACTIVE', 'INACTIVE', 'DRAFT')
+            page_size: Number of products per page (max 100)
+            page_number: Page number to retrieve (starts at 1)
+
+        Returns:
+            Dictionary containing:
+                - products: List of product objects
+                - total: Total number of products matching filter
+                - more: Boolean indicating if more pages exist
+
+        Raises:
+            TikTokShopAuthError: If authentication fails
+            TikTokShopAPIError: If API request fails
+
+        Example:
+            >>> agent = TikTokShopAgent(access_token='token')
+            >>> # Get first page of active products
+            >>> result = agent.list_products(status='ACTIVE', page_size=10)
+            >>> products = result['data']['products']
+            >>> has_more = result['data']['more']
+        """
+        client = self._get_client()
+        return client.get_products(
+            page_size=page_size,
+            page_number=page_number,
+            status=status
+        )
