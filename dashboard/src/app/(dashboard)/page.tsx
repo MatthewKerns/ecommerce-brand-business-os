@@ -1,11 +1,20 @@
-import { LayoutDashboard } from "lucide-react";
+import {
+  LayoutDashboard,
+  Eye,
+  Mail,
+  FileText,
+  DollarSign,
+  Users,
+  TrendingUp,
+} from "lucide-react";
+import { MetricCard } from "@/components/MetricCard";
 
 /**
  * Main Dashboard Page
  *
  * Central hub displaying overview of all organic marketing components.
  *
- * Features (to be implemented):
+ * Features:
  * - KPI overview cards showing key metrics
  * - Recent activity feed
  * - Quick access to system health
@@ -14,6 +23,52 @@ import { LayoutDashboard } from "lucide-react";
  * @route /
  */
 export default function DashboardPage() {
+  // Example metric data - in production, this would come from API
+  const metrics = [
+    {
+      title: "TikTok Views",
+      value: "124.5K",
+      change: 12.5,
+      icon: Eye,
+      description: "Total video views",
+    },
+    {
+      title: "Email Subscribers",
+      value: "3,452",
+      change: 8.2,
+      icon: Mail,
+      description: "Active subscribers",
+    },
+    {
+      title: "Blog Traffic",
+      value: "45.2K",
+      change: -3.1,
+      icon: FileText,
+      description: "Monthly visitors",
+    },
+    {
+      title: "Revenue",
+      value: "$12,543",
+      change: 15.8,
+      icon: DollarSign,
+      description: "Last 30 days",
+    },
+    {
+      title: "Conversion Rate",
+      value: "3.2%",
+      change: 0.5,
+      icon: TrendingUp,
+      description: "Visitor to customer",
+    },
+    {
+      title: "Total Reach",
+      value: "89.3K",
+      change: 22.1,
+      icon: Users,
+      description: "Across all channels",
+    },
+  ];
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -29,31 +84,47 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Placeholder Content */}
-      <div className="rounded-lg border border-slate-200 bg-white p-8">
-        <div className="text-center">
-          <h2 className="mb-2 text-xl font-semibold text-slate-900">
-            Welcome to Marketing OS
-          </h2>
-          <p className="text-slate-600">
-            Your central management interface for organic marketing components.
-            KPI cards and metrics will be displayed here.
-          </p>
+      {/* KPI Overview */}
+      <div>
+        <h2 className="mb-4 text-lg font-semibold text-slate-900">
+          Key Performance Indicators
+        </h2>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {metrics.map((metric, index) => (
+            <MetricCard
+              key={index}
+              title={metric.title}
+              value={metric.value}
+              change={metric.change}
+              icon={metric.icon}
+              description={metric.description}
+            />
+          ))}
         </div>
       </div>
 
-      {/* Placeholder Grid */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {[1, 2, 3, 4, 5, 6].map((i) => (
-          <div
-            key={i}
-            className="rounded-lg border border-slate-200 bg-white p-6"
-          >
-            <div className="mb-2 h-4 w-24 animate-pulse rounded bg-slate-200"></div>
-            <div className="mb-4 h-8 w-32 animate-pulse rounded bg-slate-200"></div>
-            <div className="h-3 w-20 animate-pulse rounded bg-slate-200"></div>
-          </div>
-        ))}
+      {/* Loading State Demo */}
+      <div>
+        <h2 className="mb-4 text-lg font-semibold text-slate-900">
+          Loading State Demo
+        </h2>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <MetricCard
+            title="Loading Metric"
+            value="0"
+            isLoading={true}
+          />
+          <MetricCard
+            title="Loading Metric"
+            value="0"
+            isLoading={true}
+          />
+          <MetricCard
+            title="Loading Metric"
+            value="0"
+            isLoading={true}
+          />
+        </div>
       </div>
     </div>
   );
