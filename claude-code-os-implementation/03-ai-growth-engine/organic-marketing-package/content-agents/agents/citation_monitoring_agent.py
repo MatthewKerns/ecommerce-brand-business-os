@@ -787,3 +787,370 @@ class CitationMonitoringAgent(BaseAgent):
             'citation_rate_difference': citation_rate_difference,
             'recommended_actions': recommended_actions
         }
+
+    def generate_recommendations(
+        self,
+        days: int = 30,
+        platform: Optional[str] = None,
+        brand_name: Optional[str] = None,
+        competitor_names: Optional[List[str]] = None,
+        save_to_db: bool = True,
+        db_session: Optional[Session] = None
+    ) -> Dict[str, Any]:
+        """
+        Generate optimization recommendations based on citation analysis
+
+        This method analyzes citation patterns over a specified time period and generates
+        actionable recommendations to improve citation rates and positioning. It examines
+        brand performance, competitor performance, platform-specific metrics, and content
+        patterns to identify opportunities for improvement.
+
+        Args:
+            days: Number of days to analyze (default: 30)
+            platform: Optional AI platform filter (chatgpt, claude, perplexity, or None for all)
+            brand_name: Optional brand name override (uses BRAND_NAME from config if not provided)
+            competitor_names: Optional list of competitor names to include in analysis
+            save_to_db: Whether to save recommendations to database (default: True)
+            db_session: Optional database session (creates new session if not provided)
+
+        Returns:
+            Dictionary containing:
+            - recommendations: List of recommendation objects
+                - id: Recommendation ID (if saved to DB)
+                - type: Recommendation type (content/keyword/structure/technical/other)
+                - title: Short title
+                - description: Detailed description
+                - priority: Priority level (high/medium/low)
+                - expected_impact: Expected impact score (0-100)
+                - implementation_effort: Estimated effort (low/medium/high)
+                - ai_platform: Target platform or "all"
+                - status: Status (pending)
+            - summary: Overall summary
+                - total_recommendations: Total number of recommendations generated
+                - high_priority: Number of high priority recommendations
+                - medium_priority: Number of medium priority recommendations
+                - low_priority: Number of low priority recommendations
+                - by_type: Breakdown by recommendation type
+                - by_platform: Breakdown by platform
+            - analysis_period: Analysis period details
+                - start_date: Start of analysis period
+                - end_date: End of analysis period
+                - days: Number of days analyzed
+                - platform: Platform filter (or "all")
+
+        Raises:
+            ValueError: If days is invalid or platform is invalid
+            ContentGenerationError: For unexpected errors during recommendation generation
+
+        Example:
+            >>> agent = CitationMonitoringAgent()
+            >>> result = agent.generate_recommendations(
+            ...     days=30,
+            ...     competitor_names=["UltraGuard", "DeckMaster"],
+            ...     save_to_db=True
+            ... )
+            >>> print(f"Generated {result['summary']['total_recommendations']} recommendations")
+            >>> for rec in result['recommendations']:
+            ...     if rec['priority'] == 'high':
+            ...         print(f"High Priority: {rec['title']}")
+        """
+        # Validate parameters
+        if days <= 0:
+            raise ValueError("days parameter must be greater than 0")
+        if platform and platform.lower() not in ["chatgpt", "claude", "perplexity"]:
+            raise ValueError("platform must be one of: chatgpt, claude, perplexity, or None for all")
+
+        # Use configured brand name if not provided
+        if brand_name is None:
+            brand_name = BRAND_NAME
+
+        self.logger.info(
+            f"Generating optimization recommendations for '{brand_name}' "
+            f"over {days} days (platform: {platform or 'all'})"
+        )
+
+        # Create database session if not provided
+        session_provided = db_session is not None
+        if not session_provided:
+            db_session = get_db_session()
+
+        try:
+            # Calculate date range
+            end_date = datetime.utcnow()
+            start_date = end_date - timedelta(days=days)
+
+            # Build query for citation records
+            citation_query = db_session.query(CitationRecord).filter(
+                CitationRecord.query_timestamp >= start_date,
+                CitationRecord.query_timestamp <= end_date,
+                CitationRecord.brand_name == brand_name
+            )
+
+            # Apply platform filter if specified
+            if platform:
+                citation_query = citation_query.filter(CitationRecord.ai_platform == platform.lower())
+
+            # Get citation records
+            citation_records = citation_query.all()
+
+            # Calculate basic statistics
+            total_queries = len(citation_records)
+            cited_queries = len([r for r in citation_records if r.brand_mentioned])
+            citation_rate = (cited_queries / total_queries * 100) if total_queries > 0 else 0
+
+            self.logger.info(
+                f"Analyzed {total_queries} queries with {cited_queries} citations "
+                f"(citation rate: {citation_rate:.1f}%)"
+            )
+
+            # Initialize recommendations list
+            recommendations = []
+
+            # 1. Analyze overall citation rate
+            if total_queries > 0:
+                if citation_rate < 30:
+                    recommendations.append({
+                        'type': 'content',
+                        'title': 'Low overall citation rate - improve content authority',
+                        'description': (
+                            f"Brand citation rate is only {citation_rate:.1f}% over the past {days} days. "
+                            f"Focus on creating more authoritative, comprehensive content that AI assistants "
+                            f"are likely to reference. Consider: publishing detailed guides, original research, "
+                            f"case studies, and expert analysis in your domain."
+                        ),
+                        'priority': 'high',
+                        'expected_impact': 75,
+                        'implementation_effort': 'high',
+                        'ai_platform': platform or 'all'
+                    })
+                elif citation_rate < 50:
+                    recommendations.append({
+                        'type': 'content',
+                        'title': 'Moderate citation rate - expand content coverage',
+                        'description': (
+                            f"Brand citation rate is {citation_rate:.1f}%. There's room for improvement. "
+                            f"Expand content coverage to address more user queries in your domain. "
+                            f"Analyze which queries result in citations vs. no citations to identify gaps."
+                        ),
+                        'priority': 'medium',
+                        'expected_impact': 60,
+                        'implementation_effort': 'medium',
+                        'ai_platform': platform or 'all'
+                    })
+
+            # 2. Analyze citation positioning
+            cited_records = [r for r in citation_records if r.brand_mentioned and r.citation_position]
+            if cited_records:
+                avg_position = sum(r.citation_position for r in cited_records) / len(cited_records)
+                if avg_position > 3:
+                    recommendations.append({
+                        'type': 'content',
+                        'title': 'Improve citation positioning - be mentioned earlier',
+                        'description': (
+                            f"Average citation position is {avg_position:.1f}. The brand is often mentioned "
+                            f"later in AI responses rather than first. To improve positioning: become the "
+                            f"primary authority in your niche, create highly-cited cornerstone content, "
+                            f"and ensure content directly answers common user queries."
+                        ),
+                        'priority': 'high' if avg_position > 5 else 'medium',
+                        'expected_impact': 70,
+                        'implementation_effort': 'high',
+                        'ai_platform': platform or 'all'
+                    })
+
+            # 3. Platform-specific analysis
+            platform_stats = {}
+            for platform_name in ['chatgpt', 'claude', 'perplexity']:
+                platform_records = [r for r in citation_records if r.ai_platform == platform_name]
+                if platform_records:
+                    platform_cited = len([r for r in platform_records if r.brand_mentioned])
+                    platform_rate = (platform_cited / len(platform_records) * 100)
+                    platform_stats[platform_name] = {
+                        'total': len(platform_records),
+                        'cited': platform_cited,
+                        'rate': platform_rate
+                    }
+
+                    if platform_rate < 25 and len(platform_records) >= 5:
+                        recommendations.append({
+                            'type': 'technical',
+                            'title': f'Low citation rate on {platform_name.title()} - platform optimization',
+                            'description': (
+                                f"Citation rate on {platform_name.title()} is only {platform_rate:.1f}%. "
+                                f"Different AI platforms have different citation preferences. Research how "
+                                f"{platform_name.title()} selects sources and optimize content accordingly. "
+                                f"Consider: structured data, clear factual statements, and authoritative sources."
+                            ),
+                            'priority': 'medium',
+                            'expected_impact': 55,
+                            'implementation_effort': 'medium',
+                            'ai_platform': platform_name
+                        })
+
+            # 4. Competitor analysis (if competitor names provided)
+            if competitor_names and len(competitor_names) > 0:
+                try:
+                    comparison = self.compare_competitors(
+                        competitor_names=competitor_names,
+                        days=days,
+                        platform=platform,
+                        brand_name=brand_name,
+                        db_session=db_session
+                    )
+
+                    brand_rank = comparison['comparison_summary'].get('brand_rank')
+                    if brand_rank and brand_rank > 1:
+                        leading_competitors = comparison['comparison_summary'].get('leading_competitors', [])
+                        if leading_competitors:
+                            top_competitor = leading_competitors[0]
+                            recommendations.append({
+                                'type': 'content',
+                                'title': 'Competitor analysis - learn from top performers',
+                                'description': (
+                                    f"Brand ranks #{brand_rank} in citation rate. "
+                                    f"Top competitor '{top_competitor['name']}' has "
+                                    f"{top_competitor['difference']:.1f}% higher citation rate. "
+                                    f"Analyze their content strategy, topics covered, and content depth. "
+                                    f"Identify content gaps where they are being cited but your brand is not."
+                                ),
+                                'priority': 'high',
+                                'expected_impact': 80,
+                                'implementation_effort': 'high',
+                                'ai_platform': platform or 'all'
+                            })
+                except Exception as e:
+                    self.logger.warning(f"Could not perform competitor analysis: {e}")
+
+            # 5. Analyze query patterns for content gaps
+            uncited_records = [r for r in citation_records if not r.brand_mentioned]
+            if len(uncited_records) > len(citation_records) * 0.5:  # More than 50% uncited
+                recommendations.append({
+                    'type': 'keyword',
+                    'title': 'Content gaps detected - analyze uncited queries',
+                    'description': (
+                        f"Over {len(uncited_records)} queries ({len(uncited_records)/len(citation_records)*100:.1f}%) "
+                        f"did not result in brand citations. Analyze these queries to identify content gaps. "
+                        f"Create targeted content addressing these specific user questions and needs."
+                    ),
+                    'priority': 'medium',
+                    'expected_impact': 65,
+                    'implementation_effort': 'medium',
+                    'ai_platform': platform or 'all'
+                })
+
+            # 6. Freshness recommendation
+            if total_queries > 0:
+                recommendations.append({
+                    'type': 'content',
+                    'title': 'Maintain content freshness and relevance',
+                    'description': (
+                        "AI assistants favor recent, up-to-date content. Regularly update existing "
+                        "content with new information, statistics, and examples. Publish new content "
+                        "consistently to maintain visibility in AI assistant responses."
+                    ),
+                    'priority': 'low',
+                    'expected_impact': 45,
+                    'implementation_effort': 'low',
+                    'ai_platform': platform or 'all'
+                })
+
+            # 7. Structured data recommendation
+            if citation_rate < 60:
+                recommendations.append({
+                    'type': 'technical',
+                    'title': 'Implement structured data markup',
+                    'description': (
+                        "Add schema.org structured data to your content to help AI assistants better "
+                        "understand and extract information. Use appropriate schema types like Article, "
+                        "Product, HowTo, FAQPage, etc. This can improve citation rates by making content "
+                        "more machine-readable."
+                    ),
+                    'priority': 'medium',
+                    'expected_impact': 50,
+                    'implementation_effort': 'medium',
+                    'ai_platform': platform or 'all'
+                })
+
+            self.logger.info(f"Generated {len(recommendations)} recommendations")
+
+            # Save recommendations to database if requested
+            saved_recommendations = []
+            if save_to_db:
+                for rec in recommendations:
+                    try:
+                        db_rec = OptimizationRecommendation(
+                            recommendation_type=rec['type'],
+                            title=rec['title'],
+                            description=rec['description'],
+                            priority=rec['priority'],
+                            status='pending',
+                            expected_impact=rec['expected_impact'],
+                            implementation_effort=rec['implementation_effort'],
+                            ai_platform=rec['ai_platform'],
+                            created_at=datetime.utcnow(),
+                            updated_at=datetime.utcnow()
+                        )
+                        db_session.add(db_rec)
+                        db_session.flush()  # Flush to get the ID
+
+                        # Add ID to recommendation
+                        rec['id'] = db_rec.id
+                        rec['status'] = 'pending'
+                        saved_recommendations.append(rec)
+
+                        self.logger.debug(f"Saved recommendation {db_rec.id}: {rec['title']}")
+                    except Exception as e:
+                        self.logger.error(f"Error saving recommendation to database: {e}")
+                        # Continue with next recommendation
+
+                # Commit all recommendations
+                db_session.commit()
+                self.logger.info(f"Saved {len(saved_recommendations)} recommendations to database")
+            else:
+                # Just add status to each recommendation
+                for rec in recommendations:
+                    rec['status'] = 'pending'
+                saved_recommendations = recommendations
+
+            # Generate summary
+            summary = {
+                'total_recommendations': len(saved_recommendations),
+                'high_priority': len([r for r in saved_recommendations if r['priority'] == 'high']),
+                'medium_priority': len([r for r in saved_recommendations if r['priority'] == 'medium']),
+                'low_priority': len([r for r in saved_recommendations if r['priority'] == 'low']),
+                'by_type': {},
+                'by_platform': {}
+            }
+
+            # Count by type
+            for rec in saved_recommendations:
+                rec_type = rec['type']
+                summary['by_type'][rec_type] = summary['by_type'].get(rec_type, 0) + 1
+
+            # Count by platform
+            for rec in saved_recommendations:
+                rec_platform = rec['ai_platform']
+                summary['by_platform'][rec_platform] = summary['by_platform'].get(rec_platform, 0) + 1
+
+            return {
+                'recommendations': saved_recommendations,
+                'summary': summary,
+                'analysis_period': {
+                    'start_date': start_date.isoformat(),
+                    'end_date': end_date.isoformat(),
+                    'days': days,
+                    'platform': platform or 'all'
+                }
+            }
+
+        except ValueError:
+            # Re-raise validation errors
+            raise
+        except Exception as e:
+            # Log and wrap unexpected errors
+            self.logger.error(f"Error generating recommendations: {e}", exc_info=True)
+            raise ContentGenerationError(f"Failed to generate recommendations: {str(e)}")
+        finally:
+            # Close session if we created it
+            if not session_provided and db_session:
+                db_session.close()
