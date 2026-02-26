@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ApiKeyManager } from "@/components/ApiKeyManager";
 import { ServiceConfigForm, ServiceType } from "@/components/ServiceConfigForm";
+import { WorkspaceSettings } from "@/components/WorkspaceSettings";
 import { cn } from "@/lib/utils";
 
 /**
@@ -125,17 +126,7 @@ export function ConfigurationDashboard({
         </div>
       )}
 
-      {activeTab === "workspace" && (
-        <div className="rounded-lg border border-slate-200 bg-white p-6">
-          <h2 className="mb-4 text-lg font-semibold text-slate-900">
-            Workspace Settings
-          </h2>
-          <p className="text-sm text-slate-600">
-            Manage workspace name, team members, and invitations.
-            Workspace settings will be displayed here in a future subtask.
-          </p>
-        </div>
-      )}
+      {activeTab === "workspace" && <WorkspaceSettings />}
     </div>
   );
 }
