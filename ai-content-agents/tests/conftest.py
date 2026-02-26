@@ -12,6 +12,17 @@ import pytest
 from pathlib import Path
 from unittest.mock import Mock
 
+from tests.fixtures.mock_responses import (
+    create_mock_client,
+    create_error_client,
+    MOCK_BLOG_RESPONSE,
+    MOCK_SOCIAL_RESPONSE,
+    MOCK_EMAIL_RESPONSE,
+    MOCK_VIDEO_SCRIPT_RESPONSE,
+    MOCK_API_ERROR,
+    create_mock_response
+)
+
 
 @pytest.fixture
 def mock_anthropic_client():
@@ -19,11 +30,37 @@ def mock_anthropic_client():
     Mock Anthropic API client that returns realistic responses.
     Used across all agent tests to avoid real API calls.
     """
-    mock = Mock()
-    mock.messages.create.return_value = Mock(
-        content=[Mock(text="Generated blog content about test topic")]
-    )
-    return mock
+    return create_mock_client(MOCK_BLOG_RESPONSE)
+
+
+@pytest.fixture
+def mock_blog_client():
+    """Mock client for blog content generation"""
+    return create_mock_client(MOCK_BLOG_RESPONSE)
+
+
+@pytest.fixture
+def mock_social_client():
+    """Mock client for social media content generation"""
+    return create_mock_client(MOCK_SOCIAL_RESPONSE)
+
+
+@pytest.fixture
+def mock_email_client():
+    """Mock client for email content generation"""
+    return create_mock_client(MOCK_EMAIL_RESPONSE)
+
+
+@pytest.fixture
+def mock_video_script_client():
+    """Mock client for video script generation"""
+    return create_mock_client(MOCK_VIDEO_SCRIPT_RESPONSE)
+
+
+@pytest.fixture
+def mock_error_client():
+    """Mock client that raises API errors"""
+    return create_error_client(MOCK_API_ERROR)
 
 
 @pytest.fixture
