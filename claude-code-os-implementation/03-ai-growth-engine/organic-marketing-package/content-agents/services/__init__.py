@@ -7,10 +7,13 @@ and database transactions.
 
 Available Services:
     - PublishingService: Handles publishing scheduled content to TikTok Shop
+    - NotificationService: Handles notifications for publishing events
 """
 
 from .publishing_service import PublishingService
+from .notification_service import NotificationService
 
 __all__ = [
-    "PublishingService"
+    "PublishingService",
+    "NotificationService"
 ]
