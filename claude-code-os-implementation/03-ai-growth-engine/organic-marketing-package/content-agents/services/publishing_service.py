@@ -5,6 +5,7 @@ This service handles the actual publishing of scheduled content to TikTok Shop,
 including retry logic, error handling, and publish attempt logging.
 """
 import json
+import os
 import time
 from datetime import datetime
 from typing import Optional, Dict, Any
@@ -82,17 +83,32 @@ class PublishingService:
             if tiktok_client:
                 self.tiktok_client = tiktok_client
             else:
-                if not TIKTOK_SHOP_APP_KEY or not TIKTOK_SHOP_APP_SECRET:
-                    raise ConfigurationError(
-                        "Missing TikTok Shop credentials",
-                        "TIKTOK_SHOP_APP_KEY and TIKTOK_SHOP_APP_SECRET are required"
-                    )
+                # Check if we should use mock client for testing
+                use_mock = os.getenv('USE_MOCK_TIKTOK_CLIENT', '').lower() == 'true'
 
-                self.tiktok_client = TikTokShopClient(
-                    app_key=TIKTOK_SHOP_APP_KEY,
-                    app_secret=TIKTOK_SHOP_APP_SECRET,
-                    access_token=TIKTOK_SHOP_ACCESS_TOKEN
-                )
+                if use_mock:
+                    # Import mock client for testing
+                    try:
+                        from tests.mocks.mock_tiktok_client import MockTikTokShopClient
+                        self.tiktok_client = MockTikTokShopClient()
+                        self.logger.info("Using mock TikTok client for testing")
+                    except ImportError:
+                        self.logger.warning("Mock client requested but not available, using real client")
+                        use_mock = False
+
+                if not use_mock:
+                    # Use real TikTok Shop client
+                    if not TIKTOK_SHOP_APP_KEY or not TIKTOK_SHOP_APP_SECRET:
+                        raise ConfigurationError(
+                            "Missing TikTok Shop credentials",
+                            "TIKTOK_SHOP_APP_KEY and TIKTOK_SHOP_APP_SECRET are required"
+                        )
+
+                    self.tiktok_client = TikTokShopClient(
+                        app_key=TIKTOK_SHOP_APP_KEY,
+                        app_secret=TIKTOK_SHOP_APP_SECRET,
+                        access_token=TIKTOK_SHOP_ACCESS_TOKEN
+                    )
 
             self.logger.info("Publishing service initialized successfully")
 
