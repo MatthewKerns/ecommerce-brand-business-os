@@ -74,8 +74,8 @@ function parsePostFile(filename: string): BlogPost | null {
     };
 
     return post;
-  } catch (error) {
-    console.error(`Error parsing post file ${filename}:`, error);
+  } catch {
+    // Silently skip invalid files
     return null;
   }
 }
