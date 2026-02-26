@@ -135,6 +135,64 @@ python generate_content.py amazon title "Product Name" --features "feature1,feat
 
 See [`ai-content-agents/README.md`](ai-content-agents/README.md) for the full CLI reference and Python API.
 
+## Configuration
+
+Both the Business OS and AI Content Agents require proper configuration before use. The system supports multi-environment deployment (development, staging, production) with secure credential management.
+
+### Quick Configuration Setup
+
+1. **Generate encryption keys** for secure credential storage:
+   ```bash
+   # For Python services
+   python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+
+   # For TypeScript services
+   node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+   ```
+
+2. **Create environment files** from examples:
+   ```bash
+   # Python AI content agents
+   cd ai-content-agents
+   cp .env.example .env.development
+
+   # TypeScript email automation (if applicable)
+   cd claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/04-email-marketing-automation/implementation
+   cp .env.example .env.development
+   ```
+
+3. **Configure credentials** in `.env.development`:
+   ```bash
+   ENVIRONMENT=development
+   ENCRYPTION_KEY=your-generated-key
+   ANTHROPIC_API_KEY=sk-ant-your-key-here
+   ```
+
+4. **Verify setup**:
+   ```bash
+   # Python service
+   cd ai-content-agents
+   python test_setup.py
+
+   # TypeScript service (if applicable)
+   npm run build
+   ```
+
+### Full Configuration Guide
+
+For complete documentation on configuration, secrets management, OAuth setup, multi-environment deployment, and troubleshooting, see:
+
+**[📖 CONFIGURATION.md](CONFIGURATION.md)** — Complete configuration and secrets management guide
+
+Topics covered:
+- Environment-specific configuration (development/staging/production)
+- Secure credential storage with encryption
+- Gmail OAuth setup for email automation
+- API key management (Anthropic, Google, OpenAI)
+- Security best practices and secrets rotation
+- CI/CD integration and deployment checklists
+- Troubleshooting common configuration issues
+
 ## Built With
 
 - [Claude Code](https://docs.anthropic.com/en/docs/claude-code) — Anthropic's CLI for AI-powered development and automation
