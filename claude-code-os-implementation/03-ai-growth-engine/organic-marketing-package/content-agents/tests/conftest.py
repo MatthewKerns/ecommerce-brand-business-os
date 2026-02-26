@@ -23,7 +23,10 @@ from tests.fixtures.mock_responses import (
     MOCK_API_ERROR,
     create_mock_response,
     MOCK_AMAZON_RESPONSE,
-    MOCK_COMPETITOR_RESPONSE
+    MOCK_COMPETITOR_RESPONSE,
+    MOCK_TIKTOK_VIDEO_SCRIPT_RESPONSE,
+    MOCK_TIKTOK_CALENDAR_RESPONSE,
+    MOCK_TIKTOK_VALIDATION_RESPONSE
 )
 
 
@@ -145,3 +148,21 @@ def mock_amazon_client():
 def mock_competitor_client():
     """Mock client for competitor analysis"""
     return create_mock_client(MOCK_COMPETITOR_RESPONSE)
+
+
+@pytest.fixture
+def mock_tiktok_script_client():
+    """Mock client for TikTok video script generation"""
+    return create_mock_client(MOCK_TIKTOK_VIDEO_SCRIPT_RESPONSE)
+
+
+@pytest.fixture
+def mock_tiktok_calendar_client():
+    """Mock client for TikTok calendar generation"""
+    return create_mock_client(MOCK_TIKTOK_CALENDAR_RESPONSE)
+
+
+@pytest.fixture
+def mock_tiktok_validation_client():
+    """Mock client for TikTok content validation"""
+    return create_mock_client(MOCK_TIKTOK_VALIDATION_RESPONSE)
