@@ -56,8 +56,13 @@ class ContentGenerationError(AgentError):
     """Raised when content generation fails"""
 
     def __init__(self, agent_name: str, prompt: str, api_error: str = None):
+        # Include API error in message if available
+        message = f"Content generation failed for agent '{agent_name}'"
+        if api_error:
+            message += f": {api_error}"
+
         super().__init__(
-            message=f"Content generation failed for agent '{agent_name}'",
+            message=message,
             error_code="AGENT_002",
             details={
                 "agent_name": agent_name,

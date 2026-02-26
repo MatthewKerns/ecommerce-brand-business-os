@@ -166,7 +166,7 @@ class TestGenerateBlogPost:
 
     @patch('agents.base_agent.anthropic.Anthropic')
     def test_generate_blog_post_with_invalid_pillar(
-        self, mock_anthropic_class, mock_blog_client, capsys
+        self, mock_anthropic_class, mock_blog_client, caplog
     ):
         """Test blog post generation with invalid content pillar"""
         mock_anthropic_class.return_value = mock_blog_client
@@ -179,10 +179,9 @@ class TestGenerateBlogPost:
             content_pillar=invalid_pillar
         )
 
-        # Verify warning was printed
-        captured = capsys.readouterr()
-        assert "Warning" in captured.out
-        assert invalid_pillar in captured.out
+        # Verify warning was logged
+        assert any("not in defined pillars" in record.message for record in caplog.records)
+        assert any(invalid_pillar in record.message for record in caplog.records)
 
     @patch('agents.base_agent.anthropic.Anthropic')
     def test_generate_blog_post_metadata(
@@ -253,7 +252,7 @@ class TestGenerateBlogSeries:
 
     @patch('agents.base_agent.anthropic.Anthropic')
     def test_generate_blog_series_basic(
-        self, mock_anthropic_class, mock_blog_client, capsys
+        self, mock_anthropic_class, mock_blog_client, caplog
     ):
         """Test basic blog series outline generation"""
         mock_anthropic_class.return_value = mock_blog_client
@@ -272,9 +271,8 @@ class TestGenerateBlogSeries:
         assert isinstance(path, Path)
         assert path.exists()
 
-        # Verify outline message was printed
-        captured = capsys.readouterr()
-        assert "Blog Series Outline" in captured.out
+        # Verify outline generation was logged
+        assert any("Blog series outline generated successfully" in record.message for record in caplog.records)
 
     @patch('agents.base_agent.anthropic.Anthropic')
     def test_generate_blog_series_custom_post_count(

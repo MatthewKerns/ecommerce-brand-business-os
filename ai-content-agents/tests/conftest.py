@@ -9,8 +9,9 @@ This module provides reusable test fixtures for:
 """
 
 import pytest
+import os
 from pathlib import Path
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 from tests.fixtures.mock_responses import (
     create_mock_client,
@@ -24,6 +25,24 @@ from tests.fixtures.mock_responses import (
     MOCK_AMAZON_RESPONSE,
     MOCK_COMPETITOR_RESPONSE
 )
+
+
+@pytest.fixture(autouse=True)
+def mock_anthropic_api_key(monkeypatch):
+    """
+    Automatically mock the ANTHROPIC_API_KEY environment variable for all tests.
+    This prevents AuthenticationError when tests don't have a real API key.
+    """
+    # Set environment variable
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-api-key-12345")
+
+    # Patch in config module
+    from config import config as config_module
+    monkeypatch.setattr(config_module, "ANTHROPIC_API_KEY", "test-api-key-12345")
+
+    # Also need to patch where base_agent imports it from
+    from agents import base_agent
+    monkeypatch.setattr(base_agent, "ANTHROPIC_API_KEY", "test-api-key-12345")
 
 
 @pytest.fixture

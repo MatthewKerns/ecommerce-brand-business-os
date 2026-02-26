@@ -39,6 +39,9 @@ class CompetitorAgent(BaseAgent):
         Returns:
             Tuple of (analysis, file_path)
         """
+        self.logger.info(f"Analyzing competitor listing for '{competitor_name}'")
+        self.logger.debug(f"Price: ${price}, Rating: {rating}, Reviews: {review_count}")
+
         bullets_text = "\n".join([f"{i+1}. {b}" for i, b in enumerate(bullet_points)])
         metrics_text = ""
         if price:
@@ -126,7 +129,7 @@ FORMAT:
 
 Write the complete competitive analysis now."""
 
-        return self.generate_and_save(
+        content, path = self.generate_and_save(
             prompt=prompt,
             output_dir=COMPETITOR_OUTPUT_DIR,
             filename=f"competitor_{competitor_name.replace(' ', '_')}_analysis.md",
@@ -138,6 +141,9 @@ Write the complete competitive analysis now."""
             },
             max_tokens=4096
         )
+
+        self.logger.info(f"Successfully generated competitor analysis: {path}")
+        return content, path
 
     def analyze_competitor_reviews(
         self,
@@ -156,6 +162,8 @@ Write the complete competitive analysis now."""
         Returns:
             Tuple of (analysis, file_path)
         """
+        self.logger.info(f"Analyzing reviews for competitor '{competitor_name}' ({len(positive_reviews)} positive, {len(negative_reviews)} negative)")
+
         positive_text = "\n".join([f"- {r}" for r in positive_reviews])
         negative_text = "\n".join([f"- {r}" for r in negative_reviews])
 
@@ -228,7 +236,7 @@ FORMAT:
 
 Write the complete review analysis now."""
 
-        return self.generate_and_save(
+        content, path = self.generate_and_save(
             prompt=prompt,
             output_dir=COMPETITOR_OUTPUT_DIR,
             filename=f"competitor_{competitor_name.replace(' ', '_')}_reviews.md",
@@ -239,6 +247,9 @@ Write the complete review analysis now."""
             },
             max_tokens=4096
         )
+
+        self.logger.info(f"Successfully generated review analysis: {path}")
+        return content, path
 
     def compare_multiple_competitors(
         self,
@@ -259,6 +270,9 @@ Write the complete review analysis now."""
         Returns:
             Tuple of (comparison, file_path)
         """
+        self.logger.info(f"Comparing {len(competitors)} competitors")
+        self.logger.debug(f"Competitors: {[c['name'] for c in competitors]}")
+
         comp_text = "\n\n".join([
             f"""COMPETITOR {i+1}: {c['name']}
 - Price: ${c.get('price', 'Unknown')}
@@ -338,7 +352,7 @@ FORMAT:
 
 Write the complete competitive comparison now."""
 
-        return self.generate_and_save(
+        content, path = self.generate_and_save(
             prompt=prompt,
             output_dir=COMPETITOR_OUTPUT_DIR,
             filename="competitive_landscape_analysis.md",
@@ -348,6 +362,9 @@ Write the complete competitive comparison now."""
             },
             max_tokens=4096
         )
+
+        self.logger.info(f"Successfully generated competitive landscape analysis: {path}")
+        return content, path
 
     def identify_content_gaps(
         self,
@@ -366,6 +383,8 @@ Write the complete competitive comparison now."""
         Returns:
             Tuple of (gap_analysis, file_path)
         """
+        self.logger.info(f"Analyzing {len(competitor_content)} pieces of competitor content for gaps")
+
         content_text = "\n\n".join([
             f"""- {c['competitor_name']}: {c['content_type']} on '{c['topic']}' {f"(Performance: {c.get('performance', 'Unknown')})" if 'performance' in c else ''}"""
             for c in competitor_content
@@ -432,7 +451,7 @@ FORMAT:
 
 Write the complete content gap analysis now."""
 
-        return self.generate_and_save(
+        content, path = self.generate_and_save(
             prompt=prompt,
             output_dir=COMPETITOR_OUTPUT_DIR,
             filename="content_gap_analysis.md",
@@ -441,3 +460,6 @@ Write the complete content gap analysis now."""
             },
             max_tokens=4096
         )
+
+        self.logger.info(f"Successfully generated content gap analysis: {path}")
+        return content, path

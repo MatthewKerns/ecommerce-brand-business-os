@@ -31,6 +31,9 @@ class AmazonAgent(BaseAgent):
         Returns:
             Tuple of (title, file_path)
         """
+        self.logger.info(f"Generating Amazon product title for '{product_name}'")
+        self.logger.debug(f"Key features: {key_features}, Keywords: {target_keywords}")
+
         prompt = f"""Create an optimized Amazon product title:
 
 PRODUCT: {product_name}
@@ -66,7 +69,7 @@ OPTION 3: [title]
 
 RECOMMENDED: [best option with brief explanation why]"""
 
-        return self.generate_and_save(
+        content, path = self.generate_and_save(
             prompt=prompt,
             output_dir=AMAZON_OUTPUT_DIR,
             filename=f"title_{product_name.replace(' ', '_')}.md",
@@ -76,6 +79,9 @@ RECOMMENDED: [best option with brief explanation why]"""
                 "target_keywords": target_keywords
             }
         )
+
+        self.logger.info(f"Successfully generated product title: {path}")
+        return content, path
 
     def generate_bullet_points(
         self,
@@ -94,6 +100,8 @@ RECOMMENDED: [best option with brief explanation why]"""
         Returns:
             Tuple of (bullets, file_path)
         """
+        self.logger.info(f"Generating Amazon bullet points for '{product_name}', audience='{target_audience}'")
+
         features_text = "\n".join([f"- Feature: {f.get('feature', '')}, Benefit: {f.get('benefit', '')}" for f in features])
 
         prompt = f"""Create 5 Amazon bullet points for:
@@ -152,7 +160,7 @@ Positioning:
 - Professional-grade quality
 - Tournament-tested"""
 
-        return self.generate_and_save(
+        content, path = self.generate_and_save(
             prompt=prompt,
             output_dir=AMAZON_OUTPUT_DIR,
             system_context=system_context,
@@ -163,6 +171,9 @@ Positioning:
                 "target_audience": target_audience
             }
         )
+
+        self.logger.info(f"Successfully generated bullet points: {path}")
+        return content, path
 
     def generate_product_description(
         self,
@@ -183,6 +194,8 @@ Positioning:
         Returns:
             Tuple of (description, file_path)
         """
+        self.logger.info(f"Generating Amazon product description for '{product_name}'")
+
         prompt = f"""Create an Amazon product description:
 
 PRODUCT: {product_name}
@@ -221,7 +234,7 @@ TONE:
 
 Write the complete product description now."""
 
-        return self.generate_and_save(
+        content, path = self.generate_and_save(
             prompt=prompt,
             output_dir=AMAZON_OUTPUT_DIR,
             filename=f"description_{product_name.replace(' ', '_')}.md",
@@ -231,6 +244,9 @@ Write the complete product description now."""
                 "warranty": warranty_info
             }
         )
+
+        self.logger.info(f"Successfully generated product description: {path}")
+        return content, path
 
     def generate_a_plus_content(
         self,
@@ -247,6 +263,8 @@ Write the complete product description now."""
         Returns:
             Tuple of (a_plus_content, file_path)
         """
+        self.logger.info(f"Generating Amazon A+ Content for '{product_name}', modules={modules}")
+
         modules_text = "\n".join([f"- {m}" for m in modules])
 
         prompt = f"""Create Amazon A+ Content for:
@@ -282,7 +300,7 @@ REQUIREMENTS:
 
 Write the complete A+ Content plan now."""
 
-        return self.generate_and_save(
+        content, path = self.generate_and_save(
             prompt=prompt,
             output_dir=AMAZON_OUTPUT_DIR,
             filename=f"aplus_{product_name.replace(' ', '_')}.md",
@@ -291,6 +309,9 @@ Write the complete A+ Content plan now."""
                 "modules": modules
             }
         )
+
+        self.logger.info(f"Successfully generated A+ Content: {path}")
+        return content, path
 
     def optimize_existing_listing(
         self,
@@ -311,6 +332,9 @@ Write the complete A+ Content plan now."""
         Returns:
             Tuple of (optimization_report, file_path)
         """
+        self.logger.info(f"Optimizing existing Amazon listing")
+        self.logger.debug(f"Performance data: {performance_data}")
+
         bullets_text = "\n".join([f"{i+1}. {b}" for i, b in enumerate(current_bullets)])
         perf_text = f"\n\nPERFORMANCE DATA:\n{performance_data}" if performance_data else ""
 
@@ -362,7 +386,7 @@ FORMAT:
 
 Write the complete optimization report now."""
 
-        return self.generate_and_save(
+        content, path = self.generate_and_save(
             prompt=prompt,
             output_dir=AMAZON_OUTPUT_DIR,
             filename="listing_optimization_report.md",
@@ -372,6 +396,9 @@ Write the complete optimization report now."""
             },
             max_tokens=4096
         )
+
+        self.logger.info(f"Successfully generated listing optimization report: {path}")
+        return content, path
 
     def generate_backend_keywords(
         self,
@@ -390,6 +417,8 @@ Write the complete optimization report now."""
         Returns:
             Tuple of (keywords, file_path)
         """
+        self.logger.info(f"Generating Amazon backend keywords for '{product_name}', category='{category}'")
+
         use_cases_text = ", ".join(target_use_cases)
 
         prompt = f"""Generate Amazon backend search terms:
@@ -425,7 +454,7 @@ Then provide:
 
 Write the backend keywords now."""
 
-        return self.generate_and_save(
+        content, path = self.generate_and_save(
             prompt=prompt,
             output_dir=AMAZON_OUTPUT_DIR,
             filename=f"backend_keywords_{product_name.replace(' ', '_')}.md",
@@ -434,3 +463,6 @@ Write the backend keywords now."""
                 "category": category
             }
         )
+
+        self.logger.info(f"Successfully generated backend keywords: {path}")
+        return content, path

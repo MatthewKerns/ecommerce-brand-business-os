@@ -1,0 +1,10 @@
+{
+  "product_name": "Test Product",
+  "features": [
+    {
+      "feature": "Test",
+      "benefit": "Benefit"
+    }
+  ],
+  "target_audience": "Tournament players and serious collectors"
+}

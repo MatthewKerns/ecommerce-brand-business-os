@@ -35,9 +35,11 @@ class BlogAgent(BaseAgent):
         Returns:
             Tuple of (blog_content, file_path)
         """
+        self.logger.info(f"Generating blog post: topic='{topic}', pillar={content_pillar}, word_count={word_count}")
+
         # Validate content pillar
         if content_pillar and content_pillar not in CONTENT_PILLARS:
-            print(f"Warning: '{content_pillar}' not in defined pillars. Using anyway.")
+            self.logger.warning(f"Content pillar '{content_pillar}' not in defined pillars. Using anyway.")
 
         # Build the prompt
         prompt = f"""Create a blog post on the following topic:
@@ -109,6 +111,7 @@ Tone for Blog:
             max_tokens=4096
         )
 
+        self.logger.info(f"Successfully generated blog post: {path}")
         return content, path
 
     def generate_blog_series(
@@ -128,6 +131,8 @@ Tone for Blog:
         Returns:
             List of (content, path) tuples
         """
+        self.logger.info(f"Generating blog series: topic='{series_topic}', num_posts={num_posts}, pillar={content_pillar}")
+
         # First, get post topics from Claude
         outline_prompt = f"""Create an outline for a {num_posts}-part blog series on:
 
@@ -143,14 +148,17 @@ For each post in the series, provide:
 Format as a numbered list with clear separation between posts."""
 
         outline = self.generate_content(outline_prompt)
-        print(f"\n📝 Blog Series Outline:\n{outline}\n")
+        self.logger.info("Blog series outline generated successfully")
+        self.logger.debug(f"Outline:\n{outline}")
 
         # Parse outline and generate each post
         # (In real implementation, you'd parse the outline programmatically)
         # For now, return the outline and let user generate posts individually
-        print("💡 Outline generated. Use generate_blog_post() for each post individually.")
+        self.logger.info("Outline generated. Use generate_blog_post() for each post individually.")
 
-        return [(outline, self.save_output(outline, BLOG_OUTPUT_DIR, "series_outline.md"))]
+        path = self.save_output(outline, BLOG_OUTPUT_DIR, "series_outline.md")
+        self.logger.info(f"Saved series outline to {path}")
+        return [(outline, path)]
 
     def generate_listicle(
         self,
@@ -169,6 +177,8 @@ Format as a numbered list with clear separation between posts."""
         Returns:
             Tuple of (content, path)
         """
+        self.logger.info(f"Generating listicle: topic='{topic}', num_items={num_items}, pillar={content_pillar}")
+
         prompt = f"""Create a listicle blog post:
 
 TOPIC: {topic}
@@ -187,7 +197,7 @@ Create a "{num_items} [Topic]" style post that:
 
 Use the brand voice - make it exciting and empowering, not generic."""
 
-        return self.generate_and_save(
+        content, path = self.generate_and_save(
             prompt=prompt,
             output_dir=BLOG_OUTPUT_DIR,
             metadata={
@@ -197,6 +207,9 @@ Use the brand voice - make it exciting and empowering, not generic."""
                 "content_pillar": content_pillar
             }
         )
+
+        self.logger.info(f"Successfully generated listicle: {path}")
+        return content, path
 
     def generate_how_to_guide(
         self,
@@ -215,6 +228,8 @@ Use the brand voice - make it exciting and empowering, not generic."""
         Returns:
             Tuple of (content, path)
         """
+        self.logger.info(f"Generating how-to guide: topic='{topic}', audience='{target_audience}', level={difficulty_level}")
+
         prompt = f"""Create a comprehensive how-to guide:
 
 TOPIC: {topic}
@@ -231,7 +246,7 @@ Create a practical guide that:
 
 Make it actionable and empowering. Readers should finish feeling capable and ready."""
 
-        return self.generate_and_save(
+        content, path = self.generate_and_save(
             prompt=prompt,
             output_dir=BLOG_OUTPUT_DIR,
             metadata={
@@ -241,3 +256,6 @@ Make it actionable and empowering. Readers should finish feeling capable and rea
                 "difficulty": difficulty_level
             }
         )
+
+        self.logger.info(f"Successfully generated how-to guide: {path}")
+        return content, path

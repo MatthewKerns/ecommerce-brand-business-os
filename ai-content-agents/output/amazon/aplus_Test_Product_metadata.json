@@ -1,0 +1,7 @@
+{
+  "product_name": "Test Product",
+  "modules": [
+    "Module1",
+    "Module2"
+  ]
+}

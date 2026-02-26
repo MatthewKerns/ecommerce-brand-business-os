@@ -1,0 +1,8 @@
+{
+  "product_name": "Deck Box",
+  "modules": [
+    "Hero image",
+    "Product benefits grid",
+    "Technical specs"
+  ]
+}
