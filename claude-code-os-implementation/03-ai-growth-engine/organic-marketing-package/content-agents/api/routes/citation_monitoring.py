@@ -810,11 +810,154 @@ async def test_query(
         )
 
 
+@router.get(
+    "/citations",
+    response_model=CitationListResponse,
+    summary="Get citation records",
+    description="Retrieve citation records with optional filtering by date range, platform, and brand"
+)
+async def get_citations(
+    days: Optional[int] = Query(
+        default=30,
+        ge=1,
+        le=365,
+        description="Number of days to retrieve (from today backwards)"
+    ),
+    platform: Optional[str] = Query(
+        default=None,
+        pattern="^(chatgpt|claude|perplexity)$",
+        description="Filter by AI platform"
+    ),
+    brand_name: Optional[str] = Query(
+        default="BattlBox",
+        description="Filter by brand name"
+    ),
+    limit: Optional[int] = Query(
+        default=100,
+        ge=1,
+        le=1000,
+        description="Maximum number of records to return"
+    ),
+    request_id: str = Depends(get_request_id)
+) -> Dict[str, Any]:
+    """
+    Get citation records with optional filtering.
+
+    Args:
+        days: Number of days to retrieve (from today backwards)
+        platform: Filter by specific AI platform
+        brand_name: Filter by brand name
+        limit: Maximum number of records to return
+        request_id: Unique request identifier
+
+    Returns:
+        Citation list response with citation records and statistics
+
+    Raises:
+        HTTPException: If database query fails
+    """
+    logger.info(
+        f"[{request_id}] Retrieving citations: days={days}, "
+        f"platform={platform}, brand_name={brand_name}, limit={limit}"
+    )
+    start_time = time.time()
+
+    try:
+        # Import database dependencies
+        from database.models import CitationRecord
+        from database.connection import get_db_session
+        from datetime import timedelta
+
+        # Get database session
+        db_session = get_db_session()
+
+        try:
+            # Build query
+            query = db_session.query(CitationRecord)
+
+            # Apply brand filter
+            if brand_name:
+                query = query.filter(CitationRecord.brand_name == brand_name)
+
+            # Apply platform filter
+            if platform:
+                query = query.filter(CitationRecord.ai_platform == platform.lower())
+
+            # Apply date filter
+            if days:
+                cutoff_date = datetime.utcnow() - timedelta(days=days)
+                query = query.filter(CitationRecord.query_timestamp >= cutoff_date)
+
+            # Order by timestamp descending (most recent first)
+            query = query.order_by(CitationRecord.query_timestamp.desc())
+
+            # Apply limit
+            query = query.limit(limit)
+
+            # Execute query
+            records = query.all()
+
+            # Convert to response models
+            citations = []
+            for record in records:
+                citation = CitationRecordResponse(
+                    id=record.id,
+                    query=record.query,
+                    ai_platform=record.ai_platform,
+                    brand_mentioned=record.brand_mentioned,
+                    citation_context=record.citation_context,
+                    position_in_response=record.position_in_response,
+                    competitor_mentioned=record.competitor_mentioned,
+                    query_timestamp=record.query_timestamp,
+                    response_time_ms=record.response_time_ms
+                )
+                citations.append(citation)
+
+            # Calculate statistics
+            total_count = len(citations)
+            citations_found = sum(1 for c in citations if c.brand_mentioned)
+            citation_rate = citations_found / total_count if total_count > 0 else 0.0
+
+            # Calculate query time
+            query_time_ms = int((time.time() - start_time) * 1000)
+
+            # Build response
+            response = {
+                "request_id": request_id,
+                "citations": [c.dict() for c in citations],
+                "total_count": total_count,
+                "filter_days": days,
+                "filter_platform": platform,
+                "citation_rate": citation_rate
+            }
+
+            logger.info(
+                f"[{request_id}] Retrieved {total_count} citations in {query_time_ms}ms: "
+                f"citation_rate={citation_rate:.2%}"
+            )
+            return response
+
+        finally:
+            # Close database session
+            db_session.close()
+
+    except Exception as e:
+        logger.error(f"[{request_id}] Error retrieving citations: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": "CitationRetrievalError",
+                "message": f"Failed to retrieve citations: {str(e)}",
+                "request_id": request_id,
+                "timestamp": datetime.utcnow().isoformat() + "Z"
+            }
+        )
+
+
 # ============================================================================
 # Additional Route Handlers (to be implemented in subsequent subtasks)
 # ============================================================================
 
 # Placeholder comment: Additional route handlers will be implemented in:
-# - subtask-4-3: GET /citations endpoint
 # - subtask-4-4: GET /recommendations endpoint
 # - subtask-6-3: GET /alerts endpoint
