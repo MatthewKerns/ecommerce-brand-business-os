@@ -25,6 +25,7 @@ DEFAULT_MAX_TOKENS = 4096
 # TikTok Shop API Configuration
 TIKTOK_SHOP_APP_KEY = os.getenv("TIKTOK_SHOP_APP_KEY", "")
 TIKTOK_SHOP_APP_SECRET = os.getenv("TIKTOK_SHOP_APP_SECRET", "")
+TIKTOK_SHOP_ACCESS_TOKEN = os.getenv("TIKTOK_SHOP_ACCESS_TOKEN", "")
 TIKTOK_SHOP_API_BASE_URL = os.getenv("TIKTOK_SHOP_API_BASE_URL", "https://open-api.tiktokglobalshop.com")
 
 # Output configuration
