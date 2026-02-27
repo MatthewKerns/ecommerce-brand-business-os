@@ -7,9 +7,16 @@
  * - Conditional branching
  * - A/B testing support
  * - Pause/resume functionality
+ * - Performance metrics and reporting
  */
 
 import type { Lead } from '@/types/lead';
+import type { IAnalyticsStorage } from '@/core/analytics/storage';
+import { MetricsAggregationEngine } from '@/core/analytics/metrics';
+import type {
+  SequencePerformanceReport,
+  PerformanceReportOptions,
+} from '@/core/analytics/metrics';
 
 // ============================================================
 // Types
@@ -166,8 +173,20 @@ export class SequenceEngine {
   private sequences: Map<string, EmailSequence> = new Map();
   private enrollments: Map<string, SequenceEnrollment> = new Map();
   private leadEnrollments: Map<string, Set<string>> = new Map(); // leadId -> enrollmentIds
+  private metricsEngine?: MetricsAggregationEngine;
 
-  constructor() {}
+  constructor(analyticsStorage?: IAnalyticsStorage) {
+    if (analyticsStorage) {
+      this.metricsEngine = new MetricsAggregationEngine(analyticsStorage);
+    }
+  }
+
+  /**
+   * Set analytics storage (can be called after construction)
+   */
+  setAnalyticsStorage(storage: IAnalyticsStorage): void {
+    this.metricsEngine = new MetricsAggregationEngine(storage);
+  }
 
   /**
    * Create a new sequence
@@ -487,6 +506,118 @@ export class SequenceEngine {
     }
 
     return enrollments;
+  }
+
+  // ============================================================
+  // Performance Metrics & Reporting
+  // ============================================================
+
+  /**
+   * Get performance report for a sequence
+   */
+  async getSequencePerformanceReport(
+    sequenceId: string,
+    options: Omit<PerformanceReportOptions, 'sequenceId'> = {}
+  ): Promise<SequencePerformanceReport | null> {
+    if (!this.metricsEngine) {
+      throw new Error('Analytics storage not configured. Call setAnalyticsStorage() first.');
+    }
+
+    const sequence = this.sequences.get(sequenceId);
+    if (!sequence) {
+      return null;
+    }
+
+    return this.metricsEngine.generateSequenceReport(sequenceId, options);
+  }
+
+  /**
+   * Get performance reports for all active sequences
+   */
+  async getAllSequencePerformanceReports(
+    options: Omit<PerformanceReportOptions, 'sequenceId'> = {}
+  ): Promise<SequencePerformanceReport[]> {
+    if (!this.metricsEngine) {
+      throw new Error('Analytics storage not configured. Call setAnalyticsStorage() first.');
+    }
+
+    const activeSequences = Array.from(this.sequences.values()).filter(
+      s => s.status === 'active'
+    );
+
+    const reports = await Promise.all(
+      activeSequences.map(seq =>
+        this.metricsEngine!.generateSequenceReport(seq.id, options)
+      )
+    );
+
+    return reports;
+  }
+
+  /**
+   * Update sequence metrics from analytics
+   */
+  async updateSequenceMetrics(sequenceId: string): Promise<boolean> {
+    if (!this.metricsEngine) {
+      throw new Error('Analytics storage not configured. Call setAnalyticsStorage() first.');
+    }
+
+    const sequence = this.sequences.get(sequenceId);
+    if (!sequence) {
+      return false;
+    }
+
+    try {
+      const report = await this.metricsEngine.generateSequenceReport(sequenceId);
+
+      // Update sequence metrics
+      sequence.metrics = {
+        totalEnrolled: sequence.metrics?.totalEnrolled || 0,
+        currentlyActive: sequence.metrics?.currentlyActive || 0,
+        completed: sequence.metrics?.completed || 0,
+        converted: report.summary.totalConverted,
+        unsubscribed: report.summary.totalUnsubscribed,
+        avgCompletionTime: report.summary.averageTimeToConversion,
+        conversionRate: report.summary.conversionRate,
+      };
+
+      sequence.updatedAt = new Date();
+      this.sequences.set(sequenceId, sequence);
+
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
+   * Get sequence leaderboard by performance
+   */
+  async getSequenceLeaderboard(
+    metric: 'conversionRate' | 'openRate' | 'clickRate' = 'conversionRate',
+    limit: number = 10,
+    options: Omit<PerformanceReportOptions, 'sequenceId'> = {}
+  ): Promise<Array<{ sequence: EmailSequence; report: SequencePerformanceReport }>> {
+    if (!this.metricsEngine) {
+      throw new Error('Analytics storage not configured. Call setAnalyticsStorage() first.');
+    }
+
+    const sequences = Array.from(this.sequences.values());
+    const reportsWithSequences = await Promise.all(
+      sequences.map(async seq => ({
+        sequence: seq,
+        report: await this.metricsEngine!.generateSequenceReport(seq.id, options),
+      }))
+    );
+
+    // Sort by metric
+    reportsWithSequences.sort((a, b) => {
+      const aValue = a.report.summary[metric];
+      const bValue = b.report.summary[metric];
+      return bValue - aValue;
+    });
+
+    return reportsWithSequences.slice(0, limit);
   }
 
   // ============================================================

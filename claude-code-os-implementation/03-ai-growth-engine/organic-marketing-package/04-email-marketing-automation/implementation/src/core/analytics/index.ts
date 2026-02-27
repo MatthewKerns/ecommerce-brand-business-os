@@ -80,3 +80,14 @@ export {
   getAnalyticsStorage,
   resetAnalyticsStorage,
 } from './storage';
+
+// Metrics Aggregation Engine
+export {
+  MetricsAggregationEngine,
+  getMetricsEngine,
+  resetMetricsEngine,
+  type PerformanceReportOptions,
+  type PerformanceReport,
+  type ComparisonReport,
+  type SequencePerformanceReport,
+} from './metrics';
