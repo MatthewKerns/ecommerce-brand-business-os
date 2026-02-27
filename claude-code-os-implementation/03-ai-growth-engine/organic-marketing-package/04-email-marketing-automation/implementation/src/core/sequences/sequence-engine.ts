@@ -17,6 +17,8 @@ import type {
   SequencePerformanceReport,
   PerformanceReportOptions,
 } from '@/core/analytics/metrics';
+import { ABTestManager } from '@/core/analytics/ab-testing';
+import type { ABTest, ABVariant } from '@/core/analytics/ab-testing';
 
 // ============================================================
 // Types
@@ -174,10 +176,12 @@ export class SequenceEngine {
   private enrollments: Map<string, SequenceEnrollment> = new Map();
   private leadEnrollments: Map<string, Set<string>> = new Map(); // leadId -> enrollmentIds
   private metricsEngine?: MetricsAggregationEngine;
+  private abTestManager?: ABTestManager;
 
   constructor(analyticsStorage?: IAnalyticsStorage) {
     if (analyticsStorage) {
       this.metricsEngine = new MetricsAggregationEngine(analyticsStorage);
+      this.abTestManager = new ABTestManager(analyticsStorage);
     }
   }
 
@@ -186,6 +190,21 @@ export class SequenceEngine {
    */
   setAnalyticsStorage(storage: IAnalyticsStorage): void {
     this.metricsEngine = new MetricsAggregationEngine(storage);
+    this.abTestManager = new ABTestManager(storage);
+  }
+
+  /**
+   * Set A/B test manager (can be called after construction)
+   */
+  setABTestManager(manager: ABTestManager): void {
+    this.abTestManager = manager;
+  }
+
+  /**
+   * Get A/B test manager instance
+   */
+  getABTestManager(): ABTestManager | undefined {
+    return this.abTestManager;
   }
 
   /**
@@ -740,8 +759,30 @@ export class SequenceEngine {
         return assignedVariant;
       }
 
-      // Assign variant based on weights
-      const random = Math.random() * 100;
+      // Use ABTestManager if available for more sophisticated assignment
+      if (this.abTestManager && executionDetails?.testId) {
+        const variant = await this.abTestManager.assignVariant(
+          executionDetails.testId,
+          enrollment.leadId,
+          {
+            sequenceId: sequence.id,
+            messageId: executionDetails?.messageId,
+          }
+        );
+
+        if (variant) {
+          // Store assignment
+          if (!enrollment.abTestAssignments) {
+            enrollment.abTestAssignments = {};
+          }
+          enrollment.abTestAssignments[currentStep.id] = variant.id;
+          return variant.id;
+        }
+      }
+
+      // Fallback: Assign variant based on weights using consistent hashing
+      const hash = this.hashString(`${enrollment.leadId}-${currentStep.id}`);
+      const random = (hash % 10000) / 100; // 0-100 with 2 decimal precision
       let cumulative = 0;
       for (const variant of currentStep.config.variants) {
         cumulative += variant.weight;
@@ -754,9 +795,32 @@ export class SequenceEngine {
           return variant.stepId;
         }
       }
+
+      // Fallback to last variant (handles floating point precision issues)
+      const lastVariant = currentStep.config.variants[currentStep.config.variants.length - 1];
+      if (lastVariant) {
+        if (!enrollment.abTestAssignments) {
+          enrollment.abTestAssignments = {};
+        }
+        enrollment.abTestAssignments[currentStep.id] = lastVariant.stepId;
+        return lastVariant.stepId;
+      }
     }
 
     // Default: use first next step
     return currentStep.nextSteps?.[0] || null;
+  }
+
+  /**
+   * Hash string for consistent variant assignment
+   */
+  private hashString(str: string): number {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+    return Math.abs(hash);
   }
 }

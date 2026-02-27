@@ -91,3 +91,17 @@ export {
   type ComparisonReport,
   type SequencePerformanceReport,
 } from './metrics';
+
+// A/B Testing System
+export {
+  ABTestManager,
+  getABTestManager,
+  resetABTestManager,
+  type ABTest,
+  type ABVariant,
+  type ABTestStatus,
+  type ABTestType,
+  type ABTestAssignment,
+  type ABTestFilter,
+  type ABTestResults,
+} from './ab-testing';
