@@ -6,6 +6,8 @@
  * - Tracking pixel generation for email opens
  * - Click URL wrapping for link tracking
  * - Token parsing and verification
+ * - Email event data models
+ * - Analytics storage and metrics
  */
 
 // HMAC Utilities
@@ -31,3 +33,50 @@ export {
   type TrackingConfig,
   type ParsedTrackingData,
 } from './tracking';
+
+// Data Models
+export {
+  type EmailEvent,
+  type EmailEventType,
+  type ConversionType,
+  type BounceType,
+  type EmailEventData,
+  type ClickEventData,
+  type ConversionEventData,
+  type BounceEventData,
+  type OpenEventData,
+  type EmailEventCreateInput,
+  type ClickEventInput,
+  type ConversionEventInput,
+  type OpenEventInput,
+  type EmailEventFilter,
+  type EmailEventSort,
+  type EmailEventPagination,
+  type EmailEventListResponse,
+  type EmailMetrics,
+  type SequenceMetrics,
+  type StepMetrics,
+  type CampaignMetrics,
+  type VariantMetrics,
+  type TimeInterval,
+  type TimeSeriesDataPoint,
+  type TimeSeriesMetrics,
+  type FunnelStep,
+  type EmailFunnel,
+  type CohortMetrics,
+  type EmailEventCount,
+  type TopLink,
+  type DeviceBreakdown,
+  type LocationBreakdown,
+} from './models';
+
+// Storage
+export {
+  type IAnalyticsStorage,
+  type AnalyticsStorageConfig,
+  MemoryAnalyticsStorage,
+  GoogleSheetsAnalyticsStorage,
+  createAnalyticsStorage,
+  getAnalyticsStorage,
+  resetAnalyticsStorage,
+} from './storage';
