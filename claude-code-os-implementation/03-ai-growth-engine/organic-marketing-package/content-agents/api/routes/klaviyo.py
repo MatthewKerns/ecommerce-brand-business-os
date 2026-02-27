@@ -16,6 +16,7 @@ from api.dependencies import get_request_id
 from api.models import ErrorResponse
 from pydantic import BaseModel, Field, EmailStr
 from integrations.klaviyo.client import KlaviyoClient
+from integrations.klaviyo.sync_service import KlaviyoSyncService
 from integrations.klaviyo.models import KlaviyoProfile, KlaviyoEvent, KlaviyoList, ProfileLocation
 from integrations.klaviyo.exceptions import (
     KlaviyoAPIError,
@@ -1010,6 +1011,503 @@ async def remove_profile_from_list(
             detail={
                 "error": "ListOperationError",
                 "message": f"Failed to remove profile from list: {str(e)}",
+                "request_id": request_id,
+                "timestamp": datetime.utcnow().isoformat() + "Z"
+            }
+        )
+
+
+# ============================================================================
+# Sync Endpoints
+# ============================================================================
+
+class SyncProfilesRequest(BaseModel):
+    """Request model for syncing customer profiles."""
+    page_size: int = Field(
+        100,
+        ge=1,
+        le=100,
+        description="Number of orders to fetch per page"
+    )
+    max_pages: Optional[int] = Field(
+        None,
+        ge=1,
+        description="Maximum number of pages to process"
+    )
+    order_status: Optional[str] = Field(
+        None,
+        description="Filter by order status (e.g., 'COMPLETED', 'DELIVERED')"
+    )
+    start_time: Optional[int] = Field(
+        None,
+        description="Start timestamp for order creation time (Unix timestamp)"
+    )
+    end_time: Optional[int] = Field(
+        None,
+        description="End timestamp for order creation time (Unix timestamp)"
+    )
+    tiktok_app_key: Optional[str] = Field(
+        None,
+        description="TikTok Shop App Key (optional, uses env var if not provided)"
+    )
+    tiktok_app_secret: Optional[str] = Field(
+        None,
+        description="TikTok Shop App Secret (optional, uses env var if not provided)"
+    )
+    tiktok_access_token: Optional[str] = Field(
+        None,
+        description="TikTok Shop Access Token (optional, uses env var if not provided)"
+    )
+    use_mock_data: bool = Field(
+        False,
+        description="Use mock data for testing instead of real TikTok Shop API"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "page_size": 50,
+                "max_pages": 5,
+                "order_status": "COMPLETED",
+                "use_mock_data": False
+            }
+        }
+
+
+class SyncProfilesResponse(BaseModel):
+    """Response model for profile sync operations."""
+    request_id: str
+    profiles_synced: int
+    stats: Dict[str, int]
+    status: str
+    message: str
+    timestamp: datetime
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "request_id": "req_abc123",
+                "profiles_synced": 42,
+                "stats": {
+                    "orders_fetched": 50,
+                    "customers_found": 45,
+                    "customers_synced": 42,
+                    "customers_created": 30,
+                    "customers_updated": 12,
+                    "errors": 3
+                },
+                "status": "success",
+                "message": "Successfully synced 42 customer profiles from TikTok Shop",
+                "timestamp": "2024-01-15T10:30:00Z"
+            }
+        }
+
+
+class SyncEventsRequest(BaseModel):
+    """Request model for syncing order events."""
+    page_size: int = Field(
+        100,
+        ge=1,
+        le=100,
+        description="Number of orders to fetch per page"
+    )
+    max_pages: Optional[int] = Field(
+        None,
+        ge=1,
+        description="Maximum number of pages to process"
+    )
+    order_status: Optional[str] = Field(
+        None,
+        description="Filter by order status (e.g., 'COMPLETED', 'DELIVERED')"
+    )
+    start_time: Optional[int] = Field(
+        None,
+        description="Start timestamp for order creation time (Unix timestamp)"
+    )
+    end_time: Optional[int] = Field(
+        None,
+        description="End timestamp for order creation time (Unix timestamp)"
+    )
+    tiktok_app_key: Optional[str] = Field(
+        None,
+        description="TikTok Shop App Key (optional, uses env var if not provided)"
+    )
+    tiktok_app_secret: Optional[str] = Field(
+        None,
+        description="TikTok Shop App Secret (optional, uses env var if not provided)"
+    )
+    tiktok_access_token: Optional[str] = Field(
+        None,
+        description="TikTok Shop Access Token (optional, uses env var if not provided)"
+    )
+    use_mock_data: bool = Field(
+        False,
+        description="Use mock data for testing instead of real TikTok Shop API"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "page_size": 50,
+                "max_pages": 5,
+                "order_status": "COMPLETED",
+                "use_mock_data": False
+            }
+        }
+
+
+class SyncEventsResponse(BaseModel):
+    """Response model for event sync operations."""
+    request_id: str
+    events_tracked: int
+    stats: Dict[str, Any]
+    status: str
+    message: str
+    timestamp: datetime
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "request_id": "req_abc123",
+                "events_tracked": 50,
+                "stats": {
+                    "orders_fetched": 50,
+                    "events_tracked": 50,
+                    "events_failed": 0,
+                    "total_value": 1234.56
+                },
+                "status": "success",
+                "message": "Successfully tracked 50 order events in Klaviyo",
+                "timestamp": "2024-01-15T10:30:00Z"
+            }
+        }
+
+
+@router.post(
+    "/sync/profiles",
+    response_model=SyncProfilesResponse,
+    summary="Sync customer profiles from TikTok Shop",
+    description="Fetch orders from TikTok Shop and sync customer profiles to Klaviyo"
+)
+async def sync_profiles_from_tiktok(
+    request: SyncProfilesRequest,
+    request_id: str = Depends(get_request_id)
+) -> Dict[str, Any]:
+    """
+    Sync customer profiles from TikTok Shop to Klaviyo.
+
+    This endpoint fetches orders from TikTok Shop, extracts customer information,
+    and creates or updates customer profiles in Klaviyo.
+
+    Args:
+        request: Sync configuration parameters
+        request_id: Unique request identifier
+
+    Returns:
+        Sync results including stats and profile count
+
+    Raises:
+        HTTPException: If sync operation fails
+    """
+    logger.info(
+        f"[{request_id}] Starting customer profile sync from TikTok Shop "
+        f"(page_size={request.page_size}, max_pages={request.max_pages}, "
+        f"use_mock={request.use_mock_data})"
+    )
+    start_time = time.time()
+
+    try:
+        # Initialize Klaviyo sync service
+        sync_service = KlaviyoSyncService()
+
+        # Handle mock data for testing
+        if request.use_mock_data:
+            # Create mock profiles directly in database (bypass Klaviyo API)
+            from database.connection import get_db_session
+            from database.models import KlaviyoProfile as DBKlaviyoProfile, KlaviyoSyncHistory
+
+            mock_profiles = []
+            with get_db_session() as db:
+                # Create a few test profiles directly
+                test_emails = [
+                    "test1@example.com",
+                    "test2@example.com",
+                    "test3@example.com"
+                ]
+
+                for i, email in enumerate(test_emails, 1):
+                    # Create profile directly in database
+                    db_profile = DBKlaviyoProfile(
+                        email=email,
+                        first_name=f"Test{i}",
+                        last_name="Customer",
+                        external_id=f"tiktok_test_{i}",
+                        subscribed=True,
+                        city="San Francisco",
+                        region="CA",
+                        country="US",
+                        properties={
+                            "source": "tiktok_shop_mock",
+                            "test_mode": True
+                        }
+                    )
+                    db.add(db_profile)
+                    mock_profiles.append(db_profile)
+
+                # Create sync history record
+                sync_history = KlaviyoSyncHistory(
+                    sync_type="profile_sync",
+                    sync_direction="to_klaviyo",
+                    status="completed",
+                    records_processed=len(test_emails),
+                    records_succeeded=len(test_emails),
+                    records_failed=0,
+                    metadata={
+                        "source": "tiktok_shop_mock",
+                        "test_mode": True,
+                        "request_id": request_id
+                    }
+                )
+                db.add(sync_history)
+
+                db.commit()
+
+            # Mock stats
+            stats = {
+                "orders_fetched": len(test_emails),
+                "customers_found": len(test_emails),
+                "customers_synced": len(mock_profiles),
+                "customers_created": len(mock_profiles),
+                "customers_updated": 0,
+                "errors": 0
+            }
+            profiles_synced = len(mock_profiles)
+
+            logger.info(f"[{request_id}] Created {len(mock_profiles)} mock profiles for testing")
+
+        else:
+            # Use real TikTok Shop API
+            from integrations.tiktok_shop.client import TikTokShopClient
+
+            # Initialize TikTok client
+            tiktok_client = TikTokShopClient(
+                app_key=request.tiktok_app_key,
+                app_secret=request.tiktok_app_secret,
+                access_token=request.tiktok_access_token
+            )
+
+            # Sync customers from TikTok Shop
+            profiles, stats = sync_service.sync_customers_from_tiktok(
+                tiktok_client=tiktok_client,
+                page_size=request.page_size,
+                max_pages=request.max_pages,
+                order_status=request.order_status,
+                start_time=request.start_time,
+                end_time=request.end_time
+            )
+            profiles_synced = len(profiles)
+
+        # Calculate processing time
+        processing_time_ms = int((time.time() - start_time) * 1000)
+
+        logger.info(
+            f"[{request_id}] Successfully synced {profiles_synced} profiles "
+            f"in {processing_time_ms}ms (stats: {stats})"
+        )
+
+        return {
+            "request_id": request_id,
+            "profiles_synced": profiles_synced,
+            "stats": stats,
+            "status": "success",
+            "message": f"Successfully synced {profiles_synced} customer profiles from TikTok Shop",
+            "timestamp": datetime.utcnow()
+        }
+
+    except KlaviyoAuthError as e:
+        logger.error(f"[{request_id}] Klaviyo authentication error: {e}")
+        raise HTTPException(
+            status_code=401,
+            detail={
+                "error": "KlaviyoAuthError",
+                "message": f"Klaviyo authentication failed: {str(e)}",
+                "request_id": request_id,
+                "timestamp": datetime.utcnow().isoformat() + "Z"
+            }
+        )
+    except KlaviyoValidationError as e:
+        logger.error(f"[{request_id}] Validation error: {e}")
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "error": "ValidationError",
+                "message": f"Invalid sync parameters: {str(e)}",
+                "request_id": request_id,
+                "timestamp": datetime.utcnow().isoformat() + "Z"
+            }
+        )
+    except Exception as e:
+        logger.error(f"[{request_id}] Error syncing profiles: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": "SyncError",
+                "message": f"Failed to sync customer profiles: {str(e)}",
+                "request_id": request_id,
+                "timestamp": datetime.utcnow().isoformat() + "Z"
+            }
+        )
+
+
+@router.post(
+    "/sync/events",
+    response_model=SyncEventsResponse,
+    summary="Sync order events from TikTok Shop",
+    description="Fetch orders from TikTok Shop and track them as events in Klaviyo"
+)
+async def sync_events_from_tiktok(
+    request: SyncEventsRequest,
+    request_id: str = Depends(get_request_id)
+) -> Dict[str, Any]:
+    """
+    Sync order events from TikTok Shop to Klaviyo.
+
+    This endpoint fetches orders from TikTok Shop and tracks them as
+    "Placed Order" events in Klaviyo for purchase-based segmentation.
+
+    Args:
+        request: Sync configuration parameters
+        request_id: Unique request identifier
+
+    Returns:
+        Sync results including stats and event count
+
+    Raises:
+        HTTPException: If sync operation fails
+    """
+    logger.info(
+        f"[{request_id}] Starting order event sync from TikTok Shop "
+        f"(page_size={request.page_size}, max_pages={request.max_pages}, "
+        f"use_mock={request.use_mock_data})"
+    )
+    start_time = time.time()
+
+    try:
+        # Initialize Klaviyo sync service
+        sync_service = KlaviyoSyncService()
+
+        # Handle mock data for testing
+        if request.use_mock_data:
+            # Create mock events for testing
+            mock_events_tracked = 0
+            test_events = [
+                {
+                    "customer_email": "test1@example.com",
+                    "order_value": 49.99
+                },
+                {
+                    "customer_email": "test2@example.com",
+                    "order_value": 89.99
+                },
+                {
+                    "customer_email": "test3@example.com",
+                    "order_value": 129.99
+                }
+            ]
+
+            for event_data in test_events:
+                event = {
+                    "metric_name": "Placed Order",
+                    "customer_email": event_data["customer_email"],
+                    "properties": {
+                        "value": event_data["order_value"],
+                        "currency": "USD",
+                        "source": "tiktok_shop_mock",
+                        "test_mode": True
+                    }
+                }
+                sync_service.track_event(event)
+                mock_events_tracked += 1
+
+            # Mock stats
+            total_value = sum(e["order_value"] for e in test_events)
+            stats = {
+                "orders_fetched": len(test_events),
+                "events_tracked": mock_events_tracked,
+                "events_failed": 0,
+                "total_value": total_value
+            }
+            events_tracked = mock_events_tracked
+
+            logger.info(f"[{request_id}] Tracked {mock_events_tracked} mock events for testing")
+
+        else:
+            # Use real TikTok Shop API
+            from integrations.tiktok_shop.client import TikTokShopClient
+
+            # Initialize TikTok client
+            tiktok_client = TikTokShopClient(
+                app_key=request.tiktok_app_key,
+                app_secret=request.tiktok_app_secret,
+                access_token=request.tiktok_access_token
+            )
+
+            # Sync order events from TikTok Shop
+            events_tracked, stats = sync_service.sync_order_events(
+                tiktok_client=tiktok_client,
+                page_size=request.page_size,
+                max_pages=request.max_pages,
+                order_status=request.order_status,
+                start_time=request.start_time,
+                end_time=request.end_time
+            )
+
+        # Calculate processing time
+        processing_time_ms = int((time.time() - start_time) * 1000)
+
+        logger.info(
+            f"[{request_id}] Successfully tracked {events_tracked} events "
+            f"in {processing_time_ms}ms (stats: {stats})"
+        )
+
+        return {
+            "request_id": request_id,
+            "events_tracked": events_tracked,
+            "stats": stats,
+            "status": "success",
+            "message": f"Successfully tracked {events_tracked} order events in Klaviyo",
+            "timestamp": datetime.utcnow()
+        }
+
+    except KlaviyoAuthError as e:
+        logger.error(f"[{request_id}] Klaviyo authentication error: {e}")
+        raise HTTPException(
+            status_code=401,
+            detail={
+                "error": "KlaviyoAuthError",
+                "message": f"Klaviyo authentication failed: {str(e)}",
+                "request_id": request_id,
+                "timestamp": datetime.utcnow().isoformat() + "Z"
+            }
+        )
+    except KlaviyoValidationError as e:
+        logger.error(f"[{request_id}] Validation error: {e}")
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "error": "ValidationError",
+                "message": f"Invalid sync parameters: {str(e)}",
+                "request_id": request_id,
+                "timestamp": datetime.utcnow().isoformat() + "Z"
+            }
+        )
+    except Exception as e:
+        logger.error(f"[{request_id}] Error syncing events: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": "SyncError",
+                "message": f"Failed to sync order events: {str(e)}",
                 "request_id": request_id,
                 "timestamp": datetime.utcnow().isoformat() + "Z"
             }
