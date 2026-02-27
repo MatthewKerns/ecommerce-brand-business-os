@@ -1235,3 +1235,321 @@ class KlaviyoSyncService:
         except Exception as e:
             logger.warning(f"Failed to extract customer data from order: {str(e)}")
             return None
+
+    def sync_order_events(
+        self,
+        tiktok_client,
+        page_size: int = 100,
+        max_pages: Optional[int] = None,
+        order_status: Optional[str] = None,
+        start_time: Optional[int] = None,
+        end_time: Optional[int] = None
+    ) -> Tuple[int, Dict[str, int]]:
+        """
+        Sync order events from TikTok Shop to Klaviyo
+
+        This method fetches orders from TikTok Shop and tracks them as
+        "Placed Order" events in Klaviyo for purchase-based segmentation
+        and email automation triggers.
+
+        Args:
+            tiktok_client: TikTokShopClient instance for fetching orders
+            page_size: Number of orders to fetch per page (max 100)
+            max_pages: Maximum number of pages to process (optional, processes all if not set)
+            order_status: Filter by order status (e.g., 'COMPLETED', 'DELIVERED')
+            start_time: Start timestamp for order creation time (Unix timestamp)
+            end_time: End timestamp for order creation time (Unix timestamp)
+
+        Returns:
+            Tuple of (total events tracked, stats dict)
+            Stats dict contains: orders_fetched, events_tracked, events_failed, total_value
+
+        Raises:
+            KlaviyoAPIError: If Klaviyo API requests fail
+            TikTokShopAPIError: If TikTok Shop API requests fail
+
+        Example:
+            >>> from integrations.tiktok_shop.client import TikTokShopClient
+            >>> tiktok_client = TikTokShopClient(app_key, app_secret, access_token)
+            >>> events_tracked, stats = service.sync_order_events(
+            ...     tiktok_client,
+            ...     order_status='COMPLETED',
+            ...     max_pages=10
+            ... )
+            >>> print(f"Tracked {stats['events_tracked']} order events worth ${stats['total_value']:.2f}")
+        """
+        # Create sync history record
+        sync_history = self._create_sync_history(
+            sync_type="event_sync",
+            sync_direction="to_klaviyo",
+            metadata={
+                "source": "tiktok_shop",
+                "event_type": "order_events",
+                "page_size": page_size,
+                "max_pages": max_pages,
+                "order_status": order_status
+            }
+        )
+
+        # Initialize stats tracking
+        stats = {
+            "orders_fetched": 0,
+            "events_tracked": 0,
+            "events_failed": 0,
+            "total_value": 0.0
+        }
+
+        try:
+            self._update_sync_history(sync_history, "in_progress")
+            logger.info("Starting order event sync from TikTok Shop to Klaviyo")
+
+            # Fetch orders from TikTok Shop
+            page_number = 1
+            has_more = True
+
+            while has_more:
+                # Check max_pages limit
+                if max_pages and page_number > max_pages:
+                    logger.info(f"Reached max_pages limit ({max_pages})")
+                    break
+
+                try:
+                    # Fetch orders from TikTok Shop
+                    logger.info(f"Fetching TikTok Shop orders page {page_number}")
+                    response = tiktok_client.get_orders(
+                        page_size=page_size,
+                        page_number=page_number,
+                        order_status=order_status,
+                        start_time=start_time,
+                        end_time=end_time
+                    )
+
+                    # Extract orders from response
+                    orders = response.get('data', {}).get('orders', [])
+                    stats["orders_fetched"] += len(orders)
+
+                    # Check if more pages exist
+                    has_more = response.get('data', {}).get('more', False)
+
+                    # Process each order as an event
+                    for order in orders:
+                        try:
+                            # Extract event data from order
+                            event_data = self._extract_event_from_tiktok_order(order)
+
+                            if not event_data:
+                                logger.debug(f"No event data in order {order.get('order_id')}")
+                                stats["events_failed"] += 1
+                                continue
+
+                            # Track the order event in Klaviyo
+                            try:
+                                self.track_event(**event_data)
+                                stats["events_tracked"] += 1
+
+                                # Accumulate order value for stats
+                                value = event_data.get('value', 0.0)
+                                if value:
+                                    stats["total_value"] += value
+
+                                logger.debug(
+                                    f"Tracked order event for order {order.get('order_id')}"
+                                )
+
+                            except Exception as e:
+                                stats["events_failed"] += 1
+                                logger.warning(
+                                    f"Failed to track event for order {order.get('order_id')}: {str(e)}"
+                                )
+
+                        except Exception as e:
+                            stats["events_failed"] += 1
+                            logger.warning(
+                                f"Failed to process order {order.get('order_id')}: {str(e)}"
+                            )
+
+                    # Move to next page
+                    page_number += 1
+
+                except Exception as e:
+                    # Log error but continue with next page
+                    logger.error(f"Failed to fetch orders page {page_number}: {str(e)}")
+                    break
+
+            # Determine final status
+            if stats["events_failed"] == 0:
+                status = "completed"
+            elif stats["events_tracked"] == 0:
+                status = "failed"
+            else:
+                status = "partial"
+
+            # Update sync history with final stats
+            self._update_sync_history(
+                sync_history,
+                status=status,
+                records_processed=stats["orders_fetched"],
+                records_succeeded=stats["events_tracked"],
+                records_failed=stats["events_failed"]
+            )
+
+            logger.info(
+                f"TikTok Shop order event sync completed: "
+                f"{stats['events_tracked']} events tracked "
+                f"from {stats['orders_fetched']} orders, "
+                f"{stats['events_failed']} failed, "
+                f"total value: ${stats['total_value']:.2f}"
+            )
+
+            return stats["events_tracked"], stats
+
+        except Exception as e:
+            # Update sync history with error
+            self._update_sync_history(
+                sync_history,
+                status="failed",
+                error_message=str(e),
+                error_details={"type": type(e).__name__}
+            )
+            logger.error(f"TikTok Shop order event sync failed: {str(e)}")
+            raise
+
+    def _extract_event_from_tiktok_order(
+        self,
+        order: Dict[str, Any]
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Extract Klaviyo event data from a TikTok Shop order
+
+        This method converts a TikTok Shop order into a "Placed Order" event
+        for Klaviyo with all relevant order details for segmentation and automation.
+
+        Args:
+            order: TikTok Shop order dictionary
+
+        Returns:
+            Dictionary of event data suitable for track_event(), or None if insufficient data
+
+        Note:
+            TikTok Shop order structure typically includes:
+            - order_id: Unique order identifier
+            - buyer_user_id: TikTok user ID
+            - recipient_address: Shipping address with customer info
+            - payment: Payment details including total_amount
+            - line_items: List of products in the order
+            - order_status: Current order status
+            - create_time: Order creation timestamp
+        """
+        try:
+            order_id = order.get('order_id')
+            if not order_id:
+                return None
+
+            # Extract customer identification
+            recipient = order.get('recipient_address', {})
+            customer_email = recipient.get('email') or recipient.get('recipient_email')
+            customer_phone = recipient.get('phone') or recipient.get('phone_number')
+
+            # Require at least one customer identifier
+            if not customer_email and not customer_phone:
+                logger.debug(f"Order {order_id} has no customer email or phone")
+                return None
+
+            # Clean phone number if present
+            if customer_phone:
+                customer_phone = customer_phone.replace(" ", "").replace("-", "")
+
+            # Extract external ID
+            buyer_id = order.get('buyer_user_id') or order.get('buyer_uid')
+            customer_external_id = None
+            if buyer_id:
+                customer_external_id = f"tiktok_user_{buyer_id}"
+
+            # Extract payment/order value
+            payment = order.get('payment', {})
+            total_amount = payment.get('total_amount')
+            currency = payment.get('currency', 'USD')
+
+            # Convert total_amount to float if it's a string or int
+            order_value = None
+            if total_amount is not None:
+                try:
+                    order_value = float(total_amount)
+                except (ValueError, TypeError):
+                    logger.warning(f"Invalid total_amount in order {order_id}: {total_amount}")
+
+            # Extract line items (products)
+            line_items = order.get('line_items', []) or order.get('items', [])
+            items_list = []
+            item_count = 0
+
+            for item in line_items:
+                item_count += item.get('quantity', 1)
+                items_list.append({
+                    'product_id': item.get('product_id'),
+                    'product_name': item.get('product_name') or item.get('sku_name'),
+                    'sku_id': item.get('sku_id'),
+                    'quantity': item.get('quantity', 1),
+                    'price': item.get('sale_price') or item.get('original_price')
+                })
+
+            # Build event properties
+            properties = {
+                'order_id': order_id,
+                'order_status': order.get('order_status'),
+                'total_price': total_amount,
+                'currency': currency,
+                'item_count': item_count,
+                'items': items_list,
+                'source': 'tiktok_shop',
+                'shipping_address': {
+                    'name': recipient.get('name') or recipient.get('recipient_name'),
+                    'address': recipient.get('address_line1') or recipient.get('address'),
+                    'city': recipient.get('city'),
+                    'region': recipient.get('state') or recipient.get('region'),
+                    'country': recipient.get('region_code') or recipient.get('country'),
+                    'zip': recipient.get('zipcode') or recipient.get('postal_code')
+                }
+            }
+
+            # Add payment method if available
+            payment_method = payment.get('payment_method')
+            if payment_method:
+                properties['payment_method'] = payment_method
+
+            # Add tracking number if available
+            tracking_number = order.get('tracking_number')
+            if tracking_number:
+                properties['tracking_number'] = tracking_number
+
+            # Convert order creation time to datetime if available
+            timestamp = None
+            create_time = order.get('create_time')
+            if create_time:
+                try:
+                    # TikTok Shop typically uses Unix timestamp
+                    if isinstance(create_time, int):
+                        timestamp = datetime.fromtimestamp(create_time)
+                    elif isinstance(create_time, str):
+                        # Try to parse ISO format
+                        timestamp = datetime.fromisoformat(create_time.replace('Z', '+00:00'))
+                except Exception as e:
+                    logger.warning(f"Failed to parse create_time for order {order_id}: {str(e)}")
+
+            # Build event data for track_event method
+            event_data = {
+                'event_name': 'Placed Order',
+                'customer_email': customer_email,
+                'customer_phone': customer_phone,
+                'customer_external_id': customer_external_id,
+                'value': order_value,
+                'properties': properties,
+                'timestamp': timestamp,
+                'event_id': f"tiktok_order_{order_id}"  # For deduplication
+            }
+
+            return event_data
+
+        except Exception as e:
+            logger.warning(f"Failed to extract event data from order: {str(e)}")
+            return None
