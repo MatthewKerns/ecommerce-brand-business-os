@@ -13,7 +13,7 @@ import logging
 from datetime import datetime
 
 # Import routers
-from api.routes import blog_router, social_router, amazon_router, competitor_router
+from api.routes import blog_router, social_router, amazon_router, competitor_router, cart_router
 
 # Configure logging
 logging.basicConfig(
@@ -46,6 +46,7 @@ app.include_router(blog_router, prefix="/api")
 app.include_router(social_router, prefix="/api")
 app.include_router(amazon_router, prefix="/api")
 app.include_router(competitor_router, prefix="/api")
+app.include_router(cart_router, prefix="/api")
 
 
 @app.exception_handler(Exception)
