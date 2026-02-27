@@ -33,8 +33,16 @@ CELERY_WORKER_PREFETCH_MULTIPLIER = 4
 CELERY_WORKER_MAX_TASKS_PER_CHILD = 1000
 
 # Beat Schedule (Periodic Tasks)
-# This will be populated in subsequent subtasks with periodic cart recovery checks
-CELERY_BEAT_SCHEDULE = {}
+CELERY_BEAT_SCHEDULE = {
+    "process-abandoned-carts": {
+        "task": "tasks.cart_recovery.process_abandoned_carts",
+        "schedule": 300.0,  # Run every 5 minutes (300 seconds)
+        "options": {
+            "queue": "cart_recovery",
+            "expires": 240.0,  # Task expires after 4 minutes if not picked up
+        }
+    },
+}
 
 # Logging Configuration
 CELERY_WORKER_LOG_FORMAT = "[%(asctime)s: %(levelname)s/%(processName)s] %(message)s"
