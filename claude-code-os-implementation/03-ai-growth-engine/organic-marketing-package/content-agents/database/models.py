@@ -1098,3 +1098,156 @@ class AlertRecord(Base):
         CheckConstraint(
             "alert_severity IN ('high', 'medium', 'low')",
             name="check_alert_severity"
+
+# ============================================================================
+# Klaviyo Email Platform Models (from worktree 014)
+# ============================================================================
+
+class KlaviyoProfile(Base):
+    """
+    Stores customer profiles synced from Klaviyo for local tracking and analysis.
+    
+    This table maintains a local cache of Klaviyo customer profiles to support
+    email campaign optimization and user behavior tracking without requiring
+    constant API calls. It stores both Klaviyo-specific identifiers and custom
+    properties relevant to our marketing automation workflows.
+    
+    Attributes:
+        id: Primary key for local database
+        klaviyo_profile_id: Unique identifier from Klaviyo
+        email: Customer email address
+        first_name: Customer first name
+        last_name: Customer last name
+        phone_number: Optional phone number
+        external_id: Optional external identifier (e.g., from Clerk)
+        properties: JSON field for custom properties
+        lists: JSON array of list IDs the profile belongs to
+        segments: JSON array of segment IDs the profile belongs to
+        last_synced: Timestamp of last sync from Klaviyo
+        created_at: When the local record was created
+        updated_at: When the local record was last updated
+    """
+    __tablename__ = "klaviyo_profiles"
+
+    # Primary Key
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
+    # Klaviyo Identifiers
+    klaviyo_profile_id = Column(String(100), unique=True, nullable=False, index=True)
+    
+    # Contact Information
+    email = Column(String(255), nullable=False, index=True)
+    first_name = Column(String(100))
+    last_name = Column(String(100))
+    phone_number = Column(String(50))
+    
+    # External Integration
+    external_id = Column(String(100), index=True)  # Clerk user ID
+    
+    # Klaviyo Data
+    properties = Column(JSON, default=dict)  # Custom properties
+    lists = Column(JSON, default=list)  # List memberships
+    segments = Column(JSON, default=list)  # Segment memberships
+    
+    # Sync Metadata
+    last_synced = Column(DateTime, nullable=False)
+    
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    def __repr__(self):
+        return f"<KlaviyoProfile(id={self.id}, email='{self.email}', klaviyo_id='{self.klaviyo_profile_id}')>"
+
+
+class KlaviyoSyncHistory(Base):
+    """
+    Tracks synchronization history between local database and Klaviyo.
+    
+    This table logs all sync operations with Klaviyo to maintain an audit trail
+    and support debugging of integration issues. It captures both successful
+    syncs and failures with detailed error information.
+    
+    Attributes:
+        id: Primary key
+        sync_type: Type of sync operation (e.g., 'profile_update', 'event_track')
+        sync_direction: Direction of sync ('to_klaviyo', 'from_klaviyo')
+        entity_type: Type of entity synced ('profile', 'event', 'list', 'segment')
+        entity_id: ID of the entity being synced
+        status: Sync status ('success', 'failed', 'pending')
+        error_message: Error details if sync failed
+        request_data: JSON of the request sent
+        response_data: JSON of the response received
+        started_at: When the sync started
+        completed_at: When the sync completed
+        created_at: When this record was created
+    """
+    __tablename__ = "klaviyo_sync_history"
+
+    # Primary Key
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    
+    # Sync Details
+    sync_type = Column(String(50), nullable=False, index=True)
+    sync_direction = Column(Enum('to_klaviyo', 'from_klaviyo'), nullable=False)
+    entity_type = Column(String(50), nullable=False)
+    entity_id = Column(String(100), nullable=False)
+    
+    # Status
+    status = Column(Enum('success', 'failed', 'pending'), nullable=False, index=True)
+    error_message = Column(Text)
+    
+    # Request/Response Data
+    request_data = Column(JSON)
+    response_data = Column(JSON)
+    
+    # Timing
+    started_at = Column(DateTime, nullable=False)
+    completed_at = Column(DateTime)
+    
+    # Timestamp
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    def __repr__(self):
+        return f"<KlaviyoSyncHistory(id={self.id}, type='{self.sync_type}', status='{self.status}')>"
+
+
+class KlaviyoSegment(Base):
+    """
+    Stores Klaviyo segment definitions for local reference.
+    
+    This table maintains a cache of Klaviyo segments to support rapid
+    segmentation decisions and reduce API calls during campaign planning.
+    
+    Attributes:
+        id: Primary key
+        klaviyo_segment_id: Unique identifier from Klaviyo
+        name: Segment name
+        description: Segment description
+        definition: JSON representation of segment rules
+        profile_count: Number of profiles in segment (cached)
+        last_synced: When segment was last synced from Klaviyo
+        created_at: When local record was created
+        updated_at: When local record was updated
+    """
+    __tablename__ = "klaviyo_segments"
+
+    # Primary Key
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    
+    # Klaviyo Data
+    klaviyo_segment_id = Column(String(100), unique=True, nullable=False, index=True)
+    name = Column(String(255), nullable=False)
+    description = Column(Text)
+    definition = Column(JSON)  # Segment rules/criteria
+    profile_count = Column(Integer, default=0)
+    
+    # Sync Metadata
+    last_synced = Column(DateTime, nullable=False)
+    
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    def __repr__(self):
+        return f"<KlaviyoSegment(id={self.id}, name='{self.name}', profiles={self.profile_count})>"

@@ -13,6 +13,7 @@ from api.routes.tiktok_scheduling import router as tiktok_scheduling_router
 from api.routes.aeo import router as aeo_router
 from api.routes.citation_monitoring import router as citation_monitoring_router
 from api.routes.seo import router as seo_router
+from api.routes.klaviyo import router as klaviyo_router
 
 __all__ = [
     "blog_router",
@@ -23,5 +24,6 @@ __all__ = [
     "tiktok_scheduling_router",
     "aeo_router",
     "citation_monitoring_router",
-    "seo_router"
+    "seo_router",
+    "klaviyo_router"
 ]
