@@ -11,6 +11,7 @@ import {
   Copy,
   Edit2,
   Trash2,
+  BarChart3,
 } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
@@ -302,6 +303,13 @@ export function SequenceList() {
                     {activeMenu === sequence.id && (
                       <div className="absolute right-0 z-10 mt-2 w-48 rounded-md border border-slate-200 bg-white shadow-lg">
                         <div className="py-1">
+                          <Link
+                            href={`/sequences/${sequence.id}/analytics`}
+                            className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-slate-700 transition-colors hover:bg-slate-50"
+                          >
+                            <BarChart3 className="h-4 w-4" />
+                            Analytics
+                          </Link>
                           <Link
                             href={`/sequences/${sequence.id}/edit`}
                             className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-slate-700 transition-colors hover:bg-slate-50"
