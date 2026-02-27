@@ -165,6 +165,72 @@ Infinity Vault should emphasize:
 5. Create emotional connection with serious player identity""")]
 )
 
+MOCK_TIKTOK_VIDEO_SCRIPT_RESPONSE = MockMessage(
+    content=[MockTextBlock(text="""[HOOK (0-3s)]
+Visual: Quick cuts of tournament deck building, cards flying into sleeves
+Audio: "Build your deck in 60 seconds or lose Game 1"
+Text Overlay: "⚡ 60-SECOND DECK PREP ⚡"
+
+[MAIN CONTENT (3-25s)]
+Visual: Fast-motion deck building with tournament clock counting down
+Audio: "Tournament starts in 5. Here's the secret: pre-sleeve your sideboard, organize by mana curve, keep basics accessible. Champions don't fumble - they execute."
+Text Overlay: "1. Pre-sleeve 2. Sort by curve 3. Basics ready"
+
+[CALL-TO-ACTION (Last 3-5s)]
+Visual: Player confidently presenting deck at tournament table
+Audio: "Show up battle ready. Link in bio for tournament prep guide."
+Text Overlay: "LINK IN BIO →"
+
+[PRODUCTION NOTES]
+Music Style: High-energy electronic, fast tempo (140+ BPM)
+Pace: Quick cuts every 2-3 seconds, match music beats
+Transitions: Jump cuts, no fades - maintain energy
+
+[CAPTION & HASHTAGS]
+Tournament prep like a pro ⚡ 60 seconds to battle-ready 🎯
+
+#TournamentPrep #TCG #BattleReady #InfinityVault #DeckBuilding #CompetitiveTCG #ShowUpReady #QuickTips""")]
+)
+
+MOCK_TIKTOK_CALENDAR_RESPONSE = MockMessage(
+    content=[MockTextBlock(text="""DATE: Monday, March 4
+TIME: 8:00 AM
+CONTENT TYPE: Quick Tips
+TOPIC: Speed deck check for tournaments
+DESCRIPTION: 30-second technique for checking deck legality before tournament starts
+CONTENT PILLAR: Competition & Performance
+HASHTAGS: #TournamentPrep #TCG #QuickTips
+PRODUCT OPPORTUNITY: Yes - Tournament Deck Box
+
+DATE: Wednesday, March 6
+TIME: 8:00 AM
+CONTENT TYPE: Strategy Insight
+TOPIC: Reading opponent's body language
+DESCRIPTION: Key tells to watch for during competitive play
+CONTENT PILLAR: Competition & Performance
+HASHTAGS: #CompetitiveTCG #Strategy #BattleReady
+PRODUCT OPPORTUNITY: No
+
+DATE: Friday, March 8
+TIME: 5:00 PM
+CONTENT TYPE: Quick Tips
+TOPIC: Shuffling techniques for speed
+DESCRIPTION: Tournament-legal shuffling that saves precious time
+CONTENT PILLAR: Competition & Performance
+HASHTAGS: #TournamentPrep #TCG #ProTips
+PRODUCT OPPORTUNITY: No""")]
+)
+
+MOCK_TIKTOK_VALIDATION_RESPONSE = MockMessage(
+    content=[MockTextBlock(text="""ALIGNMENT_SCORE: 0.85
+IS_VALID: YES
+FEEDBACK: Content strongly aligns with AIR channel theme. Fast-paced, action-oriented tone matches channel expectations. Hook style is direct and urgent, perfect for target audience of competitive players.
+SUGGESTIONS:
+- Consider adding specific time reference (e.g., "60 seconds") to emphasize speed
+- Include tournament context to reinforce competitive focus
+- Add product mention if natural fit exists""")]
+)
+
 # Error scenario mock responses
 MOCK_API_ERROR = Exception("API rate limit exceeded")
 MOCK_TIMEOUT_ERROR = Exception("Request timeout")
