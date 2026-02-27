@@ -10,6 +10,10 @@ import {
   TEMPLATES,
 } from "./TemplateSelector";
 import { StepBuilder, SequenceStep } from "./StepBuilder";
+import {
+  PersonalizationEditor,
+  PersonalizationSettings,
+} from "./PersonalizationEditor";
 
 /**
  * Sequence data for editing
@@ -27,6 +31,8 @@ export interface Sequence {
   templateId?: string;
   /** Sequence steps */
   steps: SequenceStep[];
+  /** Personalization settings (optional) */
+  personalization?: PersonalizationSettings;
 }
 
 /**
@@ -71,6 +77,7 @@ function getTemplateSteps(templateId: string): SequenceStep[] {
  * - Template selection for quick start
  * - Sequence metadata (name, description, status)
  * - Step builder for managing email steps
+ * - Personalization editor for source and interest variants
  * - Save and activate functionality
  * - Form validation
  * - Navigation controls
@@ -103,6 +110,15 @@ export function SequenceEditor({
   const [isSaving, setIsSaving] = useState(false);
   const [showTemplateSelector, setShowTemplateSelector] = useState(
     !sequence && steps.length === 0
+  );
+  const [personalization, setPersonalization] = useState<PersonalizationSettings>(
+    sequence?.personalization || {
+      enableSourcePersonalization: false,
+      sourceVariants: [],
+      enableInterestPersonalization: false,
+      interestVariants: [],
+      interestRules: [],
+    }
   );
 
   /**
@@ -140,6 +156,7 @@ export function SequenceEditor({
       status: newStatus || status,
       templateId: selectedTemplateId,
       steps,
+      personalization,
     };
 
     // Simulate API call
@@ -288,6 +305,16 @@ export function SequenceEditor({
       {!showTemplateSelector && (
         <div className="rounded-lg border border-slate-200 bg-white p-6">
           <StepBuilder steps={steps} onUpdateSteps={setSteps} />
+        </div>
+      )}
+
+      {/* Personalization Editor */}
+      {!showTemplateSelector && steps.length > 0 && (
+        <div className="rounded-lg border border-slate-200 bg-white p-6">
+          <PersonalizationEditor
+            settings={personalization}
+            onUpdateSettings={setPersonalization}
+          />
         </div>
       )}
 
