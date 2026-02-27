@@ -3,7 +3,7 @@ Blog Post Generation Agent
 Creates SEO-optimized blog posts aligned with brand voice and content pillars
 """
 from pathlib import Path
-from typing import Optional, List
+from typing import Optional, List, Dict
 from .base_agent import BaseAgent
 from config.config import BLOG_OUTPUT_DIR, CONTENT_PILLARS
 
@@ -14,14 +14,29 @@ class BlogAgent(BaseAgent):
     def __init__(self):
         super().__init__(agent_name="blog_agent")
 
+        # Initialize SEO agent for analysis (lazy import to avoid circular dependency)
+        self._seo_agent = None
+
+        self.logger.info("BlogAgent initialized")
+
+    @property
+    def seo_agent(self):
+        """Lazy load SEO agent to avoid circular imports"""
+        if self._seo_agent is None:
+            from .seo_agent import SEOAgent
+            self._seo_agent = SEOAgent()
+            self.logger.debug("SEOAgent initialized for blog analysis")
+        return self._seo_agent
+
     def generate_blog_post(
         self,
         topic: str,
         content_pillar: Optional[str] = None,
         target_keywords: Optional[List[str]] = None,
         word_count: int = 1000,
-        include_cta: bool = True
-    ) -> tuple[str, Path]:
+        include_cta: bool = True,
+        include_seo_analysis: bool = False
+    ) -> tuple[str, Path, Optional[Dict]]:
         """
         Generate a complete blog post
 
@@ -31,11 +46,16 @@ class BlogAgent(BaseAgent):
             target_keywords: SEO keywords to target
             word_count: Target word count
             include_cta: Whether to include a call-to-action
+            include_seo_analysis: Whether to perform SEO analysis on generated content
 
         Returns:
-            Tuple of (blog_content, file_path)
+            Tuple of (blog_content, file_path, seo_analysis)
+            seo_analysis is None if include_seo_analysis is False
         """
-        self.logger.info(f"Generating blog post: topic='{topic}', pillar={content_pillar}, word_count={word_count}")
+        self.logger.info(
+            f"Generating blog post: topic='{topic}', pillar={content_pillar}, "
+            f"word_count={word_count}, seo_analysis={include_seo_analysis}"
+        )
 
         # Validate content pillar
         if content_pillar and content_pillar not in CONTENT_PILLARS:
@@ -111,8 +131,17 @@ Tone for Blog:
             max_tokens=4096
         )
 
+        # Perform SEO analysis if requested
+        seo_analysis = None
+        if include_seo_analysis:
+            seo_analysis = self._analyze_and_log_seo(
+                content=content,
+                target_keywords=target_keywords,
+                path=path
+            )
+
         self.logger.info(f"Successfully generated blog post: {path}")
-        return content, path
+        return content, path, seo_analysis
 
     def generate_blog_series(
         self,
@@ -259,3 +288,158 @@ Make it actionable and empowering. Readers should finish feeling capable and rea
 
         self.logger.info(f"Successfully generated how-to guide: {path}")
         return content, path
+
+    def _analyze_and_log_seo(
+        self,
+        content: str,
+        target_keywords: Optional[List[str]],
+        path: Path
+    ) -> Dict[str, any]:
+        """
+        Analyze generated content for SEO quality and log results
+
+        Args:
+            content: The generated blog content
+            target_keywords: List of target keywords
+            path: Path where content was saved
+
+        Returns:
+            Dictionary with SEO analysis results
+        """
+        self.logger.info("Performing SEO analysis on generated blog post")
+
+        # Extract title from content for analysis
+        import re
+        title_match = re.search(r'^#\s+(.+)$', content, re.MULTILINE)
+        title = title_match.group(1) if title_match else None
+
+        # Use primary keyword if available
+        target_keyword = target_keywords[0] if target_keywords else None
+
+        # Perform SEO analysis
+        analysis = self.seo_agent.analyze_content_seo(
+            content=content,
+            target_keyword=target_keyword,
+            title=title
+        )
+
+        # Log SEO checklist results
+        self.logger.info("=" * 60)
+        self.logger.info("SEO ANALYSIS RESULTS")
+        self.logger.info("=" * 60)
+        self.logger.info(f"Overall Score: {analysis['total_score']:.1f}/100")
+        self.logger.info(f"Grade: {analysis['grade']}")
+        self.logger.info(f"Word Count: {analysis['word_count']}")
+        self.logger.info("")
+
+        # Log individual scores
+        self.logger.info("Component Scores:")
+        for component, data in analysis['scores'].items():
+            score = data['score']
+            weight = data['weight']
+            status = "✓" if score >= 70 else "✗"
+            self.logger.info(
+                f"  {status} {component.replace('_', ' ').title()}: "
+                f"{score:.1f}/100 (weight: {weight:.0%})"
+            )
+
+        # Log issues if any
+        if analysis['issues']:
+            self.logger.info("")
+            self.logger.info(f"Issues Found ({len(analysis['issues'])}):")
+            for issue in analysis['issues']:
+                self.logger.warning(f"  - {issue}")
+
+        # Log recommendations
+        if analysis['recommendations']:
+            self.logger.info("")
+            self.logger.info("Recommendations:")
+            for rec in analysis['recommendations'][:5]:  # Top 5
+                self.logger.info(f"  • {rec}")
+
+        self.logger.info("=" * 60)
+
+        # Save SEO analysis to separate file
+        analysis_path = path.parent / f"{path.stem}_seo_analysis.json"
+        import json
+        analysis_path.write_text(json.dumps(analysis, indent=2))
+        self.logger.info(f"SEO analysis saved to: {analysis_path}")
+
+        # Enforce minimum quality threshold
+        if analysis['total_score'] < 60:
+            self.logger.warning(
+                f"SEO score ({analysis['total_score']:.1f}) is below recommended threshold (60). "
+                "Consider regenerating with improved keywords or structure."
+            )
+        elif analysis['total_score'] >= 80:
+            self.logger.info(f"Excellent SEO score! Content is well-optimized.")
+
+        return analysis
+
+    def generate_meta_description(
+        self,
+        content: str,
+        max_length: int = 160
+    ) -> str:
+        """
+        Generate an SEO-optimized meta description for blog content
+
+        Args:
+            content: The article content or topic to generate meta description for
+            max_length: Maximum character length (default 160 for SEO best practice)
+
+        Returns:
+            Meta description string (≤ max_length characters)
+        """
+        self.logger.info(f"Generating meta description (max_length={max_length})")
+
+        prompt = f"""Generate a compelling meta description for the following content:
+
+CONTENT:
+{content[:1000]}
+
+REQUIREMENTS:
+1. Maximum {max_length} characters (strict limit)
+2. Include primary keywords naturally
+3. Write in active voice
+4. Make it compelling and clickable
+5. Align with Infinity Vault brand voice (confident, battle-ready)
+6. Include a clear value proposition or hook
+7. No special characters that break HTML
+
+Return ONLY the meta description text, nothing else."""
+
+        system_context = """You are an SEO expert specializing in meta descriptions.
+
+Meta descriptions should:
+- Be concise and compelling
+- Include target keywords naturally
+- Encourage clicks from search results
+- Accurately represent the content
+- End with a complete thought (no cut-off sentences)
+
+For Infinity Vault content, emphasize:
+- Battle-ready mindset
+- Premium quality and expertise
+- Value for serious TCG players"""
+
+        meta_description = self.generate_content(
+            prompt=prompt,
+            system_context=system_context,
+            max_tokens=100,
+            temperature=0.7
+        ).strip()
+
+        # Ensure it meets length requirement
+        if len(meta_description) > max_length:
+            self.logger.warning(
+                f"Generated meta description ({len(meta_description)} chars) exceeds "
+                f"max_length ({max_length}). Truncating..."
+            )
+            # Truncate at last complete word before max_length
+            meta_description = meta_description[:max_length].rsplit(' ', 1)[0].rstrip('.,;:') + '...'
+            if len(meta_description) > max_length:
+                meta_description = meta_description[:max_length-3] + '...'
+
+        self.logger.info(f"Generated meta description ({len(meta_description)} chars): {meta_description}")
+        return meta_description

@@ -59,7 +59,8 @@ def mock_blog_agent():
         mock_agent = Mock(spec=BlogAgent)
         mock_agent.generate_blog_post.return_value = (
             "# Test Blog Post\n\nThis is test content for e2e testing.",
-            Path("/tmp/test_blog.md")
+            Path("/tmp/test_blog.md"),
+            None  # seo_analysis
         )
         mock_agent_class.return_value = mock_agent
         yield mock_agent

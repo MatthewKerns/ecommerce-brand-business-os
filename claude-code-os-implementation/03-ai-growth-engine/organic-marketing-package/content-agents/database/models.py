@@ -35,6 +35,11 @@ class ContentHistory(Base):
         updated_at: Timestamp when record was last updated
         user_id: Optional user identifier
         campaign_id: Optional campaign identifier
+        seo_score: SEO score (0-100)
+        seo_grade: SEO grade (A, B, C, D, F)
+        target_keyword: Primary target keyword for SEO
+        meta_description: SEO meta description
+        internal_links: JSON array of internal linking suggestions
     """
     __tablename__ = "content_history"
 
@@ -74,6 +79,13 @@ class ContentHistory(Base):
     user_id = Column(String(50), index=True)
     campaign_id = Column(String(50), index=True)
 
+    # SEO Metadata
+    seo_score = Column(Numeric(5, 2))
+    seo_grade = Column(String(1))
+    target_keyword = Column(String(200))
+    meta_description = Column(String(160))
+    internal_links = Column(Text)  # JSON stored as text
+
     # Relationships
     api_usage_records = relationship("APIUsage", back_populates="content", cascade="all, delete-orphan")
     performance_metrics = relationship("PerformanceMetrics", back_populates="content", cascade="all, delete-orphan")
@@ -90,6 +102,11 @@ class ContentHistory(Base):
         ),
         CheckConstraint("tokens_used >= 0", name="check_tokens_used"),
         CheckConstraint("generation_time_ms >= 0", name="check_generation_time"),
+        CheckConstraint("seo_score >= 0 AND seo_score <= 100", name="check_seo_score"),
+        CheckConstraint(
+            "seo_grade IN ('A', 'B', 'C', 'D', 'F')",
+            name="check_seo_grade"
+        ),
         Index("idx_content_history_type_date", "content_type", "created_at"),
     )
 

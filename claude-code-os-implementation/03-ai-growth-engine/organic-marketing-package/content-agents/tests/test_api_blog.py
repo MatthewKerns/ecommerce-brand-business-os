@@ -36,7 +36,8 @@ class TestBlogPostGeneration:
             mock_agent = Mock(spec=BlogAgent)
             mock_agent.generate_blog_post.return_value = (
                 "# Test Blog Post\n\nThis is test content.",
-                Path("/tmp/test_blog.md")
+                Path("/tmp/test_blog.md"),
+                None  # seo_analysis (None when include_seo_analysis=False)
             )
             mock_agent_class.return_value = mock_agent
             yield mock_agent
@@ -477,7 +478,8 @@ class TestBlogAPIRequestValidation:
             mock_agent = Mock()
             mock_agent.generate_blog_post.return_value = (
                 "Test content",
-                Path("/tmp/test.md")
+                Path("/tmp/test.md"),
+                None  # seo_analysis
             )
             mock_agent_class.return_value = mock_agent
 

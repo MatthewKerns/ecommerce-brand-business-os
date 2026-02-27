@@ -988,3 +988,211 @@ class BulkScheduleResponse(BaseModel):
                 "total_failed": 0
             }
         }
+
+# ============================================================================
+# SEO Models (from worktree 012)
+# ============================================================================
+
+class SEOAnalysisRequest(BaseModel):
+    """
+    SEO analysis request.
+
+    This model handles SEO analysis requests for content optimization.
+    """
+    content: str = Field(
+        ...,
+        min_length=50,
+        max_length=50000,
+        description="Content to analyze for SEO"
+    )
+    target_keywords: Optional[List[str]] = Field(
+        default_factory=list,
+        max_length=20,
+        description="Target keywords to analyze for"
+    )
+    url: Optional[str] = Field(
+        None,
+        max_length=2000,
+        description="URL of the content being analyzed"
+    )
+    content_type: str = Field(
+        default="blog",
+        pattern="^(blog|product|landing_page)$",
+        description="Type of content being analyzed"
+    )
+    include_recommendations: bool = Field(
+        default=True,
+        description="Whether to include optimization recommendations"
+    )
+
+    model_config = ConfigDict(
+        json_schema_extra = {
+            "example": {
+                "content": "# Tactical Backpacks for Urban Professionals\n\nDiscover the best tactical backpacks...",
+                "target_keywords": ["tactical backpack", "urban EDC", "professional carry"],
+                "url": "https://example.com/blog/tactical-backpacks",
+                "content_type": "blog",
+                "include_recommendations": True
+            }
+        }
+    )
+
+class SEOScore(BaseModel):
+    """
+    SEO score details.
+    
+    This model represents the SEO score breakdown for analyzed content.
+    """
+    overall_score: int = Field(
+        ..., 
+        ge=0, 
+        le=100,
+        description="Overall SEO score (0-100)"
+    )
+    title_score: int = Field(
+        ..., 
+        ge=0, 
+        le=100,
+        description="Title optimization score"
+    )
+    meta_description_score: int = Field(
+        ..., 
+        ge=0, 
+        le=100,
+        description="Meta description score"
+    )
+    content_score: int = Field(
+        ..., 
+        ge=0, 
+        le=100,
+        description="Content quality and relevance score"
+    )
+    keyword_density: float = Field(
+        ..., 
+        ge=0, 
+        le=100,
+        description="Keyword density percentage"
+    )
+    readability_score: int = Field(
+        ..., 
+        ge=0, 
+        le=100,
+        description="Content readability score"
+    )
+    internal_links: int = Field(
+        ..., 
+        ge=0,
+        description="Number of internal links"
+    )
+    external_links: int = Field(
+        ..., 
+        ge=0,
+        description="Number of external links"
+    )
+
+class SEORecommendation(BaseModel):
+    """
+    SEO optimization recommendation.
+    
+    This model represents a single SEO recommendation for content improvement.
+    """
+    category: str = Field(
+        ...,
+        description="Category of recommendation (title, content, meta, etc.)"
+    )
+    priority: str = Field(
+        ...,
+        pattern="^(high|medium|low)$",
+        description="Priority level of the recommendation"
+    )
+    issue: str = Field(
+        ...,
+        max_length=500,
+        description="Description of the SEO issue"
+    )
+    recommendation: str = Field(
+        ...,
+        max_length=1000,
+        description="Specific recommendation to fix the issue"
+    )
+    impact_score: int = Field(
+        ..., 
+        ge=0, 
+        le=10,
+        description="Potential impact on SEO score (0-10)"
+    )
+
+class SEOAnalysisResponse(BaseModel):
+    """
+    SEO analysis response.
+    
+    This model represents the complete SEO analysis results for content.
+    """
+    seo_score: SEOScore = Field(
+        ...,
+        description="SEO score breakdown"
+    )
+    recommendations: List[SEORecommendation] = Field(
+        default_factory=list,
+        description="List of SEO recommendations"
+    )
+    optimized_title: Optional[str] = Field(
+        None,
+        max_length=100,
+        description="Suggested optimized title"
+    )
+    optimized_meta_description: Optional[str] = Field(
+        None,
+        max_length=160,
+        description="Suggested optimized meta description"
+    )
+    suggested_keywords: List[str] = Field(
+        default_factory=list,
+        description="Suggested additional keywords"
+    )
+    internal_link_suggestions: List[Dict[str, str]] = Field(
+        default_factory=list,
+        description="Suggested internal links"
+    )
+    content_gaps: List[str] = Field(
+        default_factory=list,
+        description="Identified content gaps to address"
+    )
+    competitor_analysis: Optional[Dict[str, Any]] = Field(
+        None,
+        description="Competitor content analysis if available"
+    )
+    
+    model_config = ConfigDict(
+        json_schema_extra = {
+            "example": {
+                "seo_score": {
+                    "overall_score": 75,
+                    "title_score": 80,
+                    "meta_description_score": 70,
+                    "content_score": 85,
+                    "keyword_density": 2.5,
+                    "readability_score": 78,
+                    "internal_links": 5,
+                    "external_links": 3
+                },
+                "recommendations": [
+                    {
+                        "category": "title",
+                        "priority": "high",
+                        "issue": "Title is too long (65 characters)",
+                        "recommendation": "Shorten title to under 60 characters",
+                        "impact_score": 8
+                    }
+                ],
+                "optimized_title": "Best Tactical Backpacks for Urban EDC (2024 Guide)",
+                "optimized_meta_description": "Discover the top tactical backpacks for urban professionals. Expert reviews, comparisons, and buying guide for everyday carry gear.",
+                "suggested_keywords": ["EDC backpack", "urban tactical gear", "professional carry bag"],
+                "internal_link_suggestions": [
+                    {"text": "tactical gear guide", "url": "/guides/tactical-gear"},
+                    {"text": "EDC essentials", "url": "/blog/edc-essentials"}
+                ],
+                "content_gaps": ["Comparison table missing", "No pricing information", "Lacks user testimonials"]
+            }
+        }
+    )

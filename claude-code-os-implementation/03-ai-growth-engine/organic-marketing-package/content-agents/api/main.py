@@ -21,7 +21,8 @@ from api.routes import (
     tiktok_channels_router,
     tiktok_scheduling_router,
     aeo_router,
-    citation_monitoring_router
+    citation_monitoring_router,
+    seo_router
 )
 
 # Configure logging
@@ -59,6 +60,7 @@ app.include_router(tiktok_channels_router, prefix="/api")
 app.include_router(tiktok_scheduling_router, prefix="/api")
 app.include_router(aeo_router, prefix="/api")
 app.include_router(citation_monitoring_router, prefix="/api")
+app.include_router(seo_router, prefix="/api")
 
 
 @app.exception_handler(Exception)
