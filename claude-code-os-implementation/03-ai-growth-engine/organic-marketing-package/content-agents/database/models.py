@@ -259,6 +259,8 @@ class PerformanceMetrics(Base):
         return f"<PerformanceMetrics(id={self.id}, request_id='{self.request_id}', duration={self.total_duration_ms}ms)>"
 
 
+# Models from 007 - TikTok Channel System
+
 class TikTokChannel(Base):
     """
     Stores TikTok channel configurations for the 4-element content strategy.
@@ -315,16 +317,16 @@ class TikTokChannel(Base):
 
 class ChannelContent(Base):
     """
-    Tracks content posted to TikTok channels with performance metrics.
+    Links generated content to TikTok channels with performance metrics.
 
     Attributes:
         id: Primary key
-        channel_id: Foreign key to tiktok_channels
+        channel_id: Foreign key to TikTok channel
         content_id: Foreign key to content_history
-        post_date: Date/time when content was posted
-        save_count: Number of saves (primary metric)
+        post_date: When content was posted to the channel
+        save_count: Number of saves/bookmarks
         view_count: Number of views
-        engagement_rate: Calculated engagement rate
+        engagement_rate: Engagement rate percentage
         created_at: Timestamp when record was created
     """
     __tablename__ = "channel_content"
@@ -362,3 +364,133 @@ class ChannelContent(Base):
 
     def __repr__(self):
         return f"<ChannelContent(id={self.id}, channel_id={self.channel_id}, saves={self.save_count}, views={self.view_count})>"
+
+
+# Models from 008 - Scheduling & Publishing System
+
+class ScheduledContent(Base):
+    """
+    Stores scheduled TikTok content for automatic publishing.
+
+    Attributes:
+        id: Primary key
+        content_type: Type of content (video, post)
+        content_data: JSON data containing content details (stored as text)
+        scheduled_time: When the content should be published
+        status: Current status (pending, published, failed)
+        retry_count: Number of publish attempts made
+        max_retries: Maximum number of retry attempts allowed
+        tiktok_video_id: TikTok video ID after successful publish
+        error_message: Error details if publishing failed
+        created_at: Timestamp when scheduled content was created
+        updated_at: Timestamp when record was last updated
+        published_at: Timestamp when content was successfully published
+    """
+    __tablename__ = "scheduled_content"
+
+    # Primary Key
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
+    # Content Details
+    content_type = Column(String(20), nullable=False, index=True)
+    content_data = Column(Text, nullable=False)  # JSON stored as text
+
+    # Scheduling
+    scheduled_time = Column(DateTime, nullable=False, index=True)
+
+    # Status Tracking
+    status = Column(String(20), nullable=False, default="pending", index=True)
+    retry_count = Column(Integer, nullable=False, default=0)
+    max_retries = Column(Integer, nullable=False, default=3)
+
+    # Publish Results
+    tiktok_video_id = Column(String(100))
+    error_message = Column(Text)
+
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    published_at = Column(DateTime)
+
+    # Relationships
+    publish_logs = relationship("PublishLog", back_populates="scheduled_content", cascade="all, delete-orphan")
+
+    # Table constraints
+    __table_args__ = (
+        CheckConstraint(
+            "content_type IN ('video', 'post')",
+            name="check_content_type_scheduled"
+        ),
+        CheckConstraint(
+            "status IN ('pending', 'published', 'failed')",
+            name="check_scheduled_status"
+        ),
+        CheckConstraint("retry_count >= 0", name="check_retry_count_scheduled"),
+        CheckConstraint("max_retries >= 0", name="check_max_retries"),
+        Index("idx_scheduled_content_status_time", "status", "scheduled_time"),
+    )
+
+    def __repr__(self):
+        return f"<ScheduledContent(id={self.id}, type='{self.content_type}', status='{self.status}')>"
+
+
+class PublishLog(Base):
+    """
+    Logs all publishing attempts for scheduled content with detailed tracking.
+
+    Attributes:
+        id: Primary key
+        scheduled_content_id: Foreign key to scheduled_content
+        attempt_number: The retry attempt number (1-indexed)
+        status: Status of this publish attempt (pending, success, failed)
+        platform: Publishing platform (tiktok)
+        tiktok_video_id: TikTok video ID if publish succeeded
+        error_type: Type of error if publish failed
+        error_message: Detailed error message if publish failed
+        api_response: Full API response data (JSON stored as text)
+        attempted_at: Timestamp when publish attempt started
+        completed_at: Timestamp when publish attempt completed
+    """
+    __tablename__ = "publish_log"
+
+    # Primary Key
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
+    # Reference to Scheduled Content
+    scheduled_content_id = Column(Integer, ForeignKey("scheduled_content.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    # Attempt Details
+    attempt_number = Column(Integer, nullable=False)
+    status = Column(String(20), nullable=False, default="pending", index=True)
+    platform = Column(String(20), nullable=False, default="tiktok")
+
+    # Publish Results
+    tiktok_video_id = Column(String(100))
+    error_type = Column(String(50))
+    error_message = Column(Text)
+    api_response = Column(Text)  # JSON stored as text
+
+    # Timestamps
+    attempted_at = Column(DateTime, default=datetime.utcnow, index=True)
+    completed_at = Column(DateTime)
+
+    # Relationships
+    scheduled_content = relationship("ScheduledContent", back_populates="publish_logs")
+
+    # Table constraints
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('pending', 'success', 'failed')",
+            name="check_publish_status"
+        ),
+        CheckConstraint(
+            "platform IN ('tiktok')",
+            name="check_publish_platform"
+        ),
+        CheckConstraint("attempt_number > 0", name="check_attempt_number"),
+        Index("idx_publish_log_content_attempt", "scheduled_content_id", "attempt_number"),
+        Index("idx_publish_log_status_time", "status", "attempted_at"),
+    )
+
+    def __repr__(self):
+        return f"<PublishLog(id={self.id}, scheduled_content_id={self.scheduled_content_id}, attempt={self.attempt_number}, status='{self.status}')>"

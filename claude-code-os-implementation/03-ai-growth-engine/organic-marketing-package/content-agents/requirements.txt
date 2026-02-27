@@ -11,3 +11,4 @@ pydantic-settings>=2.0.0
 flake8>=6.1.0
 python-amazon-sp-api>=1.0.0
 requests>=2.31.0
+APScheduler>=3.10.0
