@@ -49,6 +49,10 @@ TIKTOK_SHOP_APP_SECRET = os.getenv("TIKTOK_SHOP_APP_SECRET", "")
 TIKTOK_SHOP_ACCESS_TOKEN = os.getenv("TIKTOK_SHOP_ACCESS_TOKEN", "")
 TIKTOK_SHOP_API_BASE_URL = os.getenv("TIKTOK_SHOP_API_BASE_URL", "https://open-api.tiktokglobalshop.com")
 
+# Klaviyo API Configuration
+KLAVIYO_API_KEY = os.getenv("KLAVIYO_API_KEY", "")
+KLAVIYO_API_BASE_URL = os.getenv("KLAVIYO_API_BASE_URL", "https://a.klaviyo.com/api")
+
 # Output configuration
 BLOG_OUTPUT_DIR = OUTPUT_DIR / "blog"
 SOCIAL_OUTPUT_DIR = OUTPUT_DIR / "social"
