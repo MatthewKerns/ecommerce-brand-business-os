@@ -7,9 +7,17 @@
  * - Educate about brand/product value
  * - Build trust through social proof
  * - Guide toward first purchase
+ *
+ * Integrates with source-variants.ts for signup source-based personalization.
  */
 
 import { ContentTemplate } from '../core/ai/content-generator';
+import type { LeadSource } from '../types/lead';
+import {
+  getSourceVariant,
+  getSourceVariableOverrides,
+  hasSourceVariants,
+} from '../core/personalization/source-variants';
 
 // ============================================================
 // Welcome Series Templates (4 emails over 7 days)
@@ -247,4 +255,71 @@ export function getWelcomeSendSchedule(): Array<{ templateId: string; delayDays:
       description: 'First purchase incentive - sent 7 days after welcome',
     },
   ];
+}
+
+// ============================================================
+// Source Variant Integration
+// ============================================================
+
+/**
+ * Get welcome template with source-specific personalization
+ * Returns template with source variant variables merged in
+ */
+export function getWelcomeTemplateWithSource(
+  templateId: string,
+  source: LeadSource
+): ContentTemplate | undefined {
+  const template = getWelcomeTemplate(templateId);
+
+  if (!template || !hasSourceVariants(templateId)) {
+    return template;
+  }
+
+  // Get source-specific overrides
+  const sourceOverrides = getSourceVariableOverrides(source, templateId);
+  const variant = getSourceVariant(source, templateId);
+
+  // Create enhanced template with source-specific instructions
+  return {
+    ...template,
+    systemPrompt: `${template.systemPrompt}
+
+Source Context: The subscriber signed up via ${source}.
+${variant.contextualNote ? `Note: ${variant.contextualNote}` : ''}
+${variant.tone ? `Recommended tone for this source: ${variant.tone}` : ''}`,
+    userPromptTemplate: `${template.userPromptTemplate}
+
+Source-Specific Context:
+- Subject line guidance: ${sourceOverrides._sourceSubject || 'Use default'}
+- Opening line suggestion: ${sourceOverrides._sourceOpeningLine || 'Use standard greeting'}
+${sourceOverrides._sourcePreheader ? `- Preheader text: ${sourceOverrides._sourcePreheader}` : ''}`,
+  };
+}
+
+/**
+ * Get variables for a template with source-specific defaults
+ * Merges base template variables with source variant overrides
+ */
+export function getWelcomeVariablesWithSource(
+  templateId: string,
+  source: LeadSource,
+  baseVariables: Record<string, any>
+): Record<string, any> {
+  if (!hasSourceVariants(templateId)) {
+    return baseVariables;
+  }
+
+  const sourceOverrides = getSourceVariableOverrides(source, templateId);
+
+  return {
+    ...baseVariables,
+    ...sourceOverrides,
+  };
+}
+
+/**
+ * Check if a welcome template has source variants available
+ */
+export function welcomeTemplateHasSourceVariants(templateId: string): boolean {
+  return hasSourceVariants(templateId);
 }
