@@ -12,6 +12,7 @@
 import { ContentTemplate } from '../core/ai/content-generator';
 import { WELCOME_SERIES_TEMPLATES, getWelcomeSendSchedule } from './welcome-series';
 import { NURTURE_SERIES_TEMPLATES, getNurtureSendSchedule } from './nurture-series';
+import type { ABTest, ABVariant, ABTestManager } from '../core/analytics/ab-testing';
 
 // ============================================================
 // Types
@@ -25,9 +26,25 @@ export interface TemplateMetadata {
   sendDelay?: number;
   sendDelayUnit?: 'days' | 'weeks';
   sequencePosition?: number;
+  abTestId?: string;
 }
 
 export type TemplateCategory = 'welcome' | 'nurture' | 'promotional' | 'transactional' | 'custom';
+
+export interface TemplateVariant {
+  variantId: string;
+  templateId: string;
+  template: ContentTemplate;
+  weight: number;
+  isControl?: boolean;
+}
+
+export interface TemplateABTest {
+  testId: string;
+  baseTemplateId: string;
+  variants: TemplateVariant[];
+  status: 'draft' | 'running' | 'paused' | 'completed';
+}
 
 // ============================================================
 // Template Registry Class
@@ -35,9 +52,12 @@ export type TemplateCategory = 'welcome' | 'nurture' | 'promotional' | 'transact
 
 export class TemplateRegistry {
   private templates: Map<string, ContentTemplate>;
+  private abTestManager?: ABTestManager;
+  private templateTests: Map<string, string> = new Map(); // templateId -> testId
 
-  constructor(customTemplates?: ContentTemplate[]) {
+  constructor(customTemplates?: ContentTemplate[], abTestManager?: ABTestManager) {
     this.templates = new Map();
+    this.abTestManager = abTestManager;
 
     // Load welcome series templates
     WELCOME_SERIES_TEMPLATES.forEach(template => {
@@ -53,6 +73,20 @@ export class TemplateRegistry {
     customTemplates?.forEach(template => {
       this.templates.set(template.id, template);
     });
+  }
+
+  /**
+   * Set A/B test manager (can be called after construction)
+   */
+  setABTestManager(manager: ABTestManager): void {
+    this.abTestManager = manager;
+  }
+
+  /**
+   * Get A/B test manager instance
+   */
+  getABTestManager(): ABTestManager | undefined {
+    return this.abTestManager;
   }
 
   /**
@@ -192,6 +226,172 @@ export class TemplateRegistry {
       }));
     }
     return [];
+  }
+
+  // ============================================================
+  // A/B Testing Integration
+  // ============================================================
+
+  /**
+   * Create an A/B test for a template with variants
+   */
+  async createTemplateTest(
+    baseTemplateId: string,
+    variants: Array<{
+      id: string;
+      name: string;
+      template: ContentTemplate;
+      weight: number;
+      isControl?: boolean;
+    }>,
+    testOptions?: {
+      name?: string;
+      description?: string;
+      trafficAllocation?: number;
+      primaryMetric?: 'open_rate' | 'click_rate' | 'conversion_rate';
+    }
+  ): Promise<ABTest | null> {
+    if (!this.abTestManager) {
+      throw new Error('ABTestManager not configured. Call setABTestManager() first.');
+    }
+
+    const baseTemplate = this.getTemplate(baseTemplateId);
+    if (!baseTemplate) {
+      throw new Error(`Base template ${baseTemplateId} not found`);
+    }
+
+    // Validate and add variant templates to registry
+    for (const variant of variants) {
+      this.addTemplate(variant.template);
+    }
+
+    // Create A/B test with ABTestManager
+    const abVariants: ABVariant[] = variants.map(v => ({
+      id: v.id,
+      name: v.name,
+      weight: v.weight,
+      isControl: v.isControl,
+      config: {
+        templateId: v.template.id,
+      },
+    }));
+
+    const test = await this.abTestManager.createTest({
+      name: testOptions?.name || `${baseTemplate.name} A/B Test`,
+      description: testOptions?.description || `A/B test for template ${baseTemplateId}`,
+      type: 'full_email',
+      status: 'draft',
+      variants: abVariants,
+      trafficAllocation: testOptions?.trafficAllocation || 100,
+      primaryMetric: testOptions?.primaryMetric || 'open_rate',
+      templateId: baseTemplateId,
+    });
+
+    // Track template -> test mapping
+    this.templateTests.set(baseTemplateId, test.id);
+
+    return test;
+  }
+
+  /**
+   * Get template for a user based on A/B test assignment
+   */
+  async getTemplateForUser(
+    templateId: string,
+    userId: string,
+    context?: {
+      sequenceId?: string;
+      campaignId?: string;
+      messageId?: string;
+    }
+  ): Promise<ContentTemplate | null> {
+    // Check if template has an active A/B test
+    const testId = this.templateTests.get(templateId);
+    if (!testId || !this.abTestManager) {
+      // No test - return base template
+      return this.getTemplate(templateId) || null;
+    }
+
+    // Get test details
+    const test = await this.abTestManager.getTest(testId);
+    if (!test || test.status !== 'running') {
+      // Test not running - return base template
+      return this.getTemplate(templateId) || null;
+    }
+
+    // Assign variant to user
+    const assignedVariant = await this.abTestManager.assignVariant(testId, userId, {
+      sequenceId: context?.sequenceId,
+      campaignId: context?.campaignId,
+      messageId: context?.messageId,
+    });
+
+    if (!assignedVariant || !assignedVariant.config.templateId) {
+      // Fallback to base template
+      return this.getTemplate(templateId) || null;
+    }
+
+    // Return variant template
+    return this.getTemplate(assignedVariant.config.templateId) || null;
+  }
+
+  /**
+   * Check if a template has an active A/B test
+   */
+  hasActiveTest(templateId: string): boolean {
+    const testId = this.templateTests.get(templateId);
+    return testId !== undefined;
+  }
+
+  /**
+   * Get A/B test for a template
+   */
+  async getTemplateTest(templateId: string): Promise<ABTest | null> {
+    const testId = this.templateTests.get(templateId);
+    if (!testId || !this.abTestManager) {
+      return null;
+    }
+
+    return this.abTestManager.getTest(testId);
+  }
+
+  /**
+   * Associate a template with an existing A/B test
+   */
+  linkTemplateToTest(templateId: string, testId: string): void {
+    this.templateTests.set(templateId, testId);
+  }
+
+  /**
+   * Remove A/B test association from a template
+   */
+  unlinkTemplateFromTest(templateId: string): boolean {
+    return this.templateTests.delete(templateId);
+  }
+
+  /**
+   * Get all templates that have A/B tests
+   */
+  getTemplatesWithTests(): string[] {
+    return Array.from(this.templateTests.keys());
+  }
+
+  /**
+   * Get template variants from an A/B test
+   */
+  async getTemplateVariants(templateId: string): Promise<TemplateVariant[]> {
+    const test = await this.getTemplateTest(templateId);
+    if (!test) {
+      return [];
+    }
+
+    return test.variants.map(v => ({
+      variantId: v.id,
+      templateId: v.config.templateId || templateId,
+      template: this.getTemplate(v.config.templateId || templateId)!,
+      weight: v.weight,
+      isControl: v.isControl,
+    })).filter(v => v.template !== undefined);
   }
 }
 

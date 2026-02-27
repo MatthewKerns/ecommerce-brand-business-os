@@ -30,6 +30,8 @@ export {
   defaultTemplateRegistry,
   type TemplateMetadata,
   type TemplateCategory,
+  type TemplateVariant,
+  type TemplateABTest,
 } from './registry';
 
 // Re-export ContentTemplate type for convenience

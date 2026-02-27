@@ -19,6 +19,7 @@ import type {
 } from '@/core/analytics/metrics';
 import { ABTestManager } from '@/core/analytics/ab-testing';
 import type { ABTest, ABVariant } from '@/core/analytics/ab-testing';
+import type { TemplateRegistry } from '@/templates/registry';
 
 // ============================================================
 // Types
@@ -177,11 +178,19 @@ export class SequenceEngine {
   private leadEnrollments: Map<string, Set<string>> = new Map(); // leadId -> enrollmentIds
   private metricsEngine?: MetricsAggregationEngine;
   private abTestManager?: ABTestManager;
+  private templateRegistry?: TemplateRegistry;
 
-  constructor(analyticsStorage?: IAnalyticsStorage) {
+  constructor(analyticsStorage?: IAnalyticsStorage, templateRegistry?: TemplateRegistry) {
+    this.templateRegistry = templateRegistry;
+
     if (analyticsStorage) {
       this.metricsEngine = new MetricsAggregationEngine(analyticsStorage);
       this.abTestManager = new ABTestManager(analyticsStorage);
+
+      // Link template registry to A/B test manager if both exist
+      if (this.templateRegistry && this.abTestManager) {
+        this.templateRegistry.setABTestManager(this.abTestManager);
+      }
     }
   }
 
@@ -191,6 +200,11 @@ export class SequenceEngine {
   setAnalyticsStorage(storage: IAnalyticsStorage): void {
     this.metricsEngine = new MetricsAggregationEngine(storage);
     this.abTestManager = new ABTestManager(storage);
+
+    // Link template registry to A/B test manager if both exist
+    if (this.templateRegistry && this.abTestManager) {
+      this.templateRegistry.setABTestManager(this.abTestManager);
+    }
   }
 
   /**
@@ -198,6 +212,11 @@ export class SequenceEngine {
    */
   setABTestManager(manager: ABTestManager): void {
     this.abTestManager = manager;
+
+    // Link to template registry if it exists
+    if (this.templateRegistry) {
+      this.templateRegistry.setABTestManager(manager);
+    }
   }
 
   /**
@@ -205,6 +224,25 @@ export class SequenceEngine {
    */
   getABTestManager(): ABTestManager | undefined {
     return this.abTestManager;
+  }
+
+  /**
+   * Set template registry (can be called after construction)
+   */
+  setTemplateRegistry(registry: TemplateRegistry): void {
+    this.templateRegistry = registry;
+
+    // Link to A/B test manager if it exists
+    if (this.abTestManager) {
+      registry.setABTestManager(this.abTestManager);
+    }
+  }
+
+  /**
+   * Get template registry instance
+   */
+  getTemplateRegistry(): TemplateRegistry | undefined {
+    return this.templateRegistry;
   }
 
   /**
@@ -637,6 +675,172 @@ export class SequenceEngine {
     });
 
     return reportsWithSequences.slice(0, limit);
+  }
+
+  // ============================================================
+  // Template & A/B Testing Integration
+  // ============================================================
+
+  /**
+   * Get template for a step with A/B testing support
+   */
+  async getTemplateForStep(
+    enrollmentId: string,
+    stepId: string
+  ): Promise<import('@/core/ai/content-generator').ContentTemplate | null> {
+    if (!this.templateRegistry) {
+      return null;
+    }
+
+    const enrollment = this.enrollments.get(enrollmentId);
+    if (!enrollment) {
+      return null;
+    }
+
+    const sequence = this.sequences.get(enrollment.sequenceId);
+    if (!sequence) {
+      return null;
+    }
+
+    const step = sequence.steps.find(s => s.id === stepId);
+    if (!step || !step.config.templateId) {
+      return null;
+    }
+
+    // Get template with A/B testing support
+    return this.templateRegistry.getTemplateForUser(
+      step.config.templateId,
+      enrollment.leadId,
+      {
+        sequenceId: sequence.id,
+        messageId: `${enrollment.id}-${stepId}`,
+      }
+    );
+  }
+
+  /**
+   * Create A/B test for a sequence step template
+   */
+  async createStepTemplateTest(
+    sequenceId: string,
+    stepId: string,
+    variants: Array<{
+      id: string;
+      name: string;
+      template: import('@/core/ai/content-generator').ContentTemplate;
+      weight: number;
+      isControl?: boolean;
+    }>,
+    testOptions?: {
+      name?: string;
+      description?: string;
+      trafficAllocation?: number;
+      primaryMetric?: 'open_rate' | 'click_rate' | 'conversion_rate';
+    }
+  ): Promise<ABTest | null> {
+    if (!this.templateRegistry) {
+      throw new Error('Template registry not configured. Call setTemplateRegistry() first.');
+    }
+
+    const sequence = this.sequences.get(sequenceId);
+    if (!sequence) {
+      throw new Error(`Sequence ${sequenceId} not found`);
+    }
+
+    const step = sequence.steps.find(s => s.id === stepId);
+    if (!step || !step.config.templateId) {
+      throw new Error(`Step ${stepId} not found or has no template`);
+    }
+
+    // Create test through template registry
+    const test = await this.templateRegistry.createTemplateTest(
+      step.config.templateId,
+      variants,
+      {
+        ...testOptions,
+        name: testOptions?.name || `${sequence.name} - Step ${step.name} A/B Test`,
+      }
+    );
+
+    if (test) {
+      // Link test to sequence context
+      test.sequenceId = sequenceId;
+      if (this.abTestManager) {
+        await this.abTestManager.updateTest(test.id, { sequenceId });
+      }
+    }
+
+    return test;
+  }
+
+  /**
+   * Get A/B test results for a sequence step
+   */
+  async getStepTestResults(
+    sequenceId: string,
+    stepId: string
+  ): Promise<import('@/core/analytics/ab-testing').ABTestResults | null> {
+    if (!this.templateRegistry || !this.abTestManager) {
+      throw new Error('Template registry and AB test manager must be configured');
+    }
+
+    const sequence = this.sequences.get(sequenceId);
+    if (!sequence) {
+      return null;
+    }
+
+    const step = sequence.steps.find(s => s.id === stepId);
+    if (!step || !step.config.templateId) {
+      return null;
+    }
+
+    // Get test from template
+    const test = await this.templateRegistry.getTemplateTest(step.config.templateId);
+    if (!test) {
+      return null;
+    }
+
+    // Get test results
+    return this.abTestManager.getTestResults(test.id, {
+      sequenceId,
+    });
+  }
+
+  /**
+   * Get all A/B tests for a sequence
+   */
+  async getSequenceTests(sequenceId: string): Promise<ABTest[]> {
+    if (!this.abTestManager) {
+      throw new Error('AB test manager not configured. Call setAnalyticsStorage() first.');
+    }
+
+    return this.abTestManager.listTests({ sequenceId });
+  }
+
+  /**
+   * Start an A/B test for a sequence step template
+   */
+  async startStepTest(sequenceId: string, stepId: string): Promise<boolean> {
+    if (!this.templateRegistry || !this.abTestManager) {
+      throw new Error('Template registry and AB test manager must be configured');
+    }
+
+    const sequence = this.sequences.get(sequenceId);
+    if (!sequence) {
+      return false;
+    }
+
+    const step = sequence.steps.find(s => s.id === stepId);
+    if (!step || !step.config.templateId) {
+      return false;
+    }
+
+    const test = await this.templateRegistry.getTemplateTest(step.config.templateId);
+    if (!test) {
+      return false;
+    }
+
+    return this.abTestManager.startTest(test.id);
   }
 
   // ============================================================
