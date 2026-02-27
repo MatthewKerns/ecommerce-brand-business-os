@@ -18,6 +18,12 @@ import {
   type PersonalizationRule,
   type PersonalizationContext,
 } from '@/core/personalization/rules-engine';
+import {
+  InterestMatcher,
+  type Interest,
+  type InterestCategory,
+  type InterestMatchResult,
+} from '@/core/personalization/interest-matcher';
 
 // ============================================================
 // Types
@@ -163,6 +169,7 @@ export class ContentGenerator {
   private openaiClient?: OpenAI;
   private claudeClient?: Anthropic;
   private personalizationEngine?: PersonalizationRulesEngine;
+  private interestMatcher?: InterestMatcher;
 
   constructor(
     config: AIConfig,
@@ -356,6 +363,106 @@ export class ContentGenerator {
       return [];
     }
     return this.personalizationEngine.getPersonalizationSuggestions(lead);
+  }
+
+  /**
+   * Set interest matcher
+   */
+  setInterestMatcher(matcher: InterestMatcher): void {
+    this.interestMatcher = matcher;
+  }
+
+  /**
+   * Get interest matcher
+   */
+  getInterestMatcher(): InterestMatcher | undefined {
+    return this.interestMatcher;
+  }
+
+  /**
+   * Enable interest-based personalization (creates matcher if not exists)
+   */
+  enableInterestPersonalization(customCategories?: InterestCategory[]): void {
+    if (!this.interestMatcher) {
+      this.interestMatcher = new InterestMatcher(customCategories);
+    }
+  }
+
+  /**
+   * Get lead interests
+   */
+  getLeadInterests(lead: Lead): Interest[] {
+    if (!this.interestMatcher) {
+      this.interestMatcher = new InterestMatcher();
+    }
+    return this.interestMatcher.extractInterests(lead);
+  }
+
+  /**
+   * Match lead interests and get recommendations
+   */
+  matchLeadInterests(lead: Lead): InterestMatchResult {
+    if (!this.interestMatcher) {
+      this.interestMatcher = new InterestMatcher();
+    }
+    return this.interestMatcher.matchInterests(lead);
+  }
+
+  /**
+   * Apply interest-based personalization to content generation
+   * This automatically adds interest-based rules to the personalization engine
+   */
+  applyInterestBasedPersonalization(lead: Lead): void {
+    if (!this.interestMatcher) {
+      this.interestMatcher = new InterestMatcher();
+    }
+
+    // Get interest-based personalization rules
+    const interestRules = this.interestMatcher.getPersonalizationRules(lead);
+
+    // Add rules to personalization engine
+    for (const rule of interestRules) {
+      this.addPersonalizationRule(rule);
+    }
+  }
+
+  /**
+   * Generate content with automatic interest-based personalization
+   */
+  async generateWithInterests(
+    request: GenerateContentRequest
+  ): Promise<GeneratedContent> {
+    // If lead is provided and interest personalization is not explicitly disabled
+    if (request.lead && request.applyPersonalization !== false) {
+      // Ensure interest matcher exists
+      if (!this.interestMatcher) {
+        this.interestMatcher = new InterestMatcher();
+      }
+
+      // Apply interest-based personalization rules
+      this.applyInterestBasedPersonalization(request.lead);
+
+      // Get interest match results for metadata
+      const interestMatch = this.interestMatcher.matchInterests(request.lead);
+
+      // Generate content with standard personalization (which now includes interest rules)
+      const content = await this.generateContent(request);
+
+      // Add interest metadata
+      if (content.metadata) {
+        content.metadata = {
+          ...content.metadata,
+          interestsDetected: interestMatch.topInterests.length,
+          topInterests: interestMatch.topInterests.map(i => i.name),
+          primaryCategory: interestMatch.metadata.primaryCategory,
+        };
+      }
+
+      return content;
+    }
+
+    // Fall back to standard generation if no lead or personalization disabled
+    return this.generateContent(request);
   }
 
   // ============================================================
