@@ -248,6 +248,99 @@ class CompetitorRequest(BaseModel):
         }
 
 
+class SEOAnalysisRequest(BaseModel):
+    """
+    SEO analysis request.
+
+    This model handles SEO analysis requests for content optimization.
+    """
+    content: str = Field(
+        ...,
+        min_length=50,
+        max_length=50000,
+        description="Content to analyze for SEO"
+    )
+    target_keywords: Optional[List[str]] = Field(
+        default_factory=list,
+        max_length=20,
+        description="Target keywords to analyze for"
+    )
+    url: Optional[str] = Field(
+        None,
+        max_length=2000,
+        description="URL of the content being analyzed"
+    )
+    content_type: str = Field(
+        default="blog",
+        pattern="^(blog|product|landing_page)$",
+        description="Type of content being analyzed"
+    )
+    include_recommendations: bool = Field(
+        default=True,
+        description="Whether to include optimization recommendations"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "content": "# Tactical Backpacks for Urban Professionals\n\nDiscover the best tactical backpacks...",
+                "target_keywords": ["tactical backpack", "urban EDC", "professional carry"],
+                "url": "https://example.com/blog/tactical-backpacks",
+                "content_type": "blog",
+                "include_recommendations": True
+            }
+        }
+
+
+class KeywordResearchRequest(BaseModel):
+    """
+    Keyword research request.
+
+    This model handles keyword research and discovery requests.
+    """
+    seed_keywords: List[str] = Field(
+        ...,
+        min_length=1,
+        max_length=10,
+        description="Seed keywords for research"
+    )
+    topic: str = Field(
+        ...,
+        min_length=5,
+        max_length=500,
+        description="Topic or niche for keyword research"
+    )
+    max_keywords: int = Field(
+        default=50,
+        ge=10,
+        le=200,
+        description="Maximum number of keywords to return"
+    )
+    include_long_tail: bool = Field(
+        default=True,
+        description="Whether to include long-tail keywords"
+    )
+    competitor_urls: Optional[List[str]] = Field(
+        default_factory=list,
+        max_length=5,
+        description="Competitor URLs for keyword analysis"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "seed_keywords": ["tactical backpack", "EDC bag"],
+                "topic": "Tactical gear for urban professionals",
+                "max_keywords": 50,
+                "include_long_tail": True,
+                "competitor_urls": [
+                    "https://competitor1.com/tactical-backpacks",
+                    "https://competitor2.com/edc-gear"
+                ]
+            }
+        }
+
+
 # ============================================================================
 # Response Models
 # ============================================================================
@@ -374,5 +467,222 @@ class ErrorResponse(BaseModel):
                 },
                 "request_id": "req_abc123def456",
                 "timestamp": "2024-02-26T10:30:45Z"
+            }
+        }
+
+
+class KeywordMetrics(BaseModel):
+    """
+    Metrics for individual keywords.
+
+    This model captures SEO metrics for a specific keyword.
+    """
+    keyword: str = Field(
+        ...,
+        description="The keyword phrase"
+    )
+    search_volume: Optional[int] = Field(
+        None,
+        description="Estimated monthly search volume"
+    )
+    difficulty: Optional[float] = Field(
+        None,
+        ge=0.0,
+        le=100.0,
+        description="Keyword difficulty score (0-100)"
+    )
+    relevance_score: float = Field(
+        ...,
+        ge=0.0,
+        le=1.0,
+        description="Relevance to content (0-1)"
+    )
+    density: Optional[float] = Field(
+        None,
+        ge=0.0,
+        le=100.0,
+        description="Keyword density percentage in content"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "keyword": "tactical backpack",
+                "search_volume": 12000,
+                "difficulty": 45.5,
+                "relevance_score": 0.92,
+                "density": 2.3
+            }
+        }
+
+
+class SEOScore(BaseModel):
+    """
+    SEO scoring breakdown.
+
+    This model provides detailed SEO scoring for content.
+    """
+    overall_score: float = Field(
+        ...,
+        ge=0.0,
+        le=100.0,
+        description="Overall SEO score (0-100)"
+    )
+    keyword_optimization: float = Field(
+        ...,
+        ge=0.0,
+        le=100.0,
+        description="Keyword optimization score (0-100)"
+    )
+    content_quality: float = Field(
+        ...,
+        ge=0.0,
+        le=100.0,
+        description="Content quality score (0-100)"
+    )
+    readability: float = Field(
+        ...,
+        ge=0.0,
+        le=100.0,
+        description="Readability score (0-100)"
+    )
+    structure: float = Field(
+        ...,
+        ge=0.0,
+        le=100.0,
+        description="Content structure score (0-100)"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "overall_score": 78.5,
+                "keyword_optimization": 82.0,
+                "content_quality": 85.5,
+                "readability": 75.0,
+                "structure": 70.0
+            }
+        }
+
+
+class SEORecommendation(BaseModel):
+    """
+    Individual SEO recommendation.
+
+    This model represents a single optimization recommendation.
+    """
+    category: str = Field(
+        ...,
+        pattern="^(keywords|content|structure|readability|technical)$",
+        description="Category of the recommendation"
+    )
+    priority: str = Field(
+        ...,
+        pattern="^(high|medium|low)$",
+        description="Priority level"
+    )
+    issue: str = Field(
+        ...,
+        description="Description of the issue"
+    )
+    recommendation: str = Field(
+        ...,
+        description="Recommended action"
+    )
+    impact: str = Field(
+        ...,
+        description="Expected impact of implementing this recommendation"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "category": "keywords",
+                "priority": "high",
+                "issue": "Target keyword 'tactical backpack' appears only once in content",
+                "recommendation": "Increase keyword density to 1-2% by naturally incorporating the phrase 3-4 more times",
+                "impact": "Improved search engine ranking for target keyword"
+            }
+        }
+
+
+class SEOAnalysisResponse(BaseModel):
+    """
+    SEO analysis response.
+
+    This model structures the response for SEO analysis requests.
+    """
+    request_id: str = Field(
+        ...,
+        description="Unique identifier for the request"
+    )
+    seo_score: SEOScore = Field(
+        ...,
+        description="SEO scoring breakdown"
+    )
+    keyword_analysis: List[KeywordMetrics] = Field(
+        ...,
+        description="Analysis of keywords in content"
+    )
+    recommendations: List[SEORecommendation] = Field(
+        default_factory=list,
+        description="SEO optimization recommendations"
+    )
+    content_stats: Dict[str, Any] = Field(
+        ...,
+        description="Content statistics (word count, headings, etc.)"
+    )
+    metadata: ContentMetadata = Field(
+        ...,
+        description="Metadata about the analysis process"
+    )
+    status: str = Field(
+        default="success",
+        description="Status of the analysis"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "request_id": "req_seo123abc",
+                "seo_score": {
+                    "overall_score": 78.5,
+                    "keyword_optimization": 82.0,
+                    "content_quality": 85.5,
+                    "readability": 75.0,
+                    "structure": 70.0
+                },
+                "keyword_analysis": [
+                    {
+                        "keyword": "tactical backpack",
+                        "search_volume": 12000,
+                        "difficulty": 45.5,
+                        "relevance_score": 0.92,
+                        "density": 2.3
+                    }
+                ],
+                "recommendations": [
+                    {
+                        "category": "keywords",
+                        "priority": "high",
+                        "issue": "Target keyword density is low",
+                        "recommendation": "Increase keyword usage naturally",
+                        "impact": "Improved search ranking"
+                    }
+                ],
+                "content_stats": {
+                    "word_count": 1542,
+                    "heading_count": 8,
+                    "paragraph_count": 12,
+                    "image_count": 3
+                },
+                "metadata": {
+                    "agent": "seo_agent",
+                    "model": "claude-sonnet-4-5-20250929",
+                    "tokens_used": 1523,
+                    "generation_time_ms": 2341,
+                    "timestamp": "2024-02-26T10:30:45Z"
+                },
+                "status": "success"
             }
         }
