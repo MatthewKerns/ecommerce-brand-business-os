@@ -11,6 +11,7 @@ from api.routes.competitor import router as competitor_router
 from api.routes.tiktok_channels import router as tiktok_channels_router
 from api.routes.tiktok_scheduling import router as tiktok_scheduling_router
 from api.routes.aeo import router as aeo_router
+from api.routes.citation_monitoring import router as citation_monitoring_router
 
 __all__ = [
     "blog_router",
@@ -19,5 +20,6 @@ __all__ = [
     "competitor_router",
     "tiktok_channels_router",
     "tiktok_scheduling_router",
-    "aeo_router"
+    "aeo_router",
+    "citation_monitoring_router"
 ]

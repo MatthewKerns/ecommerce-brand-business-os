@@ -1,8 +1,11 @@
 """
-Scheduler Module for TikTok Content Publishing
+Scheduler Module for Content Publishing and Citation Monitoring
 
-This module contains scheduler tasks and service for automatic content publishing.
+This module contains scheduler tasks and services for automatic content publishing
+and automated citation monitoring.
 """
+
+# TikTok Content Publishing (from 008)
 from .tasks import (
     check_and_publish_due_content,
     retry_failed_content,
@@ -10,9 +13,15 @@ from .tasks import (
 )
 from .scheduler_service import SchedulerService
 
+# Citation Monitoring (from 011)
+from scheduler.citation_scheduler import CitationScheduler
+
 __all__ = [
+    # TikTok Publishing
     "check_and_publish_due_content",
     "retry_failed_content",
     "cleanup_old_records",
-    "SchedulerService"
+    "SchedulerService",
+    # Citation Monitoring
+    "CitationScheduler"
 ]

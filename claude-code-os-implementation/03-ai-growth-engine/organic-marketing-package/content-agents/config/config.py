@@ -32,6 +32,8 @@ TARGET_MARKET_PATH = BRAND_DIR / "03-ai-growth-engine" / "business-definition" /
 
 # API Configuration
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+PERPLEXITY_API_KEY = os.getenv("PERPLEXITY_API_KEY", "")
 DEFAULT_MODEL = "claude-sonnet-4-5-20250929"
 DEFAULT_MAX_TOKENS = 4096
 
@@ -218,3 +220,13 @@ TIKTOK_CHANNELS_OUTPUT_DIR = OUTPUT_DIR / "tiktok" / "channels"
 for element in ["air", "water", "fire", "earth"]:
     channel_dir = TIKTOK_CHANNELS_OUTPUT_DIR / element
     channel_dir.mkdir(parents=True, exist_ok=True)
+# Target queries for AI citation monitoring
+# These queries are tested weekly across AI assistants (ChatGPT, Claude, Perplexity)
+# to track brand citations and optimize AEO (Answer Engine Optimization)
+TARGET_QUERIES = [
+    "Best TCG storage solutions",
+    "Top trading card binders",
+    "Best card sleeves for protection",
+    "How to organize trading card collection",
+    "Best deck boxes for TCG players"
+]

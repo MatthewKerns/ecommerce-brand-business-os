@@ -11,6 +11,7 @@ from .competitor_agent import CompetitorAgent
 from .tiktok_shop_agent import TikTokShopAgent
 from .tiktok_channel_agent import TikTokChannelAgent
 from .aeo_agent import AEOAgent
+from .citation_monitoring_agent import CitationMonitoringAgent
 
 __all__ = [
     'BaseAgent',
@@ -20,5 +21,6 @@ __all__ = [
     'CompetitorAgent',
     'TikTokShopAgent',
     'TikTokChannelAgent',
-    'AEOAgent'
+    'AEOAgent',
+    'CitationMonitoringAgent'
 ]
