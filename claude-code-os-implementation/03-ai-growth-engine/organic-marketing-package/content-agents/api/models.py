@@ -90,6 +90,15 @@ class BlogRequest(BaseModel):
         max_length=10,
         description="SEO keywords to incorporate"
     )
+    target_keyword: Optional[str] = Field(
+        None,
+        max_length=100,
+        description="Primary target keyword for SEO optimization"
+    )
+    include_seo_analysis: bool = Field(
+        default=False,
+        description="Whether to include SEO analysis with the content"
+    )
     include_outline: bool = Field(
         default=False,
         description="Whether to include a content outline"
@@ -103,6 +112,8 @@ class BlogRequest(BaseModel):
                 "content_format": "listicle",
                 "target_word_count": 1500,
                 "seo_keywords": ["tactical backpack", "urban EDC", "professional carry"],
+                "target_keyword": "tactical backpack",
+                "include_seo_analysis": True,
                 "include_outline": True
             }
         }

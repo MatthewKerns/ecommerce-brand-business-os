@@ -49,6 +49,11 @@ class BlogPostRequest(BaseModel):
         default_factory=list,
         description="SEO keywords to target"
     )
+    target_keyword: Optional[str] = Field(
+        None,
+        max_length=100,
+        description="Primary target keyword for SEO optimization"
+    )
     word_count: int = Field(
         default=1000,
         ge=300,
@@ -59,6 +64,10 @@ class BlogPostRequest(BaseModel):
         default=True,
         description="Whether to include a call-to-action"
     )
+    include_seo_analysis: bool = Field(
+        default=False,
+        description="Whether to include SEO analysis with the content"
+    )
 
     class Config:
         json_schema_extra = {
@@ -66,8 +75,10 @@ class BlogPostRequest(BaseModel):
                 "topic": "How to Organize Your Trading Card Collection",
                 "content_pillar": "Gear & Equipment",
                 "target_keywords": ["trading card storage", "card organization", "TCG collection"],
+                "target_keyword": "trading card storage",
                 "word_count": 1500,
-                "include_cta": True
+                "include_cta": True,
+                "include_seo_analysis": True
             }
         }
 
