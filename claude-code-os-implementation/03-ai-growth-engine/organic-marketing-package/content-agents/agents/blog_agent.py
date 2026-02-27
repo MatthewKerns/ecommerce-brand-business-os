@@ -373,3 +373,71 @@ Make it actionable and empowering. Readers should finish feeling capable and rea
             self.logger.info(f"Excellent SEO score! Content is well-optimized.")
 
         return analysis
+
+    def generate_meta_description(
+        self,
+        content: str,
+        max_length: int = 160
+    ) -> str:
+        """
+        Generate an SEO-optimized meta description for blog content
+
+        Args:
+            content: The article content or topic to generate meta description for
+            max_length: Maximum character length (default 160 for SEO best practice)
+
+        Returns:
+            Meta description string (≤ max_length characters)
+        """
+        self.logger.info(f"Generating meta description (max_length={max_length})")
+
+        prompt = f"""Generate a compelling meta description for the following content:
+
+CONTENT:
+{content[:1000]}
+
+REQUIREMENTS:
+1. Maximum {max_length} characters (strict limit)
+2. Include primary keywords naturally
+3. Write in active voice
+4. Make it compelling and clickable
+5. Align with Infinity Vault brand voice (confident, battle-ready)
+6. Include a clear value proposition or hook
+7. No special characters that break HTML
+
+Return ONLY the meta description text, nothing else."""
+
+        system_context = """You are an SEO expert specializing in meta descriptions.
+
+Meta descriptions should:
+- Be concise and compelling
+- Include target keywords naturally
+- Encourage clicks from search results
+- Accurately represent the content
+- End with a complete thought (no cut-off sentences)
+
+For Infinity Vault content, emphasize:
+- Battle-ready mindset
+- Premium quality and expertise
+- Value for serious TCG players"""
+
+        meta_description = self.generate_content(
+            prompt=prompt,
+            system_context=system_context,
+            max_tokens=100,
+            temperature=0.7
+        ).strip()
+
+        # Ensure it meets length requirement
+        if len(meta_description) > max_length:
+            self.logger.warning(
+                f"Generated meta description ({len(meta_description)} chars) exceeds "
+                f"max_length ({max_length}). Truncating..."
+            )
+            # Truncate at last complete word before max_length
+            meta_description = meta_description[:max_length].rsplit(' ', 1)[0].rstrip('.,;:') + '...'
+            if len(meta_description) > max_length:
+                meta_description = meta_description[:max_length-3] + '...'
+
+        self.logger.info(f"Generated meta description ({len(meta_description)} chars): {meta_description}")
+        return meta_description
