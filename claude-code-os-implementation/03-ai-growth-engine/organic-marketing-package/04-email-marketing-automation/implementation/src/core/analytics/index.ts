@@ -8,6 +8,8 @@
  * - Token parsing and verification
  * - Email event data models
  * - Analytics storage and metrics
+ * - A/B testing system with variant management
+ * - Statistical significance testing and analysis
  */
 
 // HMAC Utilities
@@ -105,3 +107,23 @@ export {
   type ABTestFilter,
   type ABTestResults,
 } from './ab-testing';
+
+// Statistical Analysis
+export {
+  calculateSignificance,
+  calculateChiSquare,
+  calculateZScore,
+  calculatePValue,
+  calculateConfidenceInterval,
+  calculateCohenH,
+  calculatePower,
+  calculateMinimumSampleSize,
+  calculateSampleSizeRequirements,
+  compareVariantsToControl,
+  determineWinner,
+  calculateBayesianCredibleInterval,
+  type SignificanceTestResult,
+  type ConfidenceInterval,
+  type ProportionTestResult,
+  type SampleSizeRequirement,
+} from './statistics';
