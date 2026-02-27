@@ -14,6 +14,7 @@ import {
   PersonalizationEditor,
   PersonalizationSettings,
 } from "./PersonalizationEditor";
+import { ABTestManager, ABTestSettings } from "./ABTestManager";
 
 /**
  * Sequence data for editing
@@ -33,6 +34,8 @@ export interface Sequence {
   steps: SequenceStep[];
   /** Personalization settings (optional) */
   personalization?: PersonalizationSettings;
+  /** A/B test settings (optional) */
+  abTestSettings?: ABTestSettings;
 }
 
 /**
@@ -120,6 +123,12 @@ export function SequenceEditor({
       interestRules: [],
     }
   );
+  const [abTestSettings, setAbTestSettings] = useState<ABTestSettings>(
+    sequence?.abTestSettings || {
+      enabled: false,
+      tests: [],
+    }
+  );
 
   /**
    * Handle template selection
@@ -157,6 +166,7 @@ export function SequenceEditor({
       templateId: selectedTemplateId,
       steps,
       personalization,
+      abTestSettings,
     };
 
     // Simulate API call
@@ -314,6 +324,16 @@ export function SequenceEditor({
           <PersonalizationEditor
             settings={personalization}
             onUpdateSettings={setPersonalization}
+          />
+        </div>
+      )}
+
+      {/* A/B Test Manager */}
+      {!showTemplateSelector && steps.length > 0 && (
+        <div className="rounded-lg border border-slate-200 bg-white p-6">
+          <ABTestManager
+            settings={abTestSettings}
+            onUpdateSettings={setAbTestSettings}
           />
         </div>
       )}
