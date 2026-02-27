@@ -83,3 +83,37 @@ CHANNELS = {
     "youtube": "Brand awareness",
     "blog": "SEO and thought leadership"
 }
+
+# Analytics refresh configuration
+ANALYTICS_REFRESH_HOURS = int(os.getenv("ANALYTICS_REFRESH_HOURS", "24"))
+ANALYTICS_INCREMENTAL_HOURS = int(os.getenv("ANALYTICS_INCREMENTAL_HOURS", "1"))
+ANALYTICS_BACKFILL_BATCH_DAYS = int(os.getenv("ANALYTICS_BACKFILL_BATCH_DAYS", "7"))
+ANALYTICS_MAX_RETRIES = int(os.getenv("ANALYTICS_MAX_RETRIES", "3"))
+ANALYTICS_RETRY_DELAY_SECONDS = int(os.getenv("ANALYTICS_RETRY_DELAY_SECONDS", "60"))
+
+# Refresh schedule configuration
+TIKTOK_REFRESH_ENABLED = os.getenv("TIKTOK_REFRESH_ENABLED", "true").lower() == "true"
+WEBSITE_REFRESH_ENABLED = os.getenv("WEBSITE_REFRESH_ENABLED", "true").lower() == "true"
+EMAIL_REFRESH_ENABLED = os.getenv("EMAIL_REFRESH_ENABLED", "true").lower() == "true"
+SALES_REFRESH_ENABLED = os.getenv("SALES_REFRESH_ENABLED", "true").lower() == "true"
+
+
+# Settings object for convenient access
+class Settings:
+    """Configuration settings container"""
+
+    # Analytics refresh settings
+    analytics_refresh_hours = ANALYTICS_REFRESH_HOURS
+    analytics_incremental_hours = ANALYTICS_INCREMENTAL_HOURS
+    analytics_backfill_batch_days = ANALYTICS_BACKFILL_BATCH_DAYS
+    analytics_max_retries = ANALYTICS_MAX_RETRIES
+    analytics_retry_delay_seconds = ANALYTICS_RETRY_DELAY_SECONDS
+
+    # Channel refresh toggles
+    tiktok_refresh_enabled = TIKTOK_REFRESH_ENABLED
+    website_refresh_enabled = WEBSITE_REFRESH_ENABLED
+    email_refresh_enabled = EMAIL_REFRESH_ENABLED
+    sales_refresh_enabled = SALES_REFRESH_ENABLED
+
+
+settings = Settings()
