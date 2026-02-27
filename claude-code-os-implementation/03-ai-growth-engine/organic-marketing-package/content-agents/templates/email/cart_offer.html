@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Special discount on your cart - Limited time! - Infinity Vault{% endblock %}
+
+{% block content %}
+<div class="greeting">
+    Hi{% if customer_name %} {{ customer_name }}{% endif %},
+</div>
+
+<div class="message" style="text-align: center; background-color: #d4edda; padding: 25px; border-radius: 4px; border-left: 4px solid #28a745; margin-bottom: 30px;">
+    <p style="font-size: 20px; font-weight: bold; color: #155724; margin: 0 0 10px 0;">
+        🎉 Exclusive Offer Just For You!
+    </p>
+    <p style="font-size: 16px; color: #155724; margin: 0;">
+        Complete your order now and save
+        <span style="font-size: 24px; font-weight: bold; display: block; margin-top: 10px;">
+            {{ discount_percentage | default('10') }}% OFF
+        </span>
+    </p>
+</div>
+
+<div class="message">
+    <p>We really want you to have the items you selected! As a special thank you for being a valued customer, we're offering you an <strong>exclusive discount</strong> on your cart.</p>
+    <p>Use code <strong style="background-color: #f4f4f4; padding: 8px 15px; border-radius: 4px; font-size: 18px; letter-spacing: 1px;">{{ discount_code | default('SAVE10') }}</strong> at checkout to receive your discount.</p>
+</div>
+
+<!-- Cart Items Section -->
+<div class="cart-section">
+    <div class="cart-header">
+        Your Cart
+    </div>
+
+    {% if cart_items %}
+        {% for item in cart_items %}
+        <div class="cart-item">
+            {% if item.product_image_url %}
+            <div class="item-image">
+                <img src="{{ item.product_image_url }}" alt="{{ item.product_name }}">
+            </div>
+            {% endif %}
+            <div class="item-details">
+                <div class="item-name">{{ item.product_name }}</div>
+                <div class="item-quantity">Quantity: {{ item.quantity }}</div>
+                <div class="item-price">
+                    <span style="text-decoration: line-through; color: #999999; font-size: 14px;">
+                        {{ item.currency | default('$') }}{{ "%.2f" | format(item.price) }}
+                    </span>
+                    <span style="color: #28a745; margin-left: 8px;">
+                        {{ item.currency | default('$') }}{{ "%.2f" | format(item.price * (1 - (discount_percentage | default(10) / 100))) }}
+                    </span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- Cart Total -->
+        <div class="cart-total">
+            <div style="margin-bottom: 10px;">
+                <span class="total-label">Subtotal:</span>
+                <span style="font-size: 16px; color: #777777; text-decoration: line-through;">
+                    {{ currency | default('$') }}{{ "%.2f" | format(total_value) }}
+                </span>
+            </div>
+            <div style="color: #28a745;">
+                <span class="total-label">Your Price:</span>
+                <span class="total-amount" style="color: #28a745;">
+                    {{ currency | default('$') }}{{ "%.2f" | format(total_value * (1 - (discount_percentage | default(10) / 100))) }}
+                </span>
+            </div>
+            <div style="margin-top: 10px; font-size: 14px; color: #28a745;">
+                You save: {{ currency | default('$') }}{{ "%.2f" | format(total_value * (discount_percentage | default(10) / 100)) }}!
+            </div>
+        </div>
+    {% else %}
+        <p style="color: #777777; text-align: center; padding: 20px 0;">
+            Your cart items are waiting for you
+        </p>
+    {% endif %}
+</div>
+
+<!-- Call to Action Button -->
+<div class="button-container">
+    <a href="{{ recovery_link }}" class="button" style="background-color: #28a745;">
+        Claim My Discount Now
+    </a>
+</div>
+
+<div class="message" style="text-align: center; margin-top: 30px;">
+    <p style="font-size: 15px; color: #d9534f; font-weight: bold;">
+        ⏰ This offer expires in {{ offer_expiry_hours | default('24') }} hours
+    </p>
+    <p style="font-size: 14px; color: #777777; margin-top: 20px;">
+        <strong>Discount Code:</strong> {{ discount_code | default('SAVE10') }}<br>
+        Automatically applied when you click the button above
+    </p>
+</div>
+
+<div class="message" style="text-align: center; margin-top: 20px;">
+    <p style="font-size: 14px; color: #777777;">
+        Have questions about your order?<br>
+        Reply to this email or visit our <a href="{{ base_url | default('https://infinityvault.com') }}/help" style="color: #000000;">Help Center</a>
+    </p>
+</div>
+
+<div class="message" style="font-size: 12px; color: #999999; text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0;">
+    <p>
+        * Discount code {{ discount_code | default('SAVE10') }} is valid for {{ offer_expiry_hours | default('24') }} hours from the time this email was sent.
+        Cannot be combined with other offers. Standard shipping rates apply.
+    </p>
+</div>
+{% endblock %}
