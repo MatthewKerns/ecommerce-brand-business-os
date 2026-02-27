@@ -260,12 +260,13 @@ async def generate_blog_post(
         agent = BlogAgent()
 
         # Generate blog post
-        content, file_path = agent.generate_blog_post(
+        content, file_path, seo_analysis = agent.generate_blog_post(
             topic=request.topic,
             content_pillar=request.content_pillar,
             target_keywords=request.target_keywords if request.target_keywords else None,
             word_count=request.word_count,
-            include_cta=request.include_cta
+            include_cta=request.include_cta,
+            include_seo_analysis=request.include_seo_analysis
         )
 
         # Calculate generation time
@@ -285,6 +286,28 @@ async def generate_blog_post(
             },
             "status": "success"
         }
+
+        # Add SEO data to response if analysis was performed
+        if seo_analysis:
+            response["seo_score"] = seo_analysis.get("total_score", 0.0)
+            response["seo_grade"] = seo_analysis.get("grade", "N/A")
+
+            # Generate and include meta description
+            meta_description = agent.generate_meta_description(content)
+            response["meta_description"] = meta_description
+
+            # Include full SEO analysis details
+            response["seo_analysis"] = {
+                "score": seo_analysis.get("total_score", 0.0),
+                "grade": seo_analysis.get("grade", "N/A"),
+                "word_count": seo_analysis.get("word_count", 0),
+                "keyword_optimization": seo_analysis.get("keyword_optimization", {}),
+                "content_quality": seo_analysis.get("content_quality", {}),
+                "structure": seo_analysis.get("content_structure", {}),
+                "readability": seo_analysis.get("readability", {}),
+                "issues": seo_analysis.get("issues", []),
+                "recommendations": seo_analysis.get("recommendations", [])
+            }
 
         logger.info(f"[{request_id}] Successfully generated blog post in {generation_time_ms}ms")
         return response

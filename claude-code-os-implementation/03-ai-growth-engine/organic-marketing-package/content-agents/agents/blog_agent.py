@@ -36,7 +36,7 @@ class BlogAgent(BaseAgent):
         word_count: int = 1000,
         include_cta: bool = True,
         include_seo_analysis: bool = False
-    ) -> tuple[str, Path]:
+    ) -> tuple[str, Path, Optional[Dict]]:
         """
         Generate a complete blog post
 
@@ -49,7 +49,8 @@ class BlogAgent(BaseAgent):
             include_seo_analysis: Whether to perform SEO analysis on generated content
 
         Returns:
-            Tuple of (blog_content, file_path)
+            Tuple of (blog_content, file_path, seo_analysis)
+            seo_analysis is None if include_seo_analysis is False
         """
         self.logger.info(
             f"Generating blog post: topic='{topic}', pillar={content_pillar}, "
@@ -131,15 +132,16 @@ Tone for Blog:
         )
 
         # Perform SEO analysis if requested
+        seo_analysis = None
         if include_seo_analysis:
-            self._analyze_and_log_seo(
+            seo_analysis = self._analyze_and_log_seo(
                 content=content,
                 target_keywords=target_keywords,
                 path=path
             )
 
         self.logger.info(f"Successfully generated blog post: {path}")
-        return content, path
+        return content, path, seo_analysis
 
     def generate_blog_series(
         self,
