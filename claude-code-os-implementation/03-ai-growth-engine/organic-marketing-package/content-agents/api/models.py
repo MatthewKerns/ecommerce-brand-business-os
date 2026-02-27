@@ -248,6 +248,196 @@ class CompetitorRequest(BaseModel):
         }
 
 
+class KlaviyoProfileLocationRequest(BaseModel):
+    """
+    Location data for Klaviyo customer profiles.
+
+    This model handles geographic location information for customer profiles.
+    """
+    address1: Optional[str] = Field(
+        None,
+        max_length=200,
+        description="First line of address"
+    )
+    address2: Optional[str] = Field(
+        None,
+        max_length=200,
+        description="Second line of address"
+    )
+    city: Optional[str] = Field(
+        None,
+        max_length=100,
+        description="City name"
+    )
+    country: Optional[str] = Field(
+        None,
+        max_length=100,
+        description="Country name or code"
+    )
+    region: Optional[str] = Field(
+        None,
+        max_length=100,
+        description="State/province/region"
+    )
+    zip: Optional[str] = Field(
+        None,
+        max_length=20,
+        description="Postal/ZIP code"
+    )
+    timezone: Optional[str] = Field(
+        None,
+        description="IANA timezone (e.g., 'America/New_York')"
+    )
+    latitude: Optional[float] = Field(
+        None,
+        ge=-90,
+        le=90,
+        description="Geographic latitude"
+    )
+    longitude: Optional[float] = Field(
+        None,
+        ge=-180,
+        le=180,
+        description="Geographic longitude"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "city": "San Francisco",
+                "region": "CA",
+                "country": "United States",
+                "zip": "94102",
+                "timezone": "America/Los_Angeles"
+            }
+        }
+
+
+class KlaviyoProfileRequest(BaseModel):
+    """
+    Klaviyo customer profile request.
+
+    This model handles requests for creating or updating customer profiles in Klaviyo.
+    """
+    email: str = Field(
+        ...,
+        pattern="^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$",
+        description="Email address (required)"
+    )
+    phone_number: Optional[str] = Field(
+        None,
+        description="Phone number with country code (e.g., +1234567890)"
+    )
+    external_id: Optional[str] = Field(
+        None,
+        description="External ID from your system"
+    )
+    first_name: Optional[str] = Field(
+        None,
+        max_length=100,
+        description="First name"
+    )
+    last_name: Optional[str] = Field(
+        None,
+        max_length=100,
+        description="Last name"
+    )
+    organization: Optional[str] = Field(
+        None,
+        max_length=200,
+        description="Organization name"
+    )
+    title: Optional[str] = Field(
+        None,
+        max_length=100,
+        description="Job title"
+    )
+    location: Optional[KlaviyoProfileLocationRequest] = Field(
+        None,
+        description="Geographic location"
+    )
+    properties: Optional[Dict[str, Any]] = Field(
+        default_factory=dict,
+        description="Custom properties"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "email": "customer@example.com",
+                "phone_number": "+14155551234",
+                "first_name": "John",
+                "last_name": "Doe",
+                "external_id": "customer_12345",
+                "location": {
+                    "city": "San Francisco",
+                    "region": "CA",
+                    "country": "United States",
+                    "zip": "94102"
+                },
+                "properties": {
+                    "customer_tier": "VIP",
+                    "lifetime_value": 5000.00
+                }
+            }
+        }
+
+
+class KlaviyoEventRequest(BaseModel):
+    """
+    Klaviyo event tracking request.
+
+    This model handles requests for tracking customer events and behaviors in Klaviyo.
+    """
+    metric_name: str = Field(
+        ...,
+        min_length=1,
+        max_length=200,
+        description="Name of the event/metric (e.g., 'Placed Order', 'Viewed Product')"
+    )
+    customer_email: str = Field(
+        ...,
+        pattern="^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$",
+        description="Email of the customer who triggered the event"
+    )
+    customer_phone: Optional[str] = Field(
+        None,
+        description="Phone number of the customer"
+    )
+    customer_external_id: Optional[str] = Field(
+        None,
+        description="External ID of the customer"
+    )
+    properties: Optional[Dict[str, Any]] = Field(
+        default_factory=dict,
+        description="Event properties (e.g., product details, order value)"
+    )
+    time: Optional[datetime] = Field(
+        None,
+        description="Timestamp of the event (defaults to now)"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "metric_name": "Placed Order",
+                "customer_email": "customer@example.com",
+                "properties": {
+                    "order_id": "ORD-12345",
+                    "total": 149.99,
+                    "items": [
+                        {
+                            "product_id": "PROD-001",
+                            "name": "Tactical Backpack",
+                            "price": 149.99,
+                            "quantity": 1
+                        }
+                    ]
+                }
+            }
+        }
+
+
 # ============================================================================
 # Response Models
 # ============================================================================
