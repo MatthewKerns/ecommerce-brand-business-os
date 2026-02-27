@@ -65,7 +65,7 @@ class TestGenerateBlogPost:
         mock_anthropic_class.return_value = mock_blog_client
 
         agent = BlogAgent()
-        content, path = agent.generate_blog_post(
+        content, path, _ = agent.generate_blog_post(
             topic="Essential Gear for Tournament Play",
             content_pillar="Gear & Equipment"
         )
@@ -91,7 +91,7 @@ class TestGenerateBlogPost:
         agent = BlogAgent()
         keywords = ["tactical gear", "EDC", "battle ready"]
 
-        content, path = agent.generate_blog_post(
+        content, path, _ = agent.generate_blog_post(
             topic="Daily Carry Essentials",
             target_keywords=keywords
         )
@@ -111,7 +111,7 @@ class TestGenerateBlogPost:
         mock_anthropic_class.return_value = mock_blog_client
 
         agent = BlogAgent()
-        content, path = agent.generate_blog_post(
+        content, path, _ = agent.generate_blog_post(
             topic="Tournament Preparation",
             word_count=2000
         )
@@ -129,7 +129,7 @@ class TestGenerateBlogPost:
         mock_anthropic_class.return_value = mock_blog_client
 
         agent = BlogAgent()
-        content, path = agent.generate_blog_post(
+        content, path, _ = agent.generate_blog_post(
             topic="Collection Care Tips",
             include_cta=False
         )
@@ -150,7 +150,7 @@ class TestGenerateBlogPost:
         agent = BlogAgent()
         pillar = "Battle-Ready Lifestyle"
 
-        content, path = agent.generate_blog_post(
+        content, path, _ = agent.generate_blog_post(
             topic="Mental Preparation for Competition",
             content_pillar=pillar
         )
@@ -174,7 +174,7 @@ class TestGenerateBlogPost:
         agent = BlogAgent()
         invalid_pillar = "Invalid Pillar"
 
-        content, path = agent.generate_blog_post(
+        content, path, _ = agent.generate_blog_post(
             topic="Test Topic",
             content_pillar=invalid_pillar
         )
@@ -198,7 +198,7 @@ class TestGenerateBlogPost:
 
         # Mock the save_output to capture metadata
         with patch.object(agent, 'generate_and_save', wraps=agent.generate_and_save) as mock_gen_save:
-            content, path = agent.generate_blog_post(
+            content, path, _ = agent.generate_blog_post(
                 topic=topic,
                 content_pillar=pillar,
                 target_keywords=keywords,
@@ -221,7 +221,7 @@ class TestGenerateBlogPost:
         mock_anthropic_class.return_value = mock_blog_client
 
         agent = BlogAgent()
-        content, path = agent.generate_blog_post(
+        content, path, _ = agent.generate_blog_post(
             topic="Test Topic"
         )
 
@@ -237,7 +237,7 @@ class TestGenerateBlogPost:
         mock_anthropic_class.return_value = mock_blog_client
 
         agent = BlogAgent()
-        content, path = agent.generate_blog_post(
+        content, path, _ = agent.generate_blog_post(
             topic="Test Topic"
         )
 
@@ -578,7 +578,7 @@ class TestContentPillarValidation:
         agent = BlogAgent()
 
         for pillar in CONTENT_PILLARS:
-            content, path = agent.generate_blog_post(
+            content, path, _ = agent.generate_blog_post(
                 topic="Test Topic",
                 content_pillar=pillar
             )
@@ -595,7 +595,7 @@ class TestContentPillarValidation:
         mock_anthropic_class.return_value = mock_blog_client
 
         agent = BlogAgent()
-        content, path = agent.generate_blog_post(
+        content, path, _ = agent.generate_blog_post(
             topic="Test Topic",
             content_pillar=None
         )
@@ -614,7 +614,7 @@ class TestEdgeCases:
         mock_anthropic_class.return_value = mock_blog_client
 
         agent = BlogAgent()
-        content, path = agent.generate_blog_post(topic="")
+        content, path, _ = agent.generate_blog_post(topic="")
 
         # Should still generate content
         assert content is not None
@@ -627,7 +627,7 @@ class TestEdgeCases:
 
         agent = BlogAgent()
         long_topic = "Test Topic " * 100
-        content, path = agent.generate_blog_post(topic=long_topic)
+        content, path, _ = agent.generate_blog_post(topic=long_topic)
 
         # Should handle long topics
         assert content is not None
@@ -638,7 +638,7 @@ class TestEdgeCases:
         mock_anthropic_class.return_value = mock_blog_client
 
         agent = BlogAgent()
-        content, path = agent.generate_blog_post(
+        content, path, _ = agent.generate_blog_post(
             topic="Test Topic",
             target_keywords=[]
         )
@@ -653,7 +653,7 @@ class TestEdgeCases:
 
         agent = BlogAgent()
         special_topic = "How to Organize Cards: A Guide for \"Battle-Ready\" Players! 🎯"
-        content, path = agent.generate_blog_post(topic=special_topic)
+        content, path, _ = agent.generate_blog_post(topic=special_topic)
 
         # Should handle special characters
         assert content is not None
@@ -678,7 +678,7 @@ class TestEdgeCases:
         mock_anthropic_class.return_value = mock_blog_client
 
         agent = BlogAgent()
-        content, path = agent.generate_blog_post(
+        content, path, _ = agent.generate_blog_post(
             topic="Test Topic",
             word_count=100
         )
@@ -694,7 +694,7 @@ class TestEdgeCases:
         mock_anthropic_class.return_value = mock_blog_client
 
         agent = BlogAgent()
-        content, path = agent.generate_blog_post(
+        content, path, _ = agent.generate_blog_post(
             topic="Test Topic",
             word_count=5000
         )
@@ -719,9 +719,9 @@ class TestReturnTypes:
         result = agent.generate_blog_post(topic="Test")
 
         assert isinstance(result, tuple)
-        assert len(result) == 2
+        assert len(result) == 3
 
-        content, path = result
+        content, path, seo_analysis = result
         assert isinstance(content, str)
         assert isinstance(path, Path)
 
