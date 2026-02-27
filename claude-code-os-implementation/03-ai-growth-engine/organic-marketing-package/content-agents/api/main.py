@@ -13,7 +13,7 @@ import logging
 from datetime import datetime
 
 # Import routers
-from api.routes import blog_router, social_router, amazon_router, competitor_router, tiktok_channels_router, tiktok_scheduling_router
+from api.routes import blog_router, social_router, amazon_router, competitor_router, tiktok_channels_router, tiktok_scheduling_router, aeo_router
 
 # Configure logging
 logging.basicConfig(
@@ -48,6 +48,7 @@ app.include_router(amazon_router, prefix="/api")
 app.include_router(competitor_router, prefix="/api")
 app.include_router(tiktok_channels_router, prefix="/api")
 app.include_router(tiktok_scheduling_router, prefix="/api")
+app.include_router(aeo_router, prefix="/api")
 
 
 @app.exception_handler(Exception)

@@ -24,9 +24,9 @@ from tests.fixtures.mock_responses import (
     create_mock_response,
     MOCK_AMAZON_RESPONSE,
     MOCK_COMPETITOR_RESPONSE,
-    MOCK_TIKTOK_VIDEO_SCRIPT_RESPONSE,
-    MOCK_TIKTOK_CALENDAR_RESPONSE,
-    MOCK_TIKTOK_VALIDATION_RESPONSE
+    MOCK_AEO_FAQ_RESPONSE,
+    MOCK_AEO_AI_OPTIMIZED_RESPONSE,
+    MOCK_AEO_COMPARISON_RESPONSE
 )
 
 
@@ -151,18 +151,18 @@ def mock_competitor_client():
 
 
 @pytest.fixture
-def mock_tiktok_script_client():
-    """Mock client for TikTok video script generation"""
-    return create_mock_client(MOCK_TIKTOK_VIDEO_SCRIPT_RESPONSE)
+def mock_aeo_faq_client():
+    """Mock client for AEO FAQ generation"""
+    return create_mock_client(MOCK_AEO_FAQ_RESPONSE)
 
 
 @pytest.fixture
-def mock_tiktok_calendar_client():
-    """Mock client for TikTok calendar generation"""
-    return create_mock_client(MOCK_TIKTOK_CALENDAR_RESPONSE)
+def mock_aeo_ai_optimized_client():
+    """Mock client for AEO AI-optimized content generation"""
+    return create_mock_client(MOCK_AEO_AI_OPTIMIZED_RESPONSE)
 
 
 @pytest.fixture
-def mock_tiktok_validation_client():
-    """Mock client for TikTok content validation"""
-    return create_mock_client(MOCK_TIKTOK_VALIDATION_RESPONSE)
+def mock_aeo_comparison_client():
+    """Mock client for AEO comparison content generation"""
+    return create_mock_client(MOCK_AEO_COMPARISON_RESPONSE)

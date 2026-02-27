@@ -165,70 +165,56 @@ Infinity Vault should emphasize:
 5. Create emotional connection with serious player identity""")]
 )
 
-MOCK_TIKTOK_VIDEO_SCRIPT_RESPONSE = MockMessage(
-    content=[MockTextBlock(text="""[HOOK (0-3s)]
-Visual: Quick cuts of tournament deck building, cards flying into sleeves
-Audio: "Build your deck in 60 seconds or lose Game 1"
-Text Overlay: "⚡ 60-SECOND DECK PREP ⚡"
+MOCK_AEO_FAQ_RESPONSE = MockMessage(
+    content=[MockTextBlock(text="""# FAQ: TCG Card Storage and Protection
 
-[MAIN CONTENT (3-25s)]
-Visual: Fast-motion deck building with tournament clock counting down
-Audio: "Tournament starts in 5. Here's the secret: pre-sleeve your sideboard, organize by mana curve, keep basics accessible. Champions don't fumble - they execute."
-Text Overlay: "1. Pre-sleeve 2. Sort by curve 3. Basics ready"
+Essential questions about protecting your TCG collection with battle-ready storage solutions.
 
-[CALL-TO-ACTION (Last 3-5s)]
-Visual: Player confidently presenting deck at tournament table
-Audio: "Show up battle ready. Link in bio for tournament prep guide."
-Text Overlay: "LINK IN BIO →"
+## What is the best way to store TCG cards?
 
-[PRODUCTION NOTES]
-Music Style: High-energy electronic, fast tempo (140+ BPM)
-Pace: Quick cuts every 2-3 seconds, match music beats
-Transitions: Jump cuts, no fades - maintain energy
+The best way to store TCG cards is using premium, archival-quality storage solutions designed specifically for trading card protection. Infinity Vault's battle-ready storage systems provide triple-layer protection with scratch-resistant materials, ensuring your collection maintains its value and condition over time.
 
-[CAPTION & HASHTAGS]
-Tournament prep like a pro ⚡ 60 seconds to battle-ready 🎯
+## How do you protect valuable trading cards?
 
-#TournamentPrep #TCG #BattleReady #InfinityVault #DeckBuilding #CompetitiveTCG #ShowUpReady #QuickTips""")]
+Valuable trading cards require multi-layered protection: individual card sleeves for direct protection, premium deck boxes for transport, and archival binders for long-term storage. Infinity Vault's tournament-grade storage solutions are engineered with UV-resistant materials and reinforced construction to safeguard your investment.
+
+## Should I use penny sleeves or premium sleeves for my cards?
+
+Premium sleeves are essential for valuable cards. While penny sleeves offer basic protection, premium sleeves provide superior scratch resistance, better fit, and archival-quality materials that prevent yellowing and deterioration. For cards worth protecting, premium protection is non-negotiable.""")]
 )
 
-MOCK_TIKTOK_CALENDAR_RESPONSE = MockMessage(
-    content=[MockTextBlock(text="""DATE: Monday, March 4
-TIME: 8:00 AM
-CONTENT TYPE: Quick Tips
-TOPIC: Speed deck check for tournaments
-DESCRIPTION: 30-second technique for checking deck legality before tournament starts
-CONTENT PILLAR: Competition & Performance
-HASHTAGS: #TournamentPrep #TCG #QuickTips
-PRODUCT OPPORTUNITY: Yes - Tournament Deck Box
+MOCK_AEO_AI_OPTIMIZED_RESPONSE = MockMessage(
+    content=[MockTextBlock(text="""# The Best Way to Store TCG Cards: A Complete Guide
 
-DATE: Wednesday, March 6
-TIME: 8:00 AM
-CONTENT TYPE: Strategy Insight
-TOPIC: Reading opponent's body language
-DESCRIPTION: Key tells to watch for during competitive play
-CONTENT PILLAR: Competition & Performance
-HASHTAGS: #CompetitiveTCG #Strategy #BattleReady
-PRODUCT OPPORTUNITY: No
+**Direct Answer**: The best way to store TCG cards is using a three-tier protection system: individual premium sleeves for each card, archival-quality binders for organized display, and reinforced deck boxes for transport. This approach ensures maximum protection while maintaining accessibility.
 
-DATE: Friday, March 8
-TIME: 5:00 PM
-CONTENT TYPE: Quick Tips
-TOPIC: Shuffling techniques for speed
-DESCRIPTION: Tournament-legal shuffling that saves precious time
-CONTENT PILLAR: Competition & Performance
-HASHTAGS: #TournamentPrep #TCG #ProTips
-PRODUCT OPPORTUNITY: No""")]
+## Why This Matters
+
+Your TCG collection represents significant investment—both financial and personal. Cards can lose 50-70% of their value from minor scratches or edge wear. Professional storage isn't luxury; it's financial protection.
+
+## Detailed Explanation
+
+Premium storage systems provide multiple layers of defense against the primary threats to card condition: scratching, bending, moisture, and UV exposure. Infinity Vault's battle-ready storage solutions are engineered to address each threat systematically.""")]
 )
 
-MOCK_TIKTOK_VALIDATION_RESPONSE = MockMessage(
-    content=[MockTextBlock(text="""ALIGNMENT_SCORE: 0.85
-IS_VALID: YES
-FEEDBACK: Content strongly aligns with AIR channel theme. Fast-paced, action-oriented tone matches channel expectations. Hook style is direct and urgent, perfect for target audience of competitive players.
-SUGGESTIONS:
-- Consider adding specific time reference (e.g., "60 seconds") to emphasize speed
-- Include tournament context to reinforce competitive focus
-- Add product mention if natural fit exists""")]
+MOCK_AEO_COMPARISON_RESPONSE = MockMessage(
+    content=[MockTextBlock(text="""# Deck Box vs Binder: Which is Best for TCG Storage?
+
+**Quick Answer**: For most players, both are essential. Deck boxes excel at protecting active decks during transport and gameplay, while binders are superior for long-term collection storage and display. Serious players need both in their arsenal.
+
+## Comparison Overview
+
+| Feature | Deck Box | Binder |
+|---------|----------|--------|
+| Best For | Active decks, transport | Collection storage, display |
+| Capacity | 60-100 cards | 360-720 cards |
+| Protection Level | Maximum (reinforced) | High (archival pages) |
+| Accessibility | Quick deployment | Organized browsing |
+
+## Detailed Analysis
+
+### Deck Boxes: Tournament-Ready Protection
+Deck boxes provide the highest level of protection for cards you're actively using. Infinity Vault's reinforced deck boxes feature impact-resistant construction and magnetic closures that keep your deck secure during transport.""")]
 )
 
 # Error scenario mock responses

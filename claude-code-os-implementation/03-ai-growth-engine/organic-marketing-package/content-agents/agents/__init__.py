@@ -10,6 +10,7 @@ from .amazon_agent import AmazonAgent
 from .competitor_agent import CompetitorAgent
 from .tiktok_shop_agent import TikTokShopAgent
 from .tiktok_channel_agent import TikTokChannelAgent
+from .aeo_agent import AEOAgent
 
 __all__ = [
     'BaseAgent',
@@ -18,5 +19,6 @@ __all__ = [
     'AmazonAgent',
     'CompetitorAgent',
     'TikTokShopAgent',
-    'TikTokChannelAgent'
+    'TikTokChannelAgent',
+    'AEOAgent'
 ]
