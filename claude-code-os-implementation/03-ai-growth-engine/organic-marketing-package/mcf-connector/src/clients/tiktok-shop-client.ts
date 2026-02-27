@@ -23,6 +23,21 @@ import {
   TikTokOrderListResponseSchema,
   TikTokOrderDetailResponseSchema,
 } from '../types/tiktok-order';
+import type {
+  TikTokVideoMetrics,
+  TikTokVideoListResponse,
+  TikTokVideoMetricsParams,
+  TikTokAccountAnalytics,
+  TikTokAccountAnalyticsParams,
+  TikTokProductAnalytics,
+  TikTokProductAnalyticsParams,
+} from '../types/tiktok-analytics';
+import {
+  TikTokVideoMetricsSchema,
+  TikTokVideoListResponseSchema,
+  TikTokAccountAnalyticsSchema,
+  TikTokProductAnalyticsSchema,
+} from '../types/tiktok-analytics';
 import { ErrorCode } from '../types/common';
 
 // ============================================================
@@ -77,6 +92,9 @@ const TOKEN_REFRESH_ENDPOINT = '/api/token/refresh';
 const ORDERS_LIST_ENDPOINT = '/order/202309/orders/search';
 const ORDER_DETAIL_ENDPOINT = '/order/202309/orders/{order_id}';
 const UPDATE_TRACKING_ENDPOINT = '/fulfillment/202309/packages/{package_id}/tracking';
+const VIDEO_METRICS_ENDPOINT = '/analytics/202309/videos/metrics';
+const ACCOUNT_ANALYTICS_ENDPOINT = '/analytics/202309/account/summary';
+const PRODUCT_ANALYTICS_ENDPOINT = '/analytics/202309/products/metrics';
 
 // TikTok API error codes that are retryable
 const RETRYABLE_ERROR_CODES = [
@@ -466,5 +484,136 @@ export class TikTokShopClient {
     } catch (error) {
       return false;
     }
+  }
+
+  // ============================================================
+  // Analytics Methods
+  // ============================================================
+
+  /**
+   * Get video metrics for content analytics
+   *
+   * Fetches performance metrics for TikTok videos including views, engagement,
+   * and shop clicks for marketing attribution.
+   */
+  async getVideoMetrics(
+    params: TikTokVideoMetricsParams = {}
+  ): Promise<TikTokVideoListResponse> {
+    return this.executeWithRetry(async () => {
+      const requestParams: Record<string, unknown> = {
+        shop_cipher: this.config.shopId,
+      };
+
+      if (params.posted_from) requestParams.posted_from = params.posted_from;
+      if (params.posted_to) requestParams.posted_to = params.posted_to;
+      if (params.video_ids && params.video_ids.length > 0) {
+        requestParams.video_ids = params.video_ids;
+      }
+      if (params.page_size) requestParams.page_size = params.page_size;
+      if (params.cursor) requestParams.cursor = params.cursor;
+
+      const response = await this.httpClient.post<TikTokApiResponse<TikTokVideoListResponse>>(
+        VIDEO_METRICS_ENDPOINT,
+        requestParams
+      );
+
+      if (response.data.code !== 0) {
+        throw new Error(`Get video metrics failed: ${response.data.message}`);
+      }
+
+      // Add recorded_at timestamp to each video metric
+      const recordedAt = Math.floor(Date.now() / 1000);
+      const videosWithTimestamp = response.data.data.videos.map(video => ({
+        ...video,
+        recorded_at: video.recorded_at || recordedAt,
+      }));
+
+      // Validate response with Zod schema
+      const validated = TikTokVideoListResponseSchema.parse({
+        ...response.data.data,
+        videos: videosWithTimestamp,
+      });
+      return validated;
+    }, 'getVideoMetrics');
+  }
+
+  /**
+   * Get account-level analytics summary
+   *
+   * Fetches aggregate analytics for the TikTok account over a date range,
+   * including follower growth, total engagement, and commerce metrics.
+   */
+  async getAccountAnalytics(
+    params: TikTokAccountAnalyticsParams
+  ): Promise<TikTokAccountAnalytics> {
+    return this.executeWithRetry(async () => {
+      const requestParams = {
+        shop_cipher: this.config.shopId,
+        date_from: params.date_from,
+        date_to: params.date_to,
+      };
+
+      const response = await this.httpClient.post<TikTokApiResponse<TikTokAccountAnalytics>>(
+        ACCOUNT_ANALYTICS_ENDPOINT,
+        requestParams
+      );
+
+      if (response.data.code !== 0) {
+        throw new Error(`Get account analytics failed: ${response.data.message}`);
+      }
+
+      // Add recorded_at timestamp if not present
+      const dataWithTimestamp = {
+        ...response.data.data,
+        recorded_at: response.data.data.recorded_at || Math.floor(Date.now() / 1000),
+      };
+
+      // Validate response with Zod schema
+      const validated = TikTokAccountAnalyticsSchema.parse(dataWithTimestamp);
+      return validated;
+    }, 'getAccountAnalytics');
+  }
+
+  /**
+   * Get product analytics for TikTok Shop
+   *
+   * Fetches performance metrics for specific products including views,
+   * clicks, conversions, and revenue data.
+   */
+  async getProductAnalytics(
+    params: TikTokProductAnalyticsParams
+  ): Promise<TikTokProductAnalytics[]> {
+    return this.executeWithRetry(async () => {
+      const requestParams: Record<string, unknown> = {
+        shop_cipher: this.config.shopId,
+        date_from: params.date_from,
+        date_to: params.date_to,
+      };
+
+      if (params.product_ids && params.product_ids.length > 0) {
+        requestParams.product_ids = params.product_ids;
+      }
+
+      const response = await this.httpClient.post<
+        TikTokApiResponse<{ products: TikTokProductAnalytics[] }>
+      >(PRODUCT_ANALYTICS_ENDPOINT, requestParams);
+
+      if (response.data.code !== 0) {
+        throw new Error(`Get product analytics failed: ${response.data.message}`);
+      }
+
+      // Add recorded_at timestamp to each product metric if not present
+      const recordedAt = Math.floor(Date.now() / 1000);
+      const productsWithTimestamp = response.data.data.products.map(product => ({
+        ...product,
+        recorded_at: product.recorded_at || recordedAt,
+      }));
+
+      // Validate each product with Zod schema
+      const validated = productsWithTimestamp.map(product =>
+        TikTokProductAnalyticsSchema.parse(product)
+      );
+      return validated;
+    }, 'getProductAnalytics');
   }
 }
