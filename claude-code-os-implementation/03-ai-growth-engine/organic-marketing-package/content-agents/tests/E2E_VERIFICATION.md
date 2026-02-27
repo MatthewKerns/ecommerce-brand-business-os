@@ -263,17 +263,139 @@ pip install -r requirements.txt
 python3 tests/verify_e2e_profile_sync.py
 ```
 
-## Integration with Subtask 5-4
+## Order Event Tracking Verification (Subtask 5-4)
 
-The sync endpoints created for this subtask (5-3) also support the next subtask (5-4) for order event tracking verification. Both endpoints use the same infrastructure and can be tested similarly.
+Subtask 5-4 focuses specifically on verifying the order event tracking flow. A dedicated verification script has been created to test:
+
+1. ✅ Single event tracking via POST `/api/klaviyo/events`
+2. ✅ Event validation and error handling
+3. ✅ Bulk event sync via POST `/api/klaviyo/sync/events`
+4. ✅ Sync history tracking for events
+
+### Running Event Tracking Verification
+
+#### Automated Test Runner:
+
+```bash
+cd claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents
+./tests/run_e2e_event_tracking.sh
+```
+
+#### Manual Python Script:
+
+```bash
+cd claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents
+python tests/verify_e2e_event_tracking.py
+```
+
+### Event Tracking Endpoint
+
+#### POST /api/klaviyo/events
+
+Tracks a single customer event in Klaviyo.
+
+**Request:**
+```json
+{
+  "metric_name": "Placed Order",
+  "customer_email": "customer@example.com",
+  "customer_phone": "+1234567890",
+  "properties": {
+    "order_id": "ORD-12345",
+    "total": 299.98,
+    "currency": "USD",
+    "items": [
+      {
+        "product_id": "PROD-001",
+        "name": "Tactical Backpack",
+        "price": 149.99,
+        "quantity": 1
+      }
+    ]
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "request_id": "req_xyz789",
+  "event_id": "evt_abc123",
+  "metric_name": "Placed Order",
+  "status": "success",
+  "message": "Event tracked successfully",
+  "timestamp": "2024-01-15T10:30:00Z"
+}
+```
+
+### Event Tracking Verification Checklist
+
+The event tracking verification script checks:
+
+- [x] **Server Health**: FastAPI server is running
+- [x] **Single Event Tracking**: POST /api/klaviyo/events endpoint works
+- [x] **Event Response**: Response contains required fields (event_id, metric_name, status)
+- [x] **Error Handling - Missing Fields**: Returns 422 for missing customer identifier
+- [x] **Error Handling - Invalid Email**: Returns 422 for invalid email format
+- [x] **Error Handling - Empty Metric**: Returns 422 for empty metric name
+- [x] **Bulk Event Sync**: POST /api/klaviyo/sync/events endpoint works
+- [x] **Sync History**: Event sync operations recorded in database
+
+### Expected Output (Event Tracking)
+
+```
+======================================================================
+🔍 Starting End-to-End Verification: Order Event Tracking Flow
+======================================================================
+
+Step 1: Verifying FastAPI server is running...
+✅ FastAPI server is running
+
+Step 2: Calling POST /api/klaviyo/events to track an order event...
+✅ Event tracking endpoint worked: 'Placed Order' event tracked
+
+Step 3: Verifying proper error handling for invalid data...
+✅ Error handling works for: Missing required fields (status 422)
+✅ Error handling works for: Invalid email format (status 422)
+✅ Error handling works for: Empty metric name (status 422)
+
+Step 4: Checking sync history database access...
+✅ Sync history query works (single events may not create sync records)
+
+Step 5: Testing bulk event sync endpoint...
+✅ Bulk event sync endpoint worked: 5 events tracked
+
+Step 6: Verifying bulk sync history was recorded...
+✅ Found 3 sync history records, latest processed 5 records
+
+======================================================================
+📊 Verification Summary
+======================================================================
+✅ Successful checks: 9
+❌ Failed checks: 0
+
+✅ ALL VERIFICATIONS PASSED!
+
+🎉 End-to-end order event tracking flow is working correctly!
+
+Verified capabilities:
+  • Single event tracking via POST /api/klaviyo/events
+  • Bulk event sync via POST /api/klaviyo/sync/events
+  • Error handling for invalid data
+  • Sync history tracking in database
+```
 
 ## Files Created/Modified
 
-### Created:
+### Created (Subtask 5-3):
 - `api/routes/klaviyo.py`: Added sync endpoints (POST /sync/profiles, POST /sync/events)
-- `tests/verify_e2e_profile_sync.py`: Automated verification script
-- `tests/run_e2e_verification.sh`: Shell script test runner
+- `tests/verify_e2e_profile_sync.py`: Automated verification script for profile sync
+- `tests/run_e2e_verification.sh`: Shell script test runner for profile sync
 - `tests/E2E_VERIFICATION.md`: This documentation
+
+### Created (Subtask 5-4):
+- `tests/verify_e2e_event_tracking.py`: Automated verification script for event tracking
+- `tests/run_e2e_event_tracking.sh`: Shell script test runner for event tracking
 
 ### Modified:
 - `api/routes/klaviyo.py`:
