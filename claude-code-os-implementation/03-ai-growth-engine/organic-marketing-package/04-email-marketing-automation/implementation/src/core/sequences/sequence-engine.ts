@@ -7,9 +7,19 @@
  * - Conditional branching
  * - A/B testing support
  * - Pause/resume functionality
+ * - Performance metrics and reporting
  */
 
 import type { Lead } from '@/types/lead';
+import type { IAnalyticsStorage } from '@/core/analytics/storage';
+import { MetricsAggregationEngine } from '@/core/analytics/metrics';
+import type {
+  SequencePerformanceReport,
+  PerformanceReportOptions,
+} from '@/core/analytics/metrics';
+import { ABTestManager } from '@/core/analytics/ab-testing';
+import type { ABTest, ABVariant } from '@/core/analytics/ab-testing';
+import type { TemplateRegistry } from '@/templates/registry';
 
 // ============================================================
 // Types
@@ -166,8 +176,74 @@ export class SequenceEngine {
   private sequences: Map<string, EmailSequence> = new Map();
   private enrollments: Map<string, SequenceEnrollment> = new Map();
   private leadEnrollments: Map<string, Set<string>> = new Map(); // leadId -> enrollmentIds
+  private metricsEngine?: MetricsAggregationEngine;
+  private abTestManager?: ABTestManager;
+  private templateRegistry?: TemplateRegistry;
 
-  constructor() {}
+  constructor(analyticsStorage?: IAnalyticsStorage, templateRegistry?: TemplateRegistry) {
+    this.templateRegistry = templateRegistry;
+
+    if (analyticsStorage) {
+      this.metricsEngine = new MetricsAggregationEngine(analyticsStorage);
+      this.abTestManager = new ABTestManager(analyticsStorage);
+
+      // Link template registry to A/B test manager if both exist
+      if (this.templateRegistry && this.abTestManager) {
+        this.templateRegistry.setABTestManager(this.abTestManager);
+      }
+    }
+  }
+
+  /**
+   * Set analytics storage (can be called after construction)
+   */
+  setAnalyticsStorage(storage: IAnalyticsStorage): void {
+    this.metricsEngine = new MetricsAggregationEngine(storage);
+    this.abTestManager = new ABTestManager(storage);
+
+    // Link template registry to A/B test manager if both exist
+    if (this.templateRegistry && this.abTestManager) {
+      this.templateRegistry.setABTestManager(this.abTestManager);
+    }
+  }
+
+  /**
+   * Set A/B test manager (can be called after construction)
+   */
+  setABTestManager(manager: ABTestManager): void {
+    this.abTestManager = manager;
+
+    // Link to template registry if it exists
+    if (this.templateRegistry) {
+      this.templateRegistry.setABTestManager(manager);
+    }
+  }
+
+  /**
+   * Get A/B test manager instance
+   */
+  getABTestManager(): ABTestManager | undefined {
+    return this.abTestManager;
+  }
+
+  /**
+   * Set template registry (can be called after construction)
+   */
+  setTemplateRegistry(registry: TemplateRegistry): void {
+    this.templateRegistry = registry;
+
+    // Link to A/B test manager if it exists
+    if (this.abTestManager) {
+      registry.setABTestManager(this.abTestManager);
+    }
+  }
+
+  /**
+   * Get template registry instance
+   */
+  getTemplateRegistry(): TemplateRegistry | undefined {
+    return this.templateRegistry;
+  }
 
   /**
    * Create a new sequence
@@ -490,6 +566,284 @@ export class SequenceEngine {
   }
 
   // ============================================================
+  // Performance Metrics & Reporting
+  // ============================================================
+
+  /**
+   * Get performance report for a sequence
+   */
+  async getSequencePerformanceReport(
+    sequenceId: string,
+    options: Omit<PerformanceReportOptions, 'sequenceId'> = {}
+  ): Promise<SequencePerformanceReport | null> {
+    if (!this.metricsEngine) {
+      throw new Error('Analytics storage not configured. Call setAnalyticsStorage() first.');
+    }
+
+    const sequence = this.sequences.get(sequenceId);
+    if (!sequence) {
+      return null;
+    }
+
+    return this.metricsEngine.generateSequenceReport(sequenceId, options);
+  }
+
+  /**
+   * Get performance reports for all active sequences
+   */
+  async getAllSequencePerformanceReports(
+    options: Omit<PerformanceReportOptions, 'sequenceId'> = {}
+  ): Promise<SequencePerformanceReport[]> {
+    if (!this.metricsEngine) {
+      throw new Error('Analytics storage not configured. Call setAnalyticsStorage() first.');
+    }
+
+    const activeSequences = Array.from(this.sequences.values()).filter(
+      s => s.status === 'active'
+    );
+
+    const reports = await Promise.all(
+      activeSequences.map(seq =>
+        this.metricsEngine!.generateSequenceReport(seq.id, options)
+      )
+    );
+
+    return reports;
+  }
+
+  /**
+   * Update sequence metrics from analytics
+   */
+  async updateSequenceMetrics(sequenceId: string): Promise<boolean> {
+    if (!this.metricsEngine) {
+      throw new Error('Analytics storage not configured. Call setAnalyticsStorage() first.');
+    }
+
+    const sequence = this.sequences.get(sequenceId);
+    if (!sequence) {
+      return false;
+    }
+
+    try {
+      const report = await this.metricsEngine.generateSequenceReport(sequenceId);
+
+      // Update sequence metrics
+      sequence.metrics = {
+        totalEnrolled: sequence.metrics?.totalEnrolled || 0,
+        currentlyActive: sequence.metrics?.currentlyActive || 0,
+        completed: sequence.metrics?.completed || 0,
+        converted: report.summary.totalConverted,
+        unsubscribed: report.summary.totalUnsubscribed,
+        avgCompletionTime: report.summary.averageTimeToConversion,
+        conversionRate: report.summary.conversionRate,
+      };
+
+      sequence.updatedAt = new Date();
+      this.sequences.set(sequenceId, sequence);
+
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
+   * Get sequence leaderboard by performance
+   */
+  async getSequenceLeaderboard(
+    metric: 'conversionRate' | 'openRate' | 'clickRate' = 'conversionRate',
+    limit: number = 10,
+    options: Omit<PerformanceReportOptions, 'sequenceId'> = {}
+  ): Promise<Array<{ sequence: EmailSequence; report: SequencePerformanceReport }>> {
+    if (!this.metricsEngine) {
+      throw new Error('Analytics storage not configured. Call setAnalyticsStorage() first.');
+    }
+
+    const sequences = Array.from(this.sequences.values());
+    const reportsWithSequences = await Promise.all(
+      sequences.map(async seq => ({
+        sequence: seq,
+        report: await this.metricsEngine!.generateSequenceReport(seq.id, options),
+      }))
+    );
+
+    // Sort by metric
+    reportsWithSequences.sort((a, b) => {
+      const aValue = a.report.summary[metric];
+      const bValue = b.report.summary[metric];
+      return bValue - aValue;
+    });
+
+    return reportsWithSequences.slice(0, limit);
+  }
+
+  // ============================================================
+  // Template & A/B Testing Integration
+  // ============================================================
+
+  /**
+   * Get template for a step with A/B testing support
+   */
+  async getTemplateForStep(
+    enrollmentId: string,
+    stepId: string
+  ): Promise<import('@/core/ai/content-generator').ContentTemplate | null> {
+    if (!this.templateRegistry) {
+      return null;
+    }
+
+    const enrollment = this.enrollments.get(enrollmentId);
+    if (!enrollment) {
+      return null;
+    }
+
+    const sequence = this.sequences.get(enrollment.sequenceId);
+    if (!sequence) {
+      return null;
+    }
+
+    const step = sequence.steps.find(s => s.id === stepId);
+    if (!step || !step.config.templateId) {
+      return null;
+    }
+
+    // Get template with A/B testing support
+    return this.templateRegistry.getTemplateForUser(
+      step.config.templateId,
+      enrollment.leadId,
+      {
+        sequenceId: sequence.id,
+        messageId: `${enrollment.id}-${stepId}`,
+      }
+    );
+  }
+
+  /**
+   * Create A/B test for a sequence step template
+   */
+  async createStepTemplateTest(
+    sequenceId: string,
+    stepId: string,
+    variants: Array<{
+      id: string;
+      name: string;
+      template: import('@/core/ai/content-generator').ContentTemplate;
+      weight: number;
+      isControl?: boolean;
+    }>,
+    testOptions?: {
+      name?: string;
+      description?: string;
+      trafficAllocation?: number;
+      primaryMetric?: 'open_rate' | 'click_rate' | 'conversion_rate';
+    }
+  ): Promise<ABTest | null> {
+    if (!this.templateRegistry) {
+      throw new Error('Template registry not configured. Call setTemplateRegistry() first.');
+    }
+
+    const sequence = this.sequences.get(sequenceId);
+    if (!sequence) {
+      throw new Error(`Sequence ${sequenceId} not found`);
+    }
+
+    const step = sequence.steps.find(s => s.id === stepId);
+    if (!step || !step.config.templateId) {
+      throw new Error(`Step ${stepId} not found or has no template`);
+    }
+
+    // Create test through template registry
+    const test = await this.templateRegistry.createTemplateTest(
+      step.config.templateId,
+      variants,
+      {
+        ...testOptions,
+        name: testOptions?.name || `${sequence.name} - Step ${step.name} A/B Test`,
+      }
+    );
+
+    if (test) {
+      // Link test to sequence context
+      test.sequenceId = sequenceId;
+      if (this.abTestManager) {
+        await this.abTestManager.updateTest(test.id, { sequenceId });
+      }
+    }
+
+    return test;
+  }
+
+  /**
+   * Get A/B test results for a sequence step
+   */
+  async getStepTestResults(
+    sequenceId: string,
+    stepId: string
+  ): Promise<import('@/core/analytics/ab-testing').ABTestResults | null> {
+    if (!this.templateRegistry || !this.abTestManager) {
+      throw new Error('Template registry and AB test manager must be configured');
+    }
+
+    const sequence = this.sequences.get(sequenceId);
+    if (!sequence) {
+      return null;
+    }
+
+    const step = sequence.steps.find(s => s.id === stepId);
+    if (!step || !step.config.templateId) {
+      return null;
+    }
+
+    // Get test from template
+    const test = await this.templateRegistry.getTemplateTest(step.config.templateId);
+    if (!test) {
+      return null;
+    }
+
+    // Get test results
+    return this.abTestManager.getTestResults(test.id, {
+      sequenceId,
+    });
+  }
+
+  /**
+   * Get all A/B tests for a sequence
+   */
+  async getSequenceTests(sequenceId: string): Promise<ABTest[]> {
+    if (!this.abTestManager) {
+      throw new Error('AB test manager not configured. Call setAnalyticsStorage() first.');
+    }
+
+    return this.abTestManager.listTests({ sequenceId });
+  }
+
+  /**
+   * Start an A/B test for a sequence step template
+   */
+  async startStepTest(sequenceId: string, stepId: string): Promise<boolean> {
+    if (!this.templateRegistry || !this.abTestManager) {
+      throw new Error('Template registry and AB test manager must be configured');
+    }
+
+    const sequence = this.sequences.get(sequenceId);
+    if (!sequence) {
+      return false;
+    }
+
+    const step = sequence.steps.find(s => s.id === stepId);
+    if (!step || !step.config.templateId) {
+      return false;
+    }
+
+    const test = await this.templateRegistry.getTemplateTest(step.config.templateId);
+    if (!test) {
+      return false;
+    }
+
+    return this.abTestManager.startTest(test.id);
+  }
+
+  // ============================================================
   // Private Methods
   // ============================================================
 
@@ -609,8 +963,30 @@ export class SequenceEngine {
         return assignedVariant;
       }
 
-      // Assign variant based on weights
-      const random = Math.random() * 100;
+      // Use ABTestManager if available for more sophisticated assignment
+      if (this.abTestManager && executionDetails?.testId) {
+        const variant = await this.abTestManager.assignVariant(
+          executionDetails.testId,
+          enrollment.leadId,
+          {
+            sequenceId: sequence.id,
+            messageId: executionDetails?.messageId,
+          }
+        );
+
+        if (variant) {
+          // Store assignment
+          if (!enrollment.abTestAssignments) {
+            enrollment.abTestAssignments = {};
+          }
+          enrollment.abTestAssignments[currentStep.id] = variant.id;
+          return variant.id;
+        }
+      }
+
+      // Fallback: Assign variant based on weights using consistent hashing
+      const hash = this.hashString(`${enrollment.leadId}-${currentStep.id}`);
+      const random = (hash % 10000) / 100; // 0-100 with 2 decimal precision
       let cumulative = 0;
       for (const variant of currentStep.config.variants) {
         cumulative += variant.weight;
@@ -623,9 +999,32 @@ export class SequenceEngine {
           return variant.stepId;
         }
       }
+
+      // Fallback to last variant (handles floating point precision issues)
+      const lastVariant = currentStep.config.variants[currentStep.config.variants.length - 1];
+      if (lastVariant) {
+        if (!enrollment.abTestAssignments) {
+          enrollment.abTestAssignments = {};
+        }
+        enrollment.abTestAssignments[currentStep.id] = lastVariant.stepId;
+        return lastVariant.stepId;
+      }
     }
 
     // Default: use first next step
     return currentStep.nextSteps?.[0] || null;
+  }
+
+  /**
+   * Hash string for consistent variant assignment
+   */
+  private hashString(str: string): number {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+    return Math.abs(hash);
   }
 }

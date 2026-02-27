@@ -6,6 +6,7 @@ import {
   Activity,
   Settings,
   BarChart3,
+  Mail,
   Menu,
   X,
 } from "lucide-react";
@@ -26,6 +27,7 @@ import { cn } from "@/lib/utils";
  *
  * Navigation Structure:
  * - Dashboard (/) - Main overview page
+ * - Sequences (/sequences) - Email sequences and automation
  * - System Health (/health) - Service monitoring
  * - Configuration (/config) - Settings and API keys
  * - Analytics (/analytics) - Performance metrics
@@ -43,6 +45,11 @@ export function Sidebar() {
       href: "/",
       icon: LayoutDashboard,
       label: "Dashboard",
+    },
+    {
+      href: "/sequences",
+      icon: Mail,
+      label: "Sequences",
     },
     {
       href: "/health",
