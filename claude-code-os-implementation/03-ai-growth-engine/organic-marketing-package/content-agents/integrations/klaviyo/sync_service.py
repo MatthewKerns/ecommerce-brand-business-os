@@ -842,6 +842,111 @@ class KlaviyoSyncService:
             logger.error(f"Failed to sync segments: {str(e)}")
             raise
 
+    def create_default_segments(self) -> Dict[str, KlaviyoList]:
+        """
+        Create default customer segments/lists in Klaviyo
+
+        This method creates basic customer lists that are commonly used for
+        email marketing segmentation:
+        - All Customers: General customer list
+        - New Subscribers: Recently subscribed customers
+        - VIP Customers: High-value customers
+        - Active Customers: Recently active customers
+
+        The method uses get_or_create_list, so it's safe to run multiple times -
+        existing lists will be returned without duplication.
+
+        Returns:
+            Dictionary mapping segment keys to KlaviyoList objects
+            Keys: 'all_customers', 'new_subscribers', 'vip_customers', 'active_customers'
+
+        Raises:
+            KlaviyoAPIError: If API requests fail
+
+        Example:
+            >>> segments = service.create_default_segments()
+            >>> print(f"VIP list ID: {segments['vip_customers'].list_id}")
+            >>> print(f"New subscribers list ID: {segments['new_subscribers'].list_id}")
+        """
+        # Create sync history record
+        sync_history = self._create_sync_history(
+            sync_type="segment_sync",
+            sync_direction="to_klaviyo",
+            metadata={"operation": "create_default_segments"}
+        )
+
+        segments = {}
+        created_count = 0
+        existing_count = 0
+
+        try:
+            self._update_sync_history(sync_history, "in_progress")
+            logger.info("Creating default customer segments/lists in Klaviyo")
+
+            # Create each default list
+            for key, list_name in self.DEFAULT_LIST_NAMES.items():
+                try:
+                    # Get all existing lists to check if this one exists
+                    existing_lists = self.client.get_lists(limit=100)
+                    existing_list = None
+
+                    for lst in existing_lists:
+                        if lst.name == list_name:
+                            existing_list = lst
+                            existing_count += 1
+                            logger.info(f"Found existing list: {list_name}")
+                            break
+
+                    if existing_list:
+                        segments[key] = existing_list
+                    else:
+                        # Create new list
+                        created_list = self.get_or_create_list(list_name)
+                        segments[key] = created_list
+                        created_count += 1
+                        logger.info(f"Created new list: {list_name}")
+
+                except Exception as e:
+                    logger.warning(f"Failed to create/get list '{list_name}': {str(e)}")
+                    # Continue with other lists even if one fails
+
+            # Update sync history
+            total_processed = len(self.DEFAULT_LIST_NAMES)
+            succeeded = len(segments)
+            failed = total_processed - succeeded
+
+            if failed == 0:
+                status = "completed"
+            elif succeeded == 0:
+                status = "failed"
+            else:
+                status = "partial"
+
+            self._update_sync_history(
+                sync_history,
+                status=status,
+                records_processed=total_processed,
+                records_succeeded=succeeded,
+                records_failed=failed
+            )
+
+            logger.info(
+                f"Default segments setup complete: {created_count} created, "
+                f"{existing_count} already existed, {failed} failed"
+            )
+
+            return segments
+
+        except Exception as e:
+            self._update_sync_history(
+                sync_history,
+                status="failed",
+                error_message=str(e),
+                error_details={"type": type(e).__name__}
+            )
+            logger.error(f"Failed to create default segments: {str(e)}")
+            raise
+
     # ============================================================================
     # Utility Methods
     # ============================================================================
