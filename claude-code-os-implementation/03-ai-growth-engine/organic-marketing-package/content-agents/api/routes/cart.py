@@ -4,17 +4,25 @@ Cart tracking and recovery routes.
 This module defines API endpoints for abandoned cart tracking and recovery.
 """
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request, Header
 from typing import Dict, Any, List, Optional
 from datetime import datetime
 from pathlib import Path
 import logging
 import uuid
+import json
+import os
 
 from api.dependencies import get_request_id
 from api.models import ErrorResponse
 from pydantic import BaseModel, Field, EmailStr
 from services.cart_service import CartService
+from integrations.tiktok_shop.webhooks import TikTokShopWebhookHandler
+from integrations.tiktok_shop.exceptions import (
+    TikTokShopAPIError,
+    TikTokShopAuthError,
+    TikTokShopValidationError
+)
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -27,6 +35,40 @@ router = APIRouter(
         500: {"model": ErrorResponse, "description": "Internal server error"}
     }
 )
+
+# Initialize TikTok Shop webhook handler (lazily)
+_webhook_handler: Optional[TikTokShopWebhookHandler] = None
+
+
+def get_webhook_handler() -> TikTokShopWebhookHandler:
+    """
+    Get or create TikTok Shop webhook handler instance.
+
+    Returns:
+        TikTokShopWebhookHandler instance
+
+    Raises:
+        HTTPException: If required credentials are not configured
+    """
+    global _webhook_handler
+
+    if _webhook_handler is None:
+        app_secret = os.getenv('TIKTOK_SHOP_APP_SECRET')
+
+        if not app_secret:
+            logger.error("TIKTOK_SHOP_APP_SECRET not configured")
+            raise HTTPException(
+                status_code=500,
+                detail={
+                    "error": "ConfigurationError",
+                    "message": "TikTok Shop webhook handler not configured"
+                }
+            )
+
+        _webhook_handler = TikTokShopWebhookHandler(app_secret)
+        logger.info("TikTok Shop webhook handler initialized")
+
+    return _webhook_handler
 
 
 # ============================================================================
@@ -553,6 +595,190 @@ async def get_cart(
             detail={
                 "error": "InternalServerError",
                 "message": "Failed to retrieve cart details",
+                "request_id": request_id
+            }
+        )
+
+
+@router.post(
+    "/webhook/tiktok",
+    status_code=200,
+    summary="TikTok Shop cart webhook",
+    description="Handle cart-related webhook events from TikTok Shop"
+)
+async def tiktok_shop_webhook(
+    request: Request,
+    request_id: str = Depends(get_request_id),
+    x_tiktok_signature: Optional[str] = Header(None, alias="X-TikTok-Signature"),
+    x_tiktok_timestamp: Optional[str] = Header(None, alias="X-TikTok-Timestamp")
+) -> Dict[str, Any]:
+    """
+    Handle TikTok Shop webhook events.
+
+    This endpoint receives and processes webhook events from TikTok Shop,
+    including cart updates and cart abandonment events.
+
+    Args:
+        request: FastAPI request object containing webhook payload
+        request_id: Unique request identifier (injected)
+        x_tiktok_signature: Webhook signature header for validation
+        x_tiktok_timestamp: Webhook timestamp header
+
+    Returns:
+        Dict containing webhook processing result
+
+    Raises:
+        HTTPException: 400 for invalid payloads, 401 for invalid signatures,
+                      500 for server errors
+    """
+    logger.info(f"[{request_id}] Received TikTok Shop webhook")
+
+    try:
+        # Get webhook handler
+        webhook_handler = get_webhook_handler()
+
+        # Read raw request body for signature validation
+        raw_body = await request.body()
+        raw_payload = raw_body.decode('utf-8')
+
+        # Validate signature if provided
+        if x_tiktok_signature:
+            try:
+                webhook_handler.validate_signature(
+                    payload=raw_payload,
+                    signature=x_tiktok_signature,
+                    timestamp=x_tiktok_timestamp
+                )
+                logger.info(f"[{request_id}] Webhook signature validated")
+            except TikTokShopAuthError as e:
+                logger.warning(f"[{request_id}] Invalid webhook signature: {str(e)}")
+                raise HTTPException(
+                    status_code=401,
+                    detail={
+                        "error": "AuthenticationError",
+                        "message": "Invalid webhook signature",
+                        "request_id": request_id
+                    }
+                )
+            except TikTokShopValidationError as e:
+                logger.warning(f"[{request_id}] Webhook validation error: {str(e)}")
+                raise HTTPException(
+                    status_code=400,
+                    detail={
+                        "error": "ValidationError",
+                        "message": str(e),
+                        "request_id": request_id
+                    }
+                )
+        else:
+            logger.warning(
+                f"[{request_id}] Webhook received without signature "
+                "(skipping validation - not recommended for production)"
+            )
+
+        # Parse JSON payload
+        try:
+            payload = json.loads(raw_payload)
+        except json.JSONDecodeError as e:
+            logger.warning(f"[{request_id}] Invalid JSON payload: {str(e)}")
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "error": "ValidationError",
+                    "message": "Invalid JSON payload",
+                    "request_id": request_id
+                }
+            )
+
+        # Parse and validate webhook payload
+        parsed_payload = webhook_handler.parse_payload(payload)
+        event_type = parsed_payload.get('event_type')
+
+        logger.info(f"[{request_id}] Processing webhook event: {event_type}")
+
+        # Handle cart events
+        if event_type in [
+            webhook_handler.CART_UPDATED_EVENT,
+            webhook_handler.CART_ABANDONED_EVENT
+        ]:
+            try:
+                # Extract cart data from webhook
+                cart_data = webhook_handler.handle_cart_event(parsed_payload)
+
+                # Generate cart_id if not provided
+                cart_id = cart_data.get('cart_id') or f"tiktok_cart_{uuid.uuid4().hex[:16]}"
+
+                # Track cart event using CartService
+                cart_service = CartService()
+                cart = cart_service.track_cart_event(
+                    cart_id=cart_id,
+                    email=cart_data['user_email'],
+                    cart_items=cart_data['items'],
+                    platform='tiktok_shop',
+                    user_id=cart_data.get('user_id'),
+                    cart_url=cart_data.get('cart_url')
+                )
+
+                logger.info(
+                    f"[{request_id}] Cart event processed: "
+                    f"cart_id={cart.cart_id}, event_type={event_type}, "
+                    f"total_value=${cart.total_value:.2f}"
+                )
+
+                return {
+                    "success": True,
+                    "message": "Webhook processed successfully",
+                    "request_id": request_id,
+                    "event_type": event_type,
+                    "cart_id": cart.cart_id
+                }
+
+            except TikTokShopValidationError as e:
+                logger.warning(f"[{request_id}] Cart data validation error: {str(e)}")
+                raise HTTPException(
+                    status_code=400,
+                    detail={
+                        "error": "ValidationError",
+                        "message": str(e),
+                        "request_id": request_id
+                    }
+                )
+
+        # For non-cart events, acknowledge but don't process
+        else:
+            logger.info(
+                f"[{request_id}] Webhook event acknowledged but not processed: "
+                f"event_type={event_type}"
+            )
+            return {
+                "success": True,
+                "message": f"Event acknowledged (no handler for {event_type})",
+                "request_id": request_id,
+                "event_type": event_type
+            }
+
+    except HTTPException:
+        raise
+    except TikTokShopValidationError as e:
+        logger.warning(f"[{request_id}] Validation error: {str(e)}")
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "error": "ValidationError",
+                "message": str(e),
+                "request_id": request_id
+            }
+        )
+    except Exception as e:
+        logger.error(
+            f"[{request_id}] Error processing webhook: {str(e)}",
+            exc_info=True
+        )
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": "InternalServerError",
+                "message": "Failed to process webhook",
                 "request_id": request_id
             }
         )
