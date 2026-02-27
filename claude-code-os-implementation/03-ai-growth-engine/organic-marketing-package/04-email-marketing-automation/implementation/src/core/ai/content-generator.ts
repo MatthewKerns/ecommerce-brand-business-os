@@ -12,6 +12,12 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import OpenAI from 'openai';
 import Anthropic from 'anthropic';
+import type { Lead } from '@/types/lead';
+import {
+  PersonalizationRulesEngine,
+  type PersonalizationRule,
+  type PersonalizationContext,
+} from '@/core/personalization/rules-engine';
 
 // ============================================================
 // Types
@@ -49,6 +55,8 @@ export interface GenerateContentRequest {
   context?: Record<string, any>;
   tone?: 'professional' | 'casual' | 'friendly' | 'urgent' | 'educational';
   length?: 'short' | 'medium' | 'long';
+  lead?: Lead; // Optional Lead for personalization
+  applyPersonalization?: boolean; // Whether to apply personalization rules
 }
 
 export interface GeneratedContent {
@@ -61,6 +69,8 @@ export interface GeneratedContent {
     templateId?: string;
     generatedAt: Date;
     tokensUsed?: number;
+    personalizationApplied?: boolean;
+    rulesApplied?: string[];
   };
 }
 
@@ -152,8 +162,13 @@ export class ContentGenerator {
   private geminiClient?: GoogleGenerativeAI;
   private openaiClient?: OpenAI;
   private claudeClient?: Anthropic;
+  private personalizationEngine?: PersonalizationRulesEngine;
 
-  constructor(config: AIConfig, customTemplates?: ContentTemplate[]) {
+  constructor(
+    config: AIConfig,
+    customTemplates?: ContentTemplate[],
+    personalizationRules?: PersonalizationRule[]
+  ) {
     this.config = config;
     this.templates = new Map();
 
@@ -165,6 +180,11 @@ export class ContentGenerator {
 
     // Initialize appropriate client
     this.initializeClient();
+
+    // Initialize personalization engine if rules provided
+    if (personalizationRules && personalizationRules.length > 0) {
+      this.personalizationEngine = new PersonalizationRulesEngine(personalizationRules);
+    }
   }
 
   /**
@@ -197,9 +217,40 @@ export class ContentGenerator {
       throw new Error(`Template not found: ${request.templateId}`);
     }
 
+    // Apply personalization if requested and available
+    let variables = { ...request.variables };
+    let rulesApplied: string[] = [];
+    let personalizationApplied = false;
+
+    if (request.applyPersonalization !== false && request.lead && this.personalizationEngine) {
+      const personalizationContext: PersonalizationContext = {
+        lead: request.lead,
+        variables: { ...variables },
+        metadata: request.context,
+      };
+
+      const personalizationResult = this.personalizationEngine.evaluateRules(
+        personalizationContext
+      );
+
+      if (personalizationResult.matched) {
+        variables = personalizationResult.transformedVariables;
+        rulesApplied = personalizationResult.rulesApplied;
+        personalizationApplied = true;
+
+        // Apply tone and length overrides if set by personalization
+        if (variables._tone && !request.tone) {
+          request.tone = variables._tone;
+        }
+        if (variables._length && !request.length) {
+          request.length = variables._length;
+        }
+      }
+    }
+
     // Validate required variables
     for (const variable of template.variables) {
-      if (variable.required && !request.variables[variable.name]) {
+      if (variable.required && !variables[variable.name]) {
         throw new Error(`Required variable missing: ${variable.name}`);
       }
     }
@@ -207,7 +258,7 @@ export class ContentGenerator {
     // Build prompt
     const systemPrompt = this.enhanceSystemPrompt(template.systemPrompt, request);
     const userPrompt = this.substituteVariables(template.userPromptTemplate, {
-      ...request.variables,
+      ...variables,
       ...request.context,
     });
 
@@ -215,7 +266,18 @@ export class ContentGenerator {
     const content = await this.callAIProvider(systemPrompt, userPrompt);
 
     // Parse and structure the response
-    return this.parseAIResponse(content, template.id);
+    const generatedContent = this.parseAIResponse(content, template.id);
+
+    // Add personalization metadata
+    if (personalizationApplied) {
+      generatedContent.metadata = {
+        ...generatedContent.metadata,
+        personalizationApplied: true,
+        rulesApplied,
+      };
+    }
+
+    return generatedContent;
   }
 
   /**
@@ -248,6 +310,52 @@ export class ContentGenerator {
    */
   getTemplate(id: string): ContentTemplate | undefined {
     return this.templates.get(id);
+  }
+
+  /**
+   * Set personalization engine
+   */
+  setPersonalizationEngine(engine: PersonalizationRulesEngine): void {
+    this.personalizationEngine = engine;
+  }
+
+  /**
+   * Get personalization engine
+   */
+  getPersonalizationEngine(): PersonalizationRulesEngine | undefined {
+    return this.personalizationEngine;
+  }
+
+  /**
+   * Add personalization rule
+   */
+  addPersonalizationRule(rule: PersonalizationRule): void {
+    if (!this.personalizationEngine) {
+      this.personalizationEngine = new PersonalizationRulesEngine([rule]);
+    } else {
+      this.personalizationEngine.addRule(rule);
+    }
+  }
+
+  /**
+   * Remove personalization rule
+   */
+  removePersonalizationRule(ruleId: string): boolean {
+    return this.personalizationEngine?.removeRule(ruleId) || false;
+  }
+
+  /**
+   * Get personalization suggestions for a lead
+   */
+  getPersonalizationSuggestions(lead: Lead): {
+    ruleId: string;
+    ruleName: string;
+    description?: string;
+  }[] {
+    if (!this.personalizationEngine) {
+      return [];
+    }
+    return this.personalizationEngine.getPersonalizationSuggestions(lead);
   }
 
   // ============================================================
