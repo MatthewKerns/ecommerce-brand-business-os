@@ -257,3 +257,192 @@ class PerformanceMetrics(Base):
 
     def __repr__(self):
         return f"<PerformanceMetrics(id={self.id}, request_id='{self.request_id}', duration={self.total_duration_ms}ms)>"
+
+
+class AbandonedCart(Base):
+    """
+    Tracks abandoned shopping cart sessions for recovery campaigns.
+
+    Attributes:
+        id: Primary key
+        cart_id: Unique identifier for the cart session
+        user_id: Optional user identifier if authenticated
+        email: Email address for cart recovery
+        platform: Source platform (website, tiktok_shop)
+        cart_data: JSON data with complete cart contents
+        cart_url: Recovery link URL
+        total_value: Total cart value
+        currency: Currency code (USD, EUR, etc.)
+        status: Cart status (active, abandoned, recovered, expired)
+        abandoned_at: Timestamp when cart was marked abandoned
+        recovered_at: Timestamp when cart was recovered
+        created_at: Timestamp when cart was created
+        updated_at: Timestamp when cart was last updated
+    """
+    __tablename__ = "abandoned_carts"
+
+    # Primary Key
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
+    # Cart Identification
+    cart_id = Column(String(100), unique=True, nullable=False, index=True)
+
+    # User Information
+    user_id = Column(String(50), index=True)
+    email = Column(String(255), nullable=False, index=True)
+
+    # Platform and Source
+    platform = Column(String(20), nullable=False, index=True)
+
+    # Cart Data
+    cart_data = Column(Text)  # JSON stored as text
+    cart_url = Column(String(500))
+
+    # Value Tracking
+    total_value = Column(Numeric(10, 2), nullable=False)
+    currency = Column(String(3), default="USD")
+
+    # Status Tracking
+    status = Column(String(20), default="active", index=True)
+
+    # Timestamps
+    abandoned_at = Column(DateTime, index=True)
+    recovered_at = Column(DateTime)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    cart_items = relationship("CartItem", back_populates="cart", cascade="all, delete-orphan")
+    recovery_emails = relationship("CartRecoveryEmail", back_populates="cart", cascade="all, delete-orphan")
+
+    # Table constraints
+    __table_args__ = (
+        CheckConstraint(
+            "platform IN ('website', 'tiktok_shop')",
+            name="check_platform"
+        ),
+        CheckConstraint(
+            "status IN ('active', 'abandoned', 'recovered', 'expired')",
+            name="check_cart_status"
+        ),
+        CheckConstraint("total_value >= 0", name="check_total_value"),
+        Index("idx_abandoned_carts_email_status", "email", "status"),
+        Index("idx_abandoned_carts_abandoned_at", "abandoned_at"),
+    )
+
+    def __repr__(self):
+        return f"<AbandonedCart(id={self.id}, cart_id='{self.cart_id}', status='{self.status}')>"
+
+
+class CartItem(Base):
+    """
+    Stores individual products in abandoned carts for recovery email personalization.
+
+    Attributes:
+        id: Primary key
+        cart_id: Foreign key to abandoned_carts
+        product_id: Product identifier from source platform
+        product_name: Name of the product
+        product_image_url: URL to product image
+        quantity: Quantity of product in cart
+        price: Price per unit
+        currency: Currency code (USD, EUR, etc.)
+        created_at: Timestamp when item was added
+    """
+    __tablename__ = "cart_items"
+
+    # Primary Key
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
+    # Cart Reference
+    cart_id = Column(Integer, ForeignKey("abandoned_carts.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    # Product Information
+    product_id = Column(String(100), nullable=False)
+    product_name = Column(String(255), nullable=False)
+    product_image_url = Column(String(500))
+
+    # Quantity and Pricing
+    quantity = Column(Integer, nullable=False, default=1)
+    price = Column(Numeric(10, 2), nullable=False)
+    currency = Column(String(3), default="USD")
+
+    # Timestamp
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Relationships
+    cart = relationship("AbandonedCart", back_populates="cart_items")
+
+    # Table constraints
+    __table_args__ = (
+        CheckConstraint("quantity > 0", name="check_quantity"),
+        CheckConstraint("price >= 0", name="check_price"),
+        Index("idx_cart_items_cart_id", "cart_id"),
+    )
+
+    def __repr__(self):
+        return f"<CartItem(id={self.id}, product_name='{self.product_name}', quantity={self.quantity})>"
+
+
+class CartRecoveryEmail(Base):
+    """
+    Tracks recovery email sequences sent to abandoned cart owners.
+
+    Attributes:
+        id: Primary key
+        cart_id: Foreign key to abandoned_carts
+        sequence_number: Email sequence position (1, 2, 3)
+        email_type: Type of email (reminder, urgency, offer)
+        sent_at: Timestamp when email was sent
+        opened_at: Timestamp when email was opened
+        clicked_at: Timestamp when recovery link was clicked
+        status: Email delivery status (pending, sent, opened, clicked, bounced, failed)
+        error_message: Error details if email failed
+        created_at: Timestamp when record was created
+        updated_at: Timestamp when record was last updated
+    """
+    __tablename__ = "cart_recovery_emails"
+
+    # Primary Key
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
+    # Cart Reference
+    cart_id = Column(Integer, ForeignKey("abandoned_carts.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    # Email Sequence
+    sequence_number = Column(Integer, nullable=False)
+    email_type = Column(String(20), nullable=False)
+
+    # Engagement Tracking
+    sent_at = Column(DateTime, index=True)
+    opened_at = Column(DateTime)
+    clicked_at = Column(DateTime)
+
+    # Status Tracking
+    status = Column(String(20), default="pending", index=True)
+    error_message = Column(Text)
+
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    cart = relationship("AbandonedCart", back_populates="recovery_emails")
+
+    # Table constraints
+    __table_args__ = (
+        CheckConstraint(
+            "email_type IN ('reminder', 'urgency', 'offer')",
+            name="check_email_type"
+        ),
+        CheckConstraint(
+            "status IN ('pending', 'sent', 'opened', 'clicked', 'bounced', 'failed')",
+            name="check_email_status"
+        ),
+        CheckConstraint("sequence_number BETWEEN 1 AND 3", name="check_sequence_number"),
+        Index("idx_recovery_emails_cart_sequence", "cart_id", "sequence_number"),
+        Index("idx_recovery_emails_status_sent", "status", "sent_at"),
+    )
+
+    def __repr__(self):
+        return f"<CartRecoveryEmail(id={self.id}, cart_id={self.cart_id}, type='{self.email_type}', status='{self.status}')>"
