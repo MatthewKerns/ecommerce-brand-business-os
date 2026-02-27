@@ -107,6 +107,17 @@ export type {
   TikTokOrderValidationResult,
 } from './types/tiktok-order';
 
+// TikTok analytics types
+export type {
+  TikTokVideoMetrics,
+  TikTokVideoListResponse,
+  TikTokVideoMetricsParams,
+  TikTokAccountAnalytics,
+  TikTokAccountAnalyticsParams,
+  TikTokProductAnalytics,
+  TikTokProductAnalyticsParams,
+} from './types/tiktok-analytics';
+
 // MCF order types
 export type {
   MCFAddress,

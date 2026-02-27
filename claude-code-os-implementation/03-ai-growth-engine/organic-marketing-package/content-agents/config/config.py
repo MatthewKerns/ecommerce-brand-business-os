@@ -87,6 +87,7 @@ CHANNELS = {
     "blog": "SEO and thought leadership"
 }
 
+
 # TikTok 4-Channel Strategy Configuration
 TIKTOK_CHANNELS = {
     "air": {
@@ -97,136 +98,172 @@ TIKTOK_CHANNELS = {
         "content_focus": "Fast-paced, quick wins, tournament prep hacks, speed strategies",
         "posting_schedule": {
             "frequency": "daily",
-            "best_times": ["7:00 AM", "12:00 PM", "6:00 PM"],
-            "days": ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
-        },
-        "branding_guidelines": {
-            "tone": "Energetic, fast-paced, action-oriented",
-            "hashtags": ["#QuickWin", "#TournamentPrep", "#BattleReady", "#SpeedStrategy"],
-            "visual_style": "Dynamic, quick cuts, high energy"
+            "times": ["8am", "3pm", "7pm"],
+            "timezone": "America/New_York"
         }
     },
     "water": {
         "channel_name": "Infinity Vault - Water",
         "element_theme": "water",
-        "description": "Strategy, flow, and adaptability for the thinking player",
-        "target_audience": "Strategic thinkers, competitive players seeking edge, meta analysts",
-        "content_focus": "Meta analysis, deck tech, strategy guides, adaptation tactics",
+        "description": "Community stories, collector journeys, and nostalgic content",
+        "target_audience": "Collectors, community members, nostalgia seekers",
+        "content_focus": "Community stories, collection showcases, emotional connections, memories",
         "posting_schedule": {
-            "frequency": "5x per week",
-            "best_times": ["8:00 AM", "1:00 PM", "7:00 PM"],
-            "days": ["monday", "tuesday", "wednesday", "thursday", "friday"]
-        },
-        "branding_guidelines": {
-            "tone": "Analytical, thoughtful, strategic",
-            "hashtags": ["#MetaAnalysis", "#DeckTech", "#Strategy", "#AdaptAndWin"],
-            "visual_style": "Smooth transitions, calming but focused, analytical overlays"
-        }
-    },
-    "fire": {
-        "channel_name": "Infinity Vault - Fire",
-        "element_theme": "fire",
-        "description": "Hype, energy, and passion for the dedicated collector",
-        "target_audience": "Collectors, passionate gamers, community members, hype seekers",
-        "content_focus": "Unboxings, collection showcases, epic plays, community stories, tournament hype",
-        "posting_schedule": {
-            "frequency": "4x per week",
-            "best_times": ["9:00 AM", "3:00 PM", "8:00 PM"],
-            "days": ["monday", "wednesday", "friday", "saturday"]
-        },
-        "branding_guidelines": {
-            "tone": "Hyped, passionate, celebratory",
-            "hashtags": ["#Unboxing", "#EpicPlay", "#CollectorLife", "#GamersUnite"],
-            "visual_style": "High energy, dramatic lighting, emotional moments"
+            "frequency": "daily",
+            "times": ["10am", "5pm", "9pm"],
+            "timezone": "America/New_York"
         }
     },
     "earth": {
         "channel_name": "Infinity Vault - Earth",
         "element_theme": "earth",
-        "description": "Building, collecting, and organizing for the serious hobbyist",
-        "target_audience": "Collectors, organizers, long-term players, gear enthusiasts",
-        "content_focus": "Collection building, gear reviews, organization tips, long-term strategies",
+        "description": "Product deep dives, durability tests, and educational content",
+        "target_audience": "Parents, careful buyers, quality-focused consumers",
+        "content_focus": "Product features, protection tests, educational content, value propositions",
         "posting_schedule": {
-            "frequency": "3x per week",
-            "best_times": ["10:00 AM", "2:00 PM", "7:00 PM"],
-            "days": ["tuesday", "thursday", "saturday"]
-        },
-        "branding_guidelines": {
-            "tone": "Grounded, methodical, knowledgeable",
-            "hashtags": ["#CollectionGoals", "#GearReview", "#OrganizeTCG", "#BuildYourArsenal"],
-            "visual_style": "Stable shots, detailed close-ups, satisfying organization"
+            "frequency": "3x_week",
+            "days": ["Tuesday", "Thursday", "Saturday"],
+            "times": ["2pm"],
+            "timezone": "America/New_York"
+        }
+    },
+    "fire": {
+        "channel_name": "Infinity Vault - Fire",
+        "element_theme": "fire",
+        "description": "Bold claims, controversial takes, and competitive spirit",
+        "target_audience": "Competitive players, debate lovers, engagement seekers",
+        "content_focus": "Hot takes, controversial opinions, competitive spirit, bold statements",
+        "posting_schedule": {
+            "frequency": "daily",
+            "times": ["12pm", "6pm"],
+            "timezone": "America/New_York"
         }
     }
 }
 
-# Channel theme mappings for content generation
-CHANNEL_THEMES = {
-    "air": {
-        "theme_name": "Quick Tips & Fast Moves",
-        "content_types": ["quick_tips", "tournament_prep", "speed_strategies", "fast_plays"],
-        "tone": "Fast-paced, energetic, action-oriented",
-        "key_messages": [
-            "Win faster with smart prep",
-            "Tournament-ready in minutes",
-            "Quick wins for competitive play"
-        ],
-        "content_pillars": ["Battle-Ready Lifestyle", "Gear & Equipment"],
-        "video_length": "15-30 seconds",
-        "hook_style": "Start with action or bold statement"
-    },
-    "water": {
-        "theme_name": "Strategy & Flow",
-        "content_types": ["meta_analysis", "deck_tech", "strategy_guides", "adaptation_tactics"],
-        "tone": "Analytical, thoughtful, strategic",
-        "key_messages": [
-            "Adapt to win",
-            "Master the meta",
-            "Strategic advantage through preparation"
-        ],
-        "content_pillars": ["Battle-Ready Lifestyle", "Collector's Journey"],
-        "video_length": "45-60 seconds",
-        "hook_style": "Start with question or insight"
-    },
-    "fire": {
-        "theme_name": "Hype & Energy",
-        "content_types": ["unboxings", "collection_showcases", "epic_plays", "community_stories"],
-        "tone": "Hyped, passionate, celebratory",
-        "key_messages": [
-            "Celebrate the passion",
-            "Epic moments deserve epic gear",
-            "Join the collector community"
-        ],
-        "content_pillars": ["Community Champion", "Collector's Journey"],
-        "video_length": "30-60 seconds",
-        "hook_style": "Start with excitement or reveal"
-    },
-    "earth": {
-        "theme_name": "Building & Collecting",
-        "content_types": ["collection_building", "gear_reviews", "organization_tips", "long_term_strategies"],
-        "tone": "Grounded, methodical, knowledgeable",
-        "key_messages": [
-            "Build your arsenal methodically",
-            "Quality gear for serious collectors",
-            "Organization is battle preparation"
-        ],
-        "content_pillars": ["Gear & Equipment", "Collector's Journey"],
-        "video_length": "60-90 seconds",
-        "hook_style": "Start with problem or showcase result"
-    }
+# TikTok scheduling configuration
+TIKTOK_SCHEDULER_CONFIG = {
+    "max_scheduled_days": 30,
+    "min_scheduled_days": 7,
+    "buffer_hours": 2,
+    "retry_failed_posts": True,
+    "retry_max_attempts": 3,
+    "auto_reschedule": True
 }
 
-# TikTok channel output directories
-TIKTOK_CHANNELS_OUTPUT_DIR = OUTPUT_DIR / "tiktok" / "channels"
-for element in ["air", "water", "fire", "earth"]:
-    channel_dir = TIKTOK_CHANNELS_OUTPUT_DIR / element
-    channel_dir.mkdir(parents=True, exist_ok=True)
-# Target queries for AI citation monitoring
-# These queries are tested weekly across AI assistants (ChatGPT, Claude, Perplexity)
-# to track brand citations and optimize AEO (Answer Engine Optimization)
-TARGET_QUERIES = [
+# Citation monitoring targets
+CITATION_MONITORING_TARGETS = [
+    "infinity vault",
+    "infinity vault tcg",
+    "infinity vault binder",
+    "infinity vault deck box",
+    "@infinityvault"
+]
+
+# AEO (Agentic Engine Optimization) configurations
+AEO_PERPLEXITY_QUERIES = [
     "Best TCG storage solutions",
+    "Top rated card binders for collectors",
+    "Premium deck boxes for competitive players",
+    "How to protect valuable trading cards",
+    "Best trading card organization systems"
+]
+
+AEO_OPENAI_QUERIES = [
+    "Trading card storage recommendations",
+    "Card collection organization tips",
+    "Best binders for Pokemon cards",
+    "MTG deck box recommendations",
+    "Trading card protection guide"
+]
+
+AEO_GEMINI_QUERIES = [
+    "Trading card binder reviews",
+    "Best card sleeves and protectors",
+    "TCG storage solutions comparison",
+    "Card collection display options",
+    "Tournament deck box features"
+]
+
+# Blog platform configuration
+BLOG_PLATFORM_CONFIG = {
+    "base_url": os.getenv("BLOG_BASE_URL", "https://infinityvault.com"),
+    "api_endpoint": os.getenv("BLOG_API_ENDPOINT", "/api/blog"),
+    "auth_token": os.getenv("BLOG_AUTH_TOKEN", ""),
+    "auto_publish": os.getenv("BLOG_AUTO_PUBLISH", "false").lower() == "true",
+    "draft_review_required": os.getenv("BLOG_DRAFT_REVIEW", "true").lower() == "true"
+}
+
+# Product-focused keywords for content
+PRODUCT_KEYWORDS = [
+    "Trading card binder",
+    "9-pocket pages",
+    "TCG deck box",
+    "Card storage solution",
+    "Card collection organizer",
+    "Tournament deck case",
+    "Premium card protection",
+    "Trading card portfolio"
+]
+
+# Competitor brands to monitor
+COMPETITOR_BRANDS = [
+    "Ultra Pro",
+    "BCW Supplies",
+    "Dragon Shield",
+    "Ultimate Guard",
+    "Dex Protection",
+    "Monster Protectors",
+    "Legion Supplies",
+    "GameGenic"
+]
+
+# High-value search terms for optimization
+HIGH_VALUE_SEARCH_TERMS = [
+    "Best card binder for Pokemon",
+    "MTG deck box with dice tray",
+    "Premium trading card storage",
+    "9 pocket binder pages bulk",
+    "Tournament legal deck box",
+    "Waterproof card binder",
+    "Side loading card pages",
+    "Zipper binder for cards",
     "Top trading card binders",
     "Best card sleeves for protection",
     "How to organize trading card collection",
     "Best deck boxes for TCG players"
 ]
+
+# Analytics refresh configuration
+ANALYTICS_REFRESH_HOURS = int(os.getenv("ANALYTICS_REFRESH_HOURS", "24"))
+ANALYTICS_INCREMENTAL_HOURS = int(os.getenv("ANALYTICS_INCREMENTAL_HOURS", "1"))
+ANALYTICS_BACKFILL_BATCH_DAYS = int(os.getenv("ANALYTICS_BACKFILL_BATCH_DAYS", "7"))
+ANALYTICS_MAX_RETRIES = int(os.getenv("ANALYTICS_MAX_RETRIES", "3"))
+ANALYTICS_RETRY_DELAY_SECONDS = int(os.getenv("ANALYTICS_RETRY_DELAY_SECONDS", "60"))
+
+# Refresh schedule configuration
+TIKTOK_REFRESH_ENABLED = os.getenv("TIKTOK_REFRESH_ENABLED", "true").lower() == "true"
+WEBSITE_REFRESH_ENABLED = os.getenv("WEBSITE_REFRESH_ENABLED", "true").lower() == "true"
+EMAIL_REFRESH_ENABLED = os.getenv("EMAIL_REFRESH_ENABLED", "true").lower() == "true"
+SALES_REFRESH_ENABLED = os.getenv("SALES_REFRESH_ENABLED", "true").lower() == "true"
+
+
+# Settings object for convenient access
+class Settings:
+    """Configuration settings container"""
+
+    # Analytics refresh settings
+    analytics_refresh_hours = ANALYTICS_REFRESH_HOURS
+    analytics_incremental_hours = ANALYTICS_INCREMENTAL_HOURS
+    analytics_backfill_batch_days = ANALYTICS_BACKFILL_BATCH_DAYS
+    analytics_max_retries = ANALYTICS_MAX_RETRIES
+    analytics_retry_delay_seconds = ANALYTICS_RETRY_DELAY_SECONDS
+
+    # Channel refresh toggles
+    tiktok_refresh_enabled = TIKTOK_REFRESH_ENABLED
+    website_refresh_enabled = WEBSITE_REFRESH_ENABLED
+    email_refresh_enabled = EMAIL_REFRESH_ENABLED
+    sales_refresh_enabled = SALES_REFRESH_ENABLED
+
+
+settings = Settings()
