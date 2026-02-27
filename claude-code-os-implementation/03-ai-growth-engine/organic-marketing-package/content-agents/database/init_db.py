@@ -31,6 +31,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from database.connection import engine, Base, DATABASE_URL
 from database import models  # noqa: F401 - Import models to register them with Base
+from analytics import models as analytics_models  # noqa: F401 - Import analytics models to register them with Base
 
 
 def get_migration_files() -> List[Path]:
@@ -189,7 +190,10 @@ def verify_database() -> bool:
         inspector = inspect(engine)
         tables = inspector.get_table_names()
 
-        expected_tables = ['content_history', 'api_usage', 'performance_metrics']
+        expected_tables = [
+            'content_history', 'api_usage', 'performance_metrics',
+            'tiktok_metrics', 'website_analytics', 'email_metrics', 'sales_data'
+        ]
         missing_tables = [t for t in expected_tables if t not in tables]
 
         if missing_tables:
