@@ -914,3 +914,324 @@ class KlaviyoSyncService:
         return self.db_session.query(DBKlaviyoProfile).filter(
             DBKlaviyoProfile.external_id == external_id
         ).first()
+
+    # ============================================================================
+    # TikTok Shop Integration Methods
+    # ============================================================================
+
+    def sync_customers_from_tiktok(
+        self,
+        tiktok_client,
+        page_size: int = 100,
+        max_pages: Optional[int] = None,
+        order_status: Optional[str] = None,
+        start_time: Optional[int] = None,
+        end_time: Optional[int] = None
+    ) -> Tuple[List[KlaviyoProfile], Dict[str, int]]:
+        """
+        Sync customer profiles from TikTok Shop orders to Klaviyo
+
+        This method fetches orders from TikTok Shop, extracts customer information,
+        and syncs those customers to Klaviyo. It handles deduplication by checking
+        if profiles already exist before creating or updating them.
+
+        Args:
+            tiktok_client: TikTokShopClient instance for fetching orders
+            page_size: Number of orders to fetch per page (max 100)
+            max_pages: Maximum number of pages to process (optional, processes all if not set)
+            order_status: Filter by order status (e.g., 'COMPLETED', 'DELIVERED')
+            start_time: Start timestamp for order creation time (Unix timestamp)
+            end_time: End timestamp for order creation time (Unix timestamp)
+
+        Returns:
+            Tuple of (list of synced KlaviyoProfile objects, stats dict)
+            Stats dict contains: orders_fetched, customers_found, customers_synced,
+                                customers_updated, customers_created, errors
+
+        Raises:
+            KlaviyoAPIError: If Klaviyo API requests fail
+            TikTokShopAPIError: If TikTok Shop API requests fail
+
+        Example:
+            >>> from integrations.tiktok_shop.client import TikTokShopClient
+            >>> tiktok_client = TikTokShopClient(app_key, app_secret, access_token)
+            >>> profiles, stats = service.sync_customers_from_tiktok(
+            ...     tiktok_client,
+            ...     order_status='COMPLETED',
+            ...     max_pages=10
+            ... )
+            >>> print(f"Synced {stats['customers_synced']} customers from {stats['orders_fetched']} orders")
+        """
+        # Create sync history record
+        sync_history = self._create_sync_history(
+            sync_type="bulk_sync",
+            sync_direction="to_klaviyo",
+            metadata={
+                "source": "tiktok_shop",
+                "page_size": page_size,
+                "max_pages": max_pages,
+                "order_status": order_status
+            }
+        )
+
+        # Initialize stats tracking
+        stats = {
+            "orders_fetched": 0,
+            "customers_found": 0,
+            "customers_synced": 0,
+            "customers_updated": 0,
+            "customers_created": 0,
+            "errors": 0
+        }
+
+        synced_profiles = []
+        seen_customers = set()  # Track unique customers by email/phone
+
+        try:
+            self._update_sync_history(sync_history, "in_progress")
+            logger.info("Starting customer sync from TikTok Shop to Klaviyo")
+
+            # Fetch orders from TikTok Shop
+            page_number = 1
+            has_more = True
+
+            while has_more:
+                # Check max_pages limit
+                if max_pages and page_number > max_pages:
+                    logger.info(f"Reached max_pages limit ({max_pages})")
+                    break
+
+                try:
+                    # Fetch orders from TikTok Shop
+                    logger.info(f"Fetching TikTok Shop orders page {page_number}")
+                    response = tiktok_client.get_orders(
+                        page_size=page_size,
+                        page_number=page_number,
+                        order_status=order_status,
+                        start_time=start_time,
+                        end_time=end_time
+                    )
+
+                    # Extract orders from response
+                    orders = response.get('data', {}).get('orders', [])
+                    stats["orders_fetched"] += len(orders)
+
+                    # Check if more pages exist
+                    has_more = response.get('data', {}).get('more', False)
+
+                    # Process each order to extract customer data
+                    for order in orders:
+                        try:
+                            # Extract customer information from order
+                            customer_data = self._extract_customer_from_tiktok_order(order)
+
+                            if not customer_data:
+                                logger.debug(f"No customer data in order {order.get('order_id')}")
+                                continue
+
+                            stats["customers_found"] += 1
+
+                            # Create unique key for deduplication
+                            customer_key = customer_data.get("email") or customer_data.get("phone_number")
+                            if not customer_key:
+                                logger.warning(
+                                    f"Order {order.get('order_id')} has no email or phone for customer"
+                                )
+                                continue
+
+                            # Skip if we've already processed this customer in this sync
+                            if customer_key in seen_customers:
+                                continue
+
+                            seen_customers.add(customer_key)
+
+                            # Sync customer profile to Klaviyo
+                            try:
+                                api_profile, db_profile = self.sync_profile(**customer_data)
+                                synced_profiles.append(api_profile)
+                                stats["customers_synced"] += 1
+
+                                # Track if it was create or update
+                                if db_profile.created_at == db_profile.updated_at:
+                                    stats["customers_created"] += 1
+                                else:
+                                    stats["customers_updated"] += 1
+
+                                logger.debug(
+                                    f"Synced customer {customer_key} from order {order.get('order_id')}"
+                                )
+
+                            except Exception as e:
+                                stats["errors"] += 1
+                                logger.warning(
+                                    f"Failed to sync customer {customer_key}: {str(e)}"
+                                )
+
+                        except Exception as e:
+                            stats["errors"] += 1
+                            logger.warning(
+                                f"Failed to process order {order.get('order_id')}: {str(e)}"
+                            )
+
+                    # Move to next page
+                    page_number += 1
+
+                except Exception as e:
+                    # Log error but continue with next page
+                    stats["errors"] += 1
+                    logger.error(f"Failed to fetch orders page {page_number}: {str(e)}")
+                    break
+
+            # Determine final status
+            if stats["errors"] == 0:
+                status = "completed"
+            elif stats["customers_synced"] == 0:
+                status = "failed"
+            else:
+                status = "partial"
+
+            # Update sync history with final stats
+            self._update_sync_history(
+                sync_history,
+                status=status,
+                records_processed=stats["customers_found"],
+                records_succeeded=stats["customers_synced"],
+                records_failed=stats["errors"]
+            )
+
+            logger.info(
+                f"TikTok Shop customer sync completed: "
+                f"{stats['customers_synced']} synced "
+                f"({stats['customers_created']} created, {stats['customers_updated']} updated) "
+                f"from {stats['orders_fetched']} orders, "
+                f"{stats['errors']} errors"
+            )
+
+            return synced_profiles, stats
+
+        except Exception as e:
+            # Update sync history with error
+            self._update_sync_history(
+                sync_history,
+                status="failed",
+                error_message=str(e),
+                error_details={"type": type(e).__name__}
+            )
+            logger.error(f"TikTok Shop customer sync failed: {str(e)}")
+            raise
+
+    def _extract_customer_from_tiktok_order(
+        self,
+        order: Dict[str, Any]
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Extract customer profile data from a TikTok Shop order
+
+        Args:
+            order: TikTok Shop order dictionary
+
+        Returns:
+            Dictionary of customer data suitable for sync_profile(), or None if insufficient data
+
+        Note:
+            TikTok Shop order structure typically includes:
+            - recipient_address: Shipping address with name, phone, email, address fields
+            - buyer_user_id: TikTok user ID
+            - buyer_message: Optional message from buyer
+        """
+        try:
+            # Extract recipient/shipping address (primary source of customer info)
+            recipient = order.get('recipient_address', {})
+
+            if not recipient:
+                return None
+
+            # Build customer profile data
+            customer_data = {}
+
+            # Email (if available)
+            email = recipient.get('email') or recipient.get('recipient_email')
+            if email:
+                customer_data["email"] = email.strip().lower()
+
+            # Phone number
+            phone = recipient.get('phone') or recipient.get('phone_number')
+            if phone:
+                # Clean phone number (remove spaces, dashes)
+                customer_data["phone_number"] = phone.replace(" ", "").replace("-", "")
+
+            # Name
+            full_name = recipient.get('name') or recipient.get('recipient_name')
+            if full_name:
+                # Try to split full name into first/last
+                name_parts = full_name.strip().split(None, 1)
+                if len(name_parts) == 2:
+                    customer_data["first_name"] = name_parts[0]
+                    customer_data["last_name"] = name_parts[1]
+                else:
+                    customer_data["first_name"] = name_parts[0]
+
+            # External ID (TikTok Shop user ID or order ID)
+            buyer_id = order.get('buyer_user_id') or order.get('buyer_uid')
+            order_id = order.get('order_id')
+
+            if buyer_id:
+                customer_data["external_id"] = f"tiktok_user_{buyer_id}"
+            elif order_id:
+                customer_data["external_id"] = f"tiktok_order_{order_id}"
+
+            # Location data
+            location = {}
+
+            address1 = recipient.get('address_line1') or recipient.get('address')
+            if address1:
+                location["address1"] = address1
+
+            address2 = recipient.get('address_line2') or recipient.get('address_detail')
+            if address2:
+                location["address2"] = address2
+
+            city = recipient.get('city') or recipient.get('district_info', {}).get('city')
+            if city:
+                location["city"] = city
+
+            region = recipient.get('state') or recipient.get('region')
+            if region:
+                location["region"] = region
+
+            country = recipient.get('region_code') or recipient.get('country')
+            if country:
+                location["country"] = country
+
+            zip_code = recipient.get('zipcode') or recipient.get('postal_code')
+            if zip_code:
+                location["zip"] = zip_code
+
+            if location:
+                customer_data["location"] = location
+
+            # Custom properties (order metadata)
+            properties = {
+                "source": "tiktok_shop",
+                "last_order_id": order_id,
+                "last_order_status": order.get('order_status'),
+                "last_order_date": order.get('create_time')
+            }
+
+            # Add payment info if available
+            payment = order.get('payment', {})
+            if payment:
+                properties["last_order_total"] = payment.get('total_amount')
+                properties["last_order_currency"] = payment.get('currency')
+
+            customer_data["properties"] = properties
+
+            # Require at least email or phone to proceed
+            if not customer_data.get("email") and not customer_data.get("phone_number"):
+                return None
+
+            return customer_data
+
+        except Exception as e:
+            logger.warning(f"Failed to extract customer data from order: {str(e)}")
+            return None
