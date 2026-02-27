@@ -13,6 +13,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useState } from "react";
+import Link from "next/link";
 
 /**
  * Email sequence data type
@@ -301,10 +302,13 @@ export function SequenceList() {
                     {activeMenu === sequence.id && (
                       <div className="absolute right-0 z-10 mt-2 w-48 rounded-md border border-slate-200 bg-white shadow-lg">
                         <div className="py-1">
-                          <button className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-slate-700 transition-colors hover:bg-slate-50">
+                          <Link
+                            href={`/sequences/${sequence.id}/edit`}
+                            className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-slate-700 transition-colors hover:bg-slate-50"
+                          >
                             <Edit2 className="h-4 w-4" />
                             Edit
-                          </button>
+                          </Link>
                           <button className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-slate-700 transition-colors hover:bg-slate-50">
                             <Copy className="h-4 w-4" />
                             Duplicate

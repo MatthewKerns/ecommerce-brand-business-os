@@ -1,6 +1,7 @@
 "use client";
 
 import { Mail } from "lucide-react";
+import Link from "next/link";
 import { SequenceList } from "@/components/sequences/SequenceList";
 
 /**
@@ -37,9 +38,12 @@ export default function SequencesPage() {
         </div>
 
         {/* Create New Sequence Button */}
-        <button className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800">
+        <Link
+          href="/sequences/new"
+          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+        >
           Create Sequence
-        </button>
+        </Link>
       </div>
 
       {/* Sequence List */}
