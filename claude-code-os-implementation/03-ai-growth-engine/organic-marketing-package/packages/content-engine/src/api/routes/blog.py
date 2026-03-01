@@ -4,7 +4,7 @@ Blog content generation routes.
 This module defines API endpoints for blog content generation using the BlogAgent.
 """
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from typing import Dict, Any, List, Optional
 from datetime import datetime
 from pathlib import Path
@@ -15,6 +15,7 @@ from api.dependencies import get_request_id
 from api.models import ContentResponse, ContentMetadata, ErrorResponse
 from pydantic import BaseModel, Field
 from agents.blog_agent import BlogAgent
+from tasks.content_generation import generate_blog_post_task
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -169,6 +170,56 @@ class HowToGuideRequest(BaseModel):
         }
 
 
+class BlogAsyncRequest(BaseModel):
+    """Request model for async blog post generation."""
+    topic: str = Field(
+        ...,
+        min_length=10,
+        max_length=500,
+        description="The blog post topic"
+    )
+    priority: str = Field(
+        default="medium",
+        pattern="^(high|medium|low)$",
+        description="Task priority for queue routing"
+    )
+    content_pillar: Optional[str] = Field(
+        None,
+        description="Content pillar (Battle-Ready Lifestyle, Gear & Equipment, etc.)"
+    )
+    target_keywords: Optional[List[str]] = Field(
+        default_factory=list,
+        description="SEO keywords to target"
+    )
+    word_count: int = Field(
+        default=1000,
+        ge=300,
+        le=5000,
+        description="Target word count"
+    )
+    include_cta: bool = Field(
+        default=True,
+        description="Whether to include a call-to-action"
+    )
+    include_seo_analysis: bool = Field(
+        default=False,
+        description="Whether to include SEO analysis with the content"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "topic": "How to Organize Your Trading Card Collection",
+                "priority": "medium",
+                "content_pillar": "Gear & Equipment",
+                "target_keywords": ["trading card storage", "card organization"],
+                "word_count": 1500,
+                "include_cta": True,
+                "include_seo_analysis": True
+            }
+        }
+
+
 # ============================================================================
 # Response Models
 # ============================================================================
@@ -222,6 +273,38 @@ class BlogSeriesResponse(BaseModel):
     status: str = Field(
         default="success",
         description="Status of the content generation"
+    )
+
+
+class AsyncTaskResponse(BaseModel):
+    """Response model for async task initiation."""
+    task_id: str = Field(
+        ...,
+        description="Unique identifier for the async task"
+    )
+    status: str = Field(
+        default="queued",
+        description="Initial status of the task"
+    )
+    request_id: str = Field(
+        ...,
+        description="Unique identifier for the request"
+    )
+    topic: str = Field(
+        ...,
+        description="The blog post topic"
+    )
+    priority: str = Field(
+        ...,
+        description="Task priority"
+    )
+    message: str = Field(
+        default="Content generation task queued successfully",
+        description="Status message"
+    )
+    timestamp: datetime = Field(
+        default_factory=datetime.utcnow,
+        description="Task creation timestamp"
     )
 
 
@@ -536,6 +619,87 @@ async def generate_how_to_guide(
             detail={
                 "error": "HowToGuideGenerationError",
                 "message": f"Failed to generate how-to guide: {str(e)}",
+                "request_id": request_id,
+                "timestamp": datetime.utcnow().isoformat() + "Z"
+            }
+        )
+
+
+@router.post(
+    "/generate-async",
+    response_model=AsyncTaskResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+    summary="Generate a blog post asynchronously",
+    description="Queue a blog post generation task for background processing"
+)
+async def generate_blog_post_async(
+    request: BlogAsyncRequest,
+    request_id: str = Depends(get_request_id)
+) -> Dict[str, Any]:
+    """
+    Generate a blog post asynchronously using background task queue.
+
+    This endpoint queues a blog post generation task and returns immediately
+    with a task ID. The content is generated in the background and saved as
+    a draft for human review.
+
+    Args:
+        request: Async blog post generation request
+        request_id: Unique request identifier
+
+    Returns:
+        Async task response with task ID and status
+
+    Raises:
+        HTTPException: If task queueing fails
+    """
+    logger.info(
+        f"[{request_id}] Queueing async blog post generation: "
+        f"topic='{request.topic}', priority={request.priority}"
+    )
+
+    try:
+        # Build parameters for task
+        parameters = {
+            "content_pillar": request.content_pillar,
+            "target_keywords": request.target_keywords if request.target_keywords else None,
+            "word_count": request.word_count,
+            "include_cta": request.include_cta,
+            "include_seo_analysis": request.include_seo_analysis
+        }
+
+        # Queue the task using Celery
+        task = generate_blog_post_task.delay(
+            topic=request.topic,
+            parameters=parameters,
+            priority=request.priority
+        )
+
+        # Build response
+        response = {
+            "task_id": task.id,
+            "status": "queued",
+            "request_id": request_id,
+            "topic": request.topic,
+            "priority": request.priority,
+            "message": "Content generation task queued successfully",
+            "timestamp": datetime.utcnow()
+        }
+
+        logger.info(
+            f"[{request_id}] Successfully queued blog post generation: "
+            f"task_id={task.id}, priority={request.priority}"
+        )
+
+        return response
+
+    except Exception as e:
+        logger.error(f"[{request_id}] Error queueing blog post task: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": "TaskQueueError",
+                "message": f"Failed to queue blog post generation: {str(e)}",
                 "request_id": request_id,
                 "timestamp": datetime.utcnow().isoformat() + "Z"
             }
