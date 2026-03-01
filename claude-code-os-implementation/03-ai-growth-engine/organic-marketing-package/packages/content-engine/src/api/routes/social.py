@@ -4,7 +4,7 @@ Social media content generation routes.
 This module defines API endpoints for social media content generation using the SocialAgent.
 """
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from typing import Dict, Any, List, Optional
 from datetime import datetime
 from pathlib import Path
@@ -15,6 +15,7 @@ from api.dependencies import get_request_id
 from api.models import ContentResponse, ContentMetadata, ErrorResponse
 from pydantic import BaseModel, Field
 from agents.social_agent import SocialAgent
+from tasks.content_generation import generate_social_post_task
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -180,6 +181,63 @@ class BatchPostsRequest(BaseModel):
         }
 
 
+class SocialAsyncRequest(BaseModel):
+    """Request model for async social post generation."""
+    platform: str = Field(
+        ...,
+        pattern="^(instagram|reddit|twitter|discord)$",
+        description="Social media platform"
+    )
+    topic: str = Field(
+        ...,
+        min_length=10,
+        max_length=500,
+        description="Post topic/theme"
+    )
+    priority: str = Field(
+        default="medium",
+        pattern="^(high|medium|low)$",
+        description="Task priority for queue routing"
+    )
+    content_pillar: Optional[str] = Field(
+        None,
+        description="Content pillar alignment"
+    )
+    image_description: Optional[str] = Field(
+        None,
+        description="For Instagram - description of accompanying image"
+    )
+    include_hashtags: bool = Field(
+        default=True,
+        description="For Instagram - whether to include hashtags"
+    )
+    subreddit: Optional[str] = Field(
+        None,
+        description="For Reddit - target subreddit (without r/)"
+    )
+    post_type: str = Field(
+        default="discussion",
+        pattern="^(discussion|question|guide|showcase)$",
+        description="For Reddit - type of post"
+    )
+    include_product_mention: bool = Field(
+        default=False,
+        description="For Reddit - whether to subtly mention products"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "platform": "instagram",
+                "topic": "Tournament preparation checklist for TCG players",
+                "priority": "high",
+                "content_pillar": "Battle-Ready Lifestyle",
+                "image_description": "Player organizing cards in Infinity Vault binder",
+                "include_hashtags": True
+            }
+        }
+
+
 # ============================================================================
 # Response Models
 # ============================================================================
@@ -229,6 +287,42 @@ class BatchPostsResponse(BaseModel):
     status: str = Field(
         default="success",
         description="Status of the batch generation"
+    )
+
+
+class AsyncTaskResponse(BaseModel):
+    """Response model for async task initiation."""
+    task_id: str = Field(
+        ...,
+        description="Unique identifier for the async task"
+    )
+    status: str = Field(
+        default="queued",
+        description="Initial status of the task"
+    )
+    request_id: str = Field(
+        ...,
+        description="Unique identifier for the request"
+    )
+    platform: str = Field(
+        ...,
+        description="Social media platform"
+    )
+    topic: str = Field(
+        ...,
+        description="Post topic/theme"
+    )
+    priority: str = Field(
+        ...,
+        description="Task priority"
+    )
+    message: str = Field(
+        default="Content generation task queued successfully",
+        description="Status message"
+    )
+    timestamp: datetime = Field(
+        default_factory=datetime.utcnow,
+        description="Task creation timestamp"
     )
 
 
@@ -545,4 +639,88 @@ async def batch_generate_posts(
         raise HTTPException(
             status_code=500,
             detail=f"Failed to batch generate posts: {str(e)}"
+        )
+
+
+@router.post(
+    "/generate-async",
+    response_model=AsyncTaskResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+    summary="Generate a social media post asynchronously",
+    description="Queue a social media post generation task for background processing"
+)
+async def generate_social_post_async(
+    request: SocialAsyncRequest,
+    request_id: str = Depends(get_request_id)
+) -> Dict[str, Any]:
+    """
+    Generate a social media post asynchronously using background task queue.
+
+    This endpoint queues a social post generation task and returns immediately
+    with a task ID. The content is generated in the background and saved as
+    a draft for human review.
+
+    Args:
+        request: Async social post generation request
+        request_id: Unique request identifier
+
+    Returns:
+        Async task response with task ID and status
+
+    Raises:
+        HTTPException: If task queueing fails
+    """
+    logger.info(
+        f"[{request_id}] Queueing async social post generation: "
+        f"platform={request.platform}, topic='{request.topic}', priority={request.priority}"
+    )
+
+    try:
+        # Build parameters for task
+        parameters = {
+            "content_pillar": request.content_pillar,
+            "image_description": request.image_description,
+            "include_hashtags": request.include_hashtags,
+            "subreddit": request.subreddit,
+            "post_type": request.post_type,
+            "include_product_mention": request.include_product_mention
+        }
+
+        # Queue the task using Celery
+        task = generate_social_post_task.delay(
+            platform=request.platform,
+            topic=request.topic,
+            parameters=parameters,
+            priority=request.priority
+        )
+
+        # Build response
+        response = {
+            "task_id": task.id,
+            "status": "queued",
+            "request_id": request_id,
+            "platform": request.platform,
+            "topic": request.topic,
+            "priority": request.priority,
+            "message": "Content generation task queued successfully",
+            "timestamp": datetime.utcnow()
+        }
+
+        logger.info(
+            f"[{request_id}] Successfully queued social post generation: "
+            f"task_id={task.id}, platform={request.platform}, priority={request.priority}"
+        )
+
+        return response
+
+    except Exception as e:
+        logger.error(f"[{request_id}] Error queueing social post task: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": "TaskQueueError",
+                "message": f"Failed to queue social post generation: {str(e)}",
+                "request_id": request_id,
+                "timestamp": datetime.utcnow().isoformat() + "Z"
+            }
         )
