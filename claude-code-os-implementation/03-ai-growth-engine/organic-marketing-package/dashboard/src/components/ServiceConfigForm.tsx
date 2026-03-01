@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { ConfigField } from "./ConfigField";
 import { cn } from "@/lib/utils";
 import { Settings, Check, AlertCircle } from "lucide-react";
+import { useAsyncState } from "@/hooks/useAsyncState";
 
 /**
  * ServiceConfigForm component provides configuration forms for each service
@@ -100,12 +101,51 @@ export function ServiceConfigForm({
     initialConfig || DEFAULT_CONFIGS[service]
   );
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const [saveError, setSaveError] = useState<string | null>(null);
 
   const metadata = SERVICE_METADATA[service];
   const Icon = metadata.icon;
+
+  // Ref to hold current config and onSave so the async function reads fresh values
+  const saveRef = useRef({ config, onSave });
+  saveRef.current = { config, onSave };
+
+  const saveConfig = useCallback(
+    async (_signal: AbortSignal) => {
+      const { config: currentConfig, onSave: currentOnSave } = saveRef.current;
+      if (currentOnSave) {
+        await currentOnSave(currentConfig);
+      } else {
+        // Simulate API call for demo
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+      return currentConfig;
+    },
+    []
+  );
+
+  const {
+    error: asyncError,
+    isLoading: isSaving,
+    refetch: executeSave,
+    data: savedData,
+  } = useAsyncState<ServiceConfig>({
+    asyncFn: saveConfig,
+    immediate: false,
+    retryCount: 1,
+    retryDelay: 1000,
+  });
+
+  const saveError = asyncError?.message ?? null;
+
+  // Show success message when save completes
+  useEffect(() => {
+    if (savedData && !asyncError) {
+      setSaveSuccess(true);
+      const timer = setTimeout(() => setSaveSuccess(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [savedData, asyncError]);
 
   // Handle field change
   const handleChange = (field: string) => (
@@ -159,29 +199,12 @@ export function ServiceConfigForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaveSuccess(false);
-    setSaveError(null);
 
     if (!validate()) {
       return;
     }
 
-    setIsSaving(true);
-
-    try {
-      if (onSave) {
-        await onSave(config);
-      } else {
-        // Simulate API call for demo
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-      }
-
-      setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 3000);
-    } catch (error) {
-      setSaveError(error instanceof Error ? error.message : "Failed to save configuration");
-    } finally {
-      setIsSaving(false);
-    }
+    await executeSave();
   };
 
   return (

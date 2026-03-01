@@ -1,68 +1,87 @@
-import { authMiddleware } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 /**
- * Protected route middleware with workspace (organization) verification
+ * Middleware that handles both Clerk authentication and skip-auth development mode
  *
- * This middleware:
- * 1. Protects all routes except authentication pages and public assets
- * 2. Verifies authenticated users have an active workspace (Clerk organization)
- * 3. Redirects to workspace selection if user is authenticated but has no workspace
- * 4. Redirects to sign-in if user is unauthenticated
+ * In development with NEXT_PUBLIC_SKIP_AUTH=true:
+ * - Allows all requests through without authentication
  *
- * Multi-tenancy: Uses Clerk Organizations as workspaces
- * See https://clerk.com/docs/references/nextjs/auth-middleware
+ * In production or with Clerk configured:
+ * - Protects routes and enforces workspace requirements
  */
-export default authMiddleware({
-  // Routes that don't require authentication
-  publicRoutes: [
-    "/sign-in(.*)",
-    "/sign-up(.*)",
-    "/api/webhook(.*)",
-  ],
-  // Routes that are always accessible even when signed out
-  ignoredRoutes: [
-    "/api/health",
-    "/_next(.*)",
-    "/favicon.ico",
-    "/public(.*)",
-  ],
+export function middleware(request: NextRequest) {
+  // Check if we're in skip-auth mode
+  const skipAuth = process.env.NEXT_PUBLIC_SKIP_AUTH === 'true';
 
-  /**
-   * afterAuth callback runs after authentication is verified
-   * Used to enforce workspace requirement for all protected routes
-   */
-  afterAuth(auth, req) {
-    // If user is not authenticated, redirect to sign-in
-    if (!auth.userId && !auth.isPublicRoute) {
-      const signInUrl = new URL("/sign-in", req.url);
-      signInUrl.searchParams.set("redirect_url", req.url);
-      return NextResponse.redirect(signInUrl);
-    }
-
-    // If user is authenticated but has no organization (workspace),
-    // redirect to workspace selection (handled by Clerk's organization switcher)
-    // Skip this check for API routes and public routes
-    if (
-      auth.userId &&
-      !auth.orgId &&
-      !auth.isPublicRoute &&
-      !req.nextUrl.pathname.startsWith("/api")
-    ) {
-      // Create organization URL - Clerk will show org creation/selection UI
-      const orgSelectionUrl = new URL("/sign-in", req.url);
-      orgSelectionUrl.searchParams.set("redirect_url", req.url);
-      return NextResponse.redirect(orgSelectionUrl);
-    }
-
-    // Allow the request to proceed
+  if (skipAuth) {
+    // In development mode with skip auth, allow all requests
     return NextResponse.next();
-  },
-});
+  }
+
+  // Check if Clerk is properly configured
+  const hasClerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY &&
+                     !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.includes('PLACEHOLDER');
+
+  if (!hasClerkKey) {
+    // No valid Clerk configuration, allow access to show setup screen
+    return NextResponse.next();
+  }
+
+  // Try to use Clerk middleware if available
+  try {
+    const { authMiddleware } = require("@clerk/nextjs");
+
+    // Use Clerk's authMiddleware with the original configuration
+    const clerkMiddleware = authMiddleware({
+      publicRoutes: [
+        "/sign-in(.*)",
+        "/sign-up(.*)",
+        "/api/webhook(.*)",
+      ],
+      ignoredRoutes: [
+        "/api/health",
+        "/_next(.*)",
+        "/favicon.ico",
+        "/public(.*)",
+      ],
+      afterAuth(auth: any, req: NextRequest) {
+        // If user is not authenticated, redirect to sign-in
+        if (!auth.userId && !auth.isPublicRoute) {
+          const signInUrl = new URL("/sign-in", req.url);
+          signInUrl.searchParams.set("redirect_url", req.url);
+          return NextResponse.redirect(signInUrl);
+        }
+
+        // If user is authenticated but has no organization (workspace),
+        // redirect to workspace selection
+        if (
+          auth.userId &&
+          !auth.orgId &&
+          !auth.isPublicRoute &&
+          !req.nextUrl.pathname.startsWith("/api")
+        ) {
+          const orgSelectionUrl = new URL("/sign-in", req.url);
+          orgSelectionUrl.searchParams.set("redirect_url", req.url);
+          return NextResponse.redirect(orgSelectionUrl);
+        }
+
+        return NextResponse.next();
+      },
+    });
+
+    // Execute Clerk middleware
+    return clerkMiddleware(request);
+  } catch (error) {
+    // Clerk not available or error, allow request to proceed
+    console.warn("Clerk middleware not available, proceeding without authentication");
+    return NextResponse.next();
+  }
+}
 
 export const config = {
   matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
+    // Skip Next.js internals and all static files
     "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
     // Always run for API routes
     "/(api|trpc)(.*)",

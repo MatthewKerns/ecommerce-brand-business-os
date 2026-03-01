@@ -1,5 +1,8 @@
+"use client";
+
 import { Settings } from "lucide-react";
 import { ConfigurationDashboard } from "@/components/ConfigurationDashboard";
+import { ConfigErrorBoundary } from "@/components/error-boundaries";
 
 /**
  * Configuration Management Page
@@ -15,7 +18,7 @@ import { ConfigurationDashboard } from "@/components/ConfigurationDashboard";
  *
  * @route /config
  */
-export default function ConfigPage() {
+function ConfigContent() {
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -34,5 +37,13 @@ export default function ConfigPage() {
       {/* Configuration Dashboard */}
       <ConfigurationDashboard />
     </div>
+  );
+}
+
+export default function ConfigPage() {
+  return (
+    <ConfigErrorBoundary>
+      <ConfigContent />
+    </ConfigErrorBoundary>
   );
 }

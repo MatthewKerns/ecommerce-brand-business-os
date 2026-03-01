@@ -1,17 +1,18 @@
 "use client";
 
-import { LayoutDashboard } from "lucide-react";
-import { KPIOverview } from "@/components/KPIOverview";
-import { LoadingCard } from "@/components/LoadingCard";
 import {
-  SkeletonLoader,
-  SkeletonText,
-  SkeletonAvatar,
-  SkeletonCard,
-} from "@/components/SkeletonLoader";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { ErrorTest } from "@/components/ErrorTest";
-import { useState } from "react";
+  LayoutDashboard,
+  TrendingUp,
+  Users,
+  Video,
+  FileText,
+  Activity,
+  ArrowUpRight,
+  ArrowDownRight,
+  Clock
+} from "lucide-react";
+import { KPIOverview } from "@/components/KPIOverview";
+import Link from "next/link";
 
 /**
  * Main Dashboard Page
@@ -20,15 +21,86 @@ import { useState } from "react";
  *
  * Features:
  * - KPI overview cards showing key metrics
- * - Recent activity feed
- * - Quick access to system health
- * - Performance charts and visualizations
- * - Loading state demonstrations
+ * - Quick access to content tools
+ * - System health overview
+ * - Recent activity summary
  *
  * @route /
  */
 export default function DashboardPage() {
-  const [showLoadingDemo, setShowLoadingDemo] = useState(false);
+  // Sample data - in production, this would come from your API
+  const recentMetrics = {
+    contentGenerated: 24,
+    videosCreated: 8,
+    emailsSent: 156,
+    engagementRate: 4.2,
+  };
+
+  const quickStats = [
+    {
+      label: "Content Generated",
+      value: "24",
+      change: "+12%",
+      trend: "up",
+      period: "this week"
+    },
+    {
+      label: "Videos Created",
+      value: "8",
+      change: "+5%",
+      trend: "up",
+      period: "this week"
+    },
+    {
+      label: "Engagement Rate",
+      value: "4.2%",
+      change: "-0.3%",
+      trend: "down",
+      period: "vs last week"
+    },
+    {
+      label: "Active Campaigns",
+      value: "12",
+      change: "+2",
+      trend: "up",
+      period: "running"
+    },
+  ];
+
+  const contentTools = [
+    {
+      title: "TikTok Content Studio",
+      description: "Create viral scripts and manage video content",
+      icon: Video,
+      href: "/tiktok",
+      color: "bg-purple-100 text-purple-700",
+      stats: "8 videos this week"
+    },
+    {
+      title: "Blog Engine",
+      description: "Generate SEO-optimized blog posts",
+      icon: FileText,
+      href: "/blog",
+      color: "bg-blue-100 text-blue-700",
+      stats: "16 posts published"
+    },
+    {
+      title: "Email Automation",
+      description: "Manage email campaigns and sequences",
+      icon: Users,
+      href: "/email",
+      color: "bg-green-100 text-green-700",
+      stats: "156 emails sent"
+    },
+    {
+      title: "Analytics",
+      description: "Track performance across all channels",
+      icon: Activity,
+      href: "/analytics",
+      color: "bg-orange-100 text-orange-700",
+      stats: "Real-time metrics"
+    },
+  ];
 
   return (
     <div className="space-y-8">
@@ -45,108 +117,88 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* KPI Overview */}
-      <KPIOverview isLoading={showLoadingDemo} />
-
-      {/* Error Boundary Test Section */}
-      <div className="rounded-lg border border-slate-200 bg-white p-6">
-        <div className="mb-4">
-          <h2 className="text-lg font-semibold text-slate-900">
-            Error Boundary Demo
-          </h2>
-          <p className="text-sm text-slate-600">
-            Test error handling and recovery functionality
-          </p>
-        </div>
-        <ErrorBoundary>
-          <ErrorTest />
-        </ErrorBoundary>
+      {/* Quick Stats */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {quickStats.map((stat, index) => (
+          <div key={index} className="rounded-lg border border-slate-200 bg-white p-6">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-medium text-slate-600">{stat.label}</p>
+              <span className="text-xs text-slate-500">{stat.period}</span>
+            </div>
+            <div className="mt-2 flex items-baseline gap-2">
+              <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
+              <span className={`flex items-center text-sm font-medium ${
+                stat.trend === 'up' ? 'text-green-600' : 'text-red-600'
+              }`}>
+                {stat.trend === 'up' ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+                {stat.change}
+              </span>
+            </div>
+          </div>
+        ))}
       </div>
 
-      {/* Loading States Demo Section */}
-      <div className="mt-12 rounded-lg border border-slate-200 bg-slate-50 p-6">
+      {/* KPI Overview */}
+      <KPIOverview />
+
+      {/* Content Tools */}
+      <div className="space-y-4">
+        <div>
+          <h2 className="text-lg font-semibold text-slate-900">Content Tools</h2>
+          <p className="text-sm text-slate-600">Quick access to your marketing tools</p>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {contentTools.map((tool, index) => (
+            <Link
+              key={index}
+              href={tool.href}
+              className="group relative rounded-lg border border-slate-200 bg-white p-6 transition-all hover:border-slate-300 hover:shadow-md"
+            >
+              <div className={`inline-flex rounded-lg p-3 ${tool.color}`}>
+                <tool.icon className="h-6 w-6" />
+              </div>
+              <h3 className="mt-4 font-semibold text-slate-900 group-hover:text-slate-700">
+                {tool.title}
+              </h3>
+              <p className="mt-1 text-sm text-slate-600">{tool.description}</p>
+              <div className="mt-3 flex items-center gap-1 text-xs text-slate-500">
+                <Clock className="h-3 w-3" />
+                {tool.stats}
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* System Status */}
+      <div className="rounded-lg border border-slate-200 bg-white p-6">
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-slate-900">
-              Loading States Demo
-            </h2>
-            <p className="text-sm text-slate-600">
-              Demonstration of skeleton screens and loading components
-            </p>
+            <h2 className="text-lg font-semibold text-slate-900">System Status</h2>
+            <p className="text-sm text-slate-600">All services operational</p>
           </div>
-          <button
-            onClick={() => setShowLoadingDemo(!showLoadingDemo)}
-            className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+          <Link
+            href="/monitoring"
+            className="text-sm font-medium text-blue-600 hover:text-blue-700"
           >
-            {showLoadingDemo ? "Show Data" : "Show Loading"}
-          </button>
+            View Details →
+          </Link>
         </div>
-
-        <div className="space-y-6">
-          {/* LoadingCard Variants */}
-          <div>
-            <h3 className="mb-3 text-sm font-medium text-slate-700">
-              LoadingCard Components
-            </h3>
-            <div className="grid gap-4 md:grid-cols-3">
-              <div>
-                <p className="mb-2 text-xs text-slate-600">Metric Variant</p>
-                <LoadingCard variant="metric" />
-              </div>
-              <div>
-                <p className="mb-2 text-xs text-slate-600">Status Variant</p>
-                <LoadingCard variant="status" />
-              </div>
-              <div>
-                <p className="mb-2 text-xs text-slate-600">Default Variant</p>
-                <LoadingCard variant="default" />
-              </div>
-            </div>
+        <div className="grid gap-2 md:grid-cols-3">
+          <div className="flex items-center gap-2">
+            <div className="h-2 w-2 rounded-full bg-green-500"></div>
+            <span className="text-sm text-slate-700">TikTok API</span>
+            <span className="text-xs text-slate-500">Operational</span>
           </div>
-
-          {/* SkeletonLoader Components */}
-          <div>
-            <h3 className="mb-3 text-sm font-medium text-slate-700">
-              Skeleton Loaders
-            </h3>
-            <div className="space-y-4 rounded-lg bg-white p-4">
-              <div>
-                <p className="mb-2 text-xs text-slate-600">Text Skeleton</p>
-                <SkeletonText lines={3} />
-              </div>
-              <div className="flex items-center gap-4">
-                <div>
-                  <p className="mb-2 text-xs text-slate-600">Avatar - Small</p>
-                  <SkeletonAvatar size="sm" />
-                </div>
-                <div>
-                  <p className="mb-2 text-xs text-slate-600">Avatar - Medium</p>
-                  <SkeletonAvatar size="md" />
-                </div>
-                <div>
-                  <p className="mb-2 text-xs text-slate-600">Avatar - Large</p>
-                  <SkeletonAvatar size="lg" />
-                </div>
-              </div>
-              <div>
-                <p className="mb-2 text-xs text-slate-600">
-                  Rectangle Skeleton
-                </p>
-                <SkeletonLoader
-                  variant="rectangle"
-                  width="w-full"
-                  height="h-32"
-                />
-              </div>
-            </div>
+          <div className="flex items-center gap-2">
+            <div className="h-2 w-2 rounded-full bg-green-500"></div>
+            <span className="text-sm text-slate-700">Python Agents</span>
+            <span className="text-xs text-slate-500">Running</span>
           </div>
-
-          {/* SkeletonCard Component */}
-          <div>
-            <h3 className="mb-3 text-sm font-medium text-slate-700">
-              Skeleton Card
-            </h3>
-            <SkeletonCard />
+          <div className="flex items-center gap-2">
+            <div className="h-2 w-2 rounded-full bg-green-500"></div>
+            <span className="text-sm text-slate-700">Database</span>
+            <span className="text-xs text-slate-500">Connected</span>
           </div>
         </div>
       </div>

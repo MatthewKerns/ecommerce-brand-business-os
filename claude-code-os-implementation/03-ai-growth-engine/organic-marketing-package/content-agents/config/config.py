@@ -61,10 +61,12 @@ SOCIAL_OUTPUT_DIR = OUTPUT_DIR / "social"
 AMAZON_OUTPUT_DIR = OUTPUT_DIR / "amazon"
 COMPETITOR_OUTPUT_DIR = OUTPUT_DIR / "competitor-analysis"
 TIKTOK_OUTPUT_DIR = OUTPUT_DIR / "tiktok"
+TIKTOK_CHANNELS_OUTPUT_DIR = OUTPUT_DIR / "tiktok-channels"
 AEO_OUTPUT_DIR = OUTPUT_DIR / "aeo"
+REDDIT_OUTPUT_DIR = OUTPUT_DIR / "reddit"
 
 # Ensure output directories exist
-for dir_path in [BLOG_OUTPUT_DIR, SOCIAL_OUTPUT_DIR, AMAZON_OUTPUT_DIR, COMPETITOR_OUTPUT_DIR, TIKTOK_OUTPUT_DIR, AEO_OUTPUT_DIR]:
+for dir_path in [BLOG_OUTPUT_DIR, SOCIAL_OUTPUT_DIR, AMAZON_OUTPUT_DIR, COMPETITOR_OUTPUT_DIR, TIKTOK_OUTPUT_DIR, TIKTOK_CHANNELS_OUTPUT_DIR, AEO_OUTPUT_DIR, REDDIT_OUTPUT_DIR]:
     dir_path.mkdir(parents=True, exist_ok=True)
 
 # Brand identity constants
@@ -91,6 +93,38 @@ CHANNELS = {
     "blog": "SEO and thought leadership"
 }
 
+
+# TikTok Channel Themes
+CHANNEL_THEMES = {
+    "air": {
+        "visual_style": "Fast cuts, dynamic angles, motion graphics",
+        "hook_style": "Question or shocking statement",
+        "video_length": "15-30 seconds",
+        "key_messages": ["Speed wins", "Be ready", "Quick tips"],
+        "hashtags": ["#TCGSpeed", "#QuickTips", "#TournamentReady", "#InfinityVault"]
+    },
+    "water": {
+        "visual_style": "Smooth transitions, emotional close-ups",
+        "hook_style": "Personal story or relatable moment",
+        "video_length": "30-60 seconds",
+        "key_messages": ["Community first", "Share your journey", "We understand"],
+        "hashtags": ["#TCGCommunity", "#CollectorStory", "#CardFamily", "#InfinityVault"]
+    },
+    "earth": {
+        "visual_style": "Clear demonstrations, product close-ups",
+        "hook_style": "Problem statement or how-to",
+        "video_length": "30-45 seconds",
+        "key_messages": ["Quality matters", "Built to last", "Protect your investment"],
+        "hashtags": ["#CardProtection", "#TCGStorage", "#QualityFirst", "#InfinityVault"]
+    },
+    "fire": {
+        "visual_style": "Bold graphics, high contrast, intense music",
+        "hook_style": "Controversial opinion or challenge",
+        "video_length": "15-30 seconds",
+        "key_messages": ["Challenge accepted", "Prove them wrong", "Be legendary"],
+        "hashtags": ["#HotTake", "#TCGDebate", "#Controversial", "#InfinityVault"]
+    }
+}
 
 # TikTok 4-Channel Strategy Configuration
 TIKTOK_CHANNELS = {
@@ -189,6 +223,95 @@ AEO_GEMINI_QUERIES = [
     "Tournament deck box features"
 ]
 
+# AEO (Agentic Engine Optimization) Configuration
+AEO_CONFIG = {
+    # Tracking frequency
+    "monitoring_interval_hours": int(os.getenv("AEO_MONITORING_INTERVAL_HOURS", "6")),
+    "batch_size": int(os.getenv("AEO_BATCH_SIZE", "10")),
+
+    # Scoring thresholds
+    "opportunity_score_high": 70,
+    "opportunity_score_medium": 40,
+    "opportunity_score_low": 20,
+
+    # Scoring weights
+    "weights": {
+        "brand_not_mentioned": 30,
+        "competitor_mentioned": 25,
+        "high_intent_query": 20,
+        "no_citation_url": 15,
+        "query_category_relevance": 10,
+    },
+
+    # Alert thresholds
+    "alert_citation_drop_percent": 20,
+    "alert_competitor_gain_percent": 15,
+    "alert_min_data_points": 5,
+
+    # Content optimization
+    "max_recommendations_per_run": 10,
+    "recommendation_cooldown_hours": 48,
+}
+
+# AI Platform API Configurations for Citation Tracking
+AEO_PLATFORM_CONFIG = {
+    "chatgpt": {
+        "api_key_env": "OPENAI_API_KEY",
+        "model": os.getenv("AEO_CHATGPT_MODEL", "gpt-4o"),
+        "max_tokens": 2048,
+        "enabled": os.getenv("AEO_CHATGPT_ENABLED", "true").lower() == "true",
+    },
+    "perplexity": {
+        "api_key_env": "PERPLEXITY_API_KEY",
+        "model": os.getenv("AEO_PERPLEXITY_MODEL", "llama-3.1-sonar-large-128k-online"),
+        "max_tokens": 2048,
+        "enabled": os.getenv("AEO_PERPLEXITY_ENABLED", "true").lower() == "true",
+    },
+    "claude": {
+        "api_key_env": "ANTHROPIC_API_KEY",
+        "model": os.getenv("AEO_CLAUDE_MODEL", "claude-sonnet-4-5-20250929"),
+        "max_tokens": 2048,
+        "enabled": os.getenv("AEO_CLAUDE_ENABLED", "true").lower() == "true",
+    },
+    "google_ai": {
+        "api_key_env": "GOOGLE_AI_API_KEY",
+        "model": os.getenv("AEO_GOOGLE_MODEL", "gemini-2.0-flash"),
+        "max_tokens": 2048,
+        "enabled": os.getenv("AEO_GOOGLE_ENABLED", "true").lower() == "true",
+    },
+}
+
+# Google AI API Key
+GOOGLE_AI_API_KEY = os.getenv("GOOGLE_AI_API_KEY", "")
+
+# Reddit Integration Settings (Phase 3)
+REDDIT_CONFIG = {
+    "client_id": os.getenv("REDDIT_CLIENT_ID", ""),
+    "client_secret": os.getenv("REDDIT_CLIENT_SECRET", ""),
+    "username": os.getenv("REDDIT_USERNAME", ""),
+    "password": os.getenv("REDDIT_PASSWORD", ""),
+    "user_agent": os.getenv("REDDIT_USER_AGENT", "InfinityVault AEO Bot v1.0"),
+    "target_subreddits": [
+        "mtg", "magicTCG", "pkmntcg", "PokemonTCG",
+        "yugioh", "lorcana", "FleshandBloodTCG",
+        "tradingcardcommunity", "cardgames"
+    ],
+    "monitoring_keywords": [
+        "card storage", "deck box", "binder", "card protection",
+        "card organizer", "trading card accessories"
+    ],
+    "enabled": os.getenv("REDDIT_ENABLED", "false").lower() == "true",
+}
+
+# AEO Query Categories
+AEO_QUERY_CATEGORIES = {
+    "product_discovery": "Queries where users are looking for products",
+    "problem_solving": "Queries about solving card storage/protection problems",
+    "comparison": "Queries comparing different brands or products",
+    "purchase_intent": "Queries with clear buying signals",
+    "educational": "Queries seeking knowledge about card care/collecting",
+}
+
 # Blog platform configuration
 BLOG_PLATFORM_CONFIG = {
     "base_url": os.getenv("BLOG_BASE_URL", "https://infinityvault.com"),
@@ -268,6 +391,12 @@ class Settings:
     website_refresh_enabled = WEBSITE_REFRESH_ENABLED
     email_refresh_enabled = EMAIL_REFRESH_ENABLED
     sales_refresh_enabled = SALES_REFRESH_ENABLED
+
+    # AEO settings
+    aeo_config = AEO_CONFIG
+    aeo_platform_config = AEO_PLATFORM_CONFIG
+    reddit_config = REDDIT_CONFIG
+    aeo_query_categories = AEO_QUERY_CATEGORIES
 
 
 settings = Settings()

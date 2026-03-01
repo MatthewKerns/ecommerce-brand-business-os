@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  useOrganization,
-  useOrganizationList,
-  useUser,
-} from "@clerk/nextjs";
-import { createContext, useContext, ReactNode } from "react";
+import { createContext, useContext, ReactNode, useMemo } from "react";
 
 /**
  * Workspace data structure representing a Clerk organization
@@ -59,19 +54,41 @@ interface WorkspaceProviderProps {
 }
 
 /**
- * WorkspaceProvider wraps the application and provides workspace context
- *
- * Uses Clerk Organizations as the multi-tenant workspace system.
- * Each organization represents a separate workspace with isolated data.
- *
- * @example
- * ```tsx
- * <WorkspaceProvider>
- *   <YourApp />
- * </WorkspaceProvider>
- * ```
+ * Mock workspace provider for development without Clerk
  */
-export function WorkspaceProvider({ children }: WorkspaceProviderProps) {
+function MockWorkspaceProvider({ children }: WorkspaceProviderProps) {
+  const mockWorkspace: Workspace = {
+    id: "dev-workspace",
+    name: "Development Workspace",
+    slug: "dev-workspace",
+    imageUrl: "https://api.dicebear.com/7.x/shapes/svg?seed=workspace",
+    membersCount: 1,
+  };
+
+  const value: WorkspaceContextValue = {
+    currentWorkspace: mockWorkspace,
+    workspaces: [mockWorkspace],
+    isLoading: false,
+    switchWorkspace: async () => {
+      console.log("Switching workspaces is disabled in development mode");
+    },
+    hasWorkspaces: true,
+  };
+
+  return (
+    <WorkspaceContext.Provider value={value}>
+      {children}
+    </WorkspaceContext.Provider>
+  );
+}
+
+/**
+ * Clerk-based workspace provider for production
+ */
+function ClerkWorkspaceProvider({ children }: WorkspaceProviderProps) {
+  // Dynamically import Clerk hooks to avoid errors when not available
+  const { useUser, useOrganization, useOrganizationList } = require("@clerk/nextjs");
+
   const { isLoaded: isUserLoaded } = useUser();
   const { organization, isLoaded: isOrgLoaded } = useOrganization();
   const {
@@ -87,14 +104,17 @@ export function WorkspaceProvider({ children }: WorkspaceProviderProps) {
   const isLoading = !isUserLoaded || !isOrgLoaded || !isListLoaded;
 
   // Map Clerk organizations to workspace objects
-  const workspaces: Workspace[] =
-    userMemberships?.data?.map((membership) => ({
-      id: membership.organization.id,
-      name: membership.organization.name,
-      slug: membership.organization.slug,
-      imageUrl: membership.organization.imageUrl,
-      membersCount: membership.organization.membersCount,
-    })) ?? [];
+  const workspaces: Workspace[] = useMemo(
+    () =>
+      userMemberships?.data?.map((membership: any) => ({
+        id: membership.organization.id,
+        name: membership.organization.name,
+        slug: membership.organization.slug,
+        imageUrl: membership.organization.imageUrl,
+        membersCount: membership.organization.membersCount,
+      })) ?? [],
+    [userMemberships?.data]
+  );
 
   const currentWorkspace: Workspace | null = organization
     ? {
@@ -130,6 +150,39 @@ export function WorkspaceProvider({ children }: WorkspaceProviderProps) {
       {children}
     </WorkspaceContext.Provider>
   );
+}
+
+/**
+ * WorkspaceProvider wraps the application and provides workspace context
+ *
+ * Uses Clerk Organizations as the multi-tenant workspace system in production,
+ * or provides mock data in development when skip-auth is enabled.
+ *
+ * @example
+ * ```tsx
+ * <WorkspaceProvider>
+ *   <YourApp />
+ * </WorkspaceProvider>
+ * ```
+ */
+export function WorkspaceProvider({ children }: WorkspaceProviderProps) {
+  // Check if we're in skip-auth mode
+  const skipAuth = process.env.NEXT_PUBLIC_SKIP_AUTH === 'true';
+  const hasClerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY &&
+                      !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.includes('PLACEHOLDER');
+
+  // Use mock provider in development or when Clerk isn't configured
+  if (skipAuth || !hasClerkKey) {
+    return <MockWorkspaceProvider>{children}</MockWorkspaceProvider>;
+  }
+
+  // Try to use Clerk provider
+  try {
+    return <ClerkWorkspaceProvider>{children}</ClerkWorkspaceProvider>;
+  } catch (error) {
+    console.warn("Clerk not available, using mock workspace provider");
+    return <MockWorkspaceProvider>{children}</MockWorkspaceProvider>;
+  }
 }
 
 /**

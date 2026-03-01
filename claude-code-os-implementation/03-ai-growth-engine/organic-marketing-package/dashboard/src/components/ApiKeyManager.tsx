@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Plus, Key } from "lucide-react";
 import { ApiKeyItem } from "./ApiKeyItem";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/useToast";
 
 /**
  * ApiKeyManager component manages the list of API keys
@@ -118,13 +119,14 @@ export function ApiKeyManager({
     onCopyKey?.(value);
   };
 
+  const { showInfo } = useToast();
+
   // Handle add key
   const handleAddKey = () => {
     if (onAddKey) {
       onAddKey();
     } else {
-      // Demo: Show alert for now
-      alert("Add API Key dialog would open here. This will be implemented in a future subtask.");
+      showInfo("Add API Key dialog coming soon");
     }
   };
 

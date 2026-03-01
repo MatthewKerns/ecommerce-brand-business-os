@@ -2,15 +2,17 @@
  * API Client Library
  *
  * Centralized HTTP client for making API requests to Next.js API routes.
- * Provides type-safe wrappers with error handling and retry logic.
- *
- * @example
- * ```ts
- * import { apiClient } from '@/lib/api-client'
- *
- * const data = await apiClient.get('/api/metrics')
- * ```
+ * Provides type-safe wrappers with error handling, retry logic with
+ * exponential backoff, and request deduplication.
  */
+
+import {
+  withRetry,
+  retryPolicies,
+  deduplicateRequest,
+  generateIdempotencyKey,
+} from '@/lib/resilience'
+import type { RetryPolicy } from '@/lib/resilience'
 
 export class ApiError extends Error {
   constructor(
@@ -26,87 +28,109 @@ export class ApiError extends Error {
 export interface ApiClientOptions {
   /** Request timeout in milliseconds (default: 10000) */
   timeout?: number
-  /** Number of retry attempts (default: 0) */
+  /** Number of retry attempts (default: 0 for backwards compat) */
   retries?: number
-  /** Retry delay in milliseconds (default: 1000) */
+  /** Retry delay in milliseconds (legacy, prefer retryPolicy) */
   retryDelay?: number
   /** Custom headers */
   headers?: Record<string, string>
+  /** Retry policy (overrides retries/retryDelay) */
+  retryPolicy?: RetryPolicy
+  /** Deduplicate concurrent identical requests (GET only). Default false. */
+  deduplicate?: boolean
+  /** Abort signal for external cancellation */
+  signal?: AbortSignal
+}
+
+/**
+ * Internal helper that executes a single fetch and throws ApiError on failure.
+ */
+async function executeFetch<T>(
+  url: string,
+  init: RequestInit,
+  timeout: number
+): Promise<T> {
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), timeout)
+
+  // Combine external signal with timeout signal
+  const existingSignal = init.signal
+  if (existingSignal) {
+    existingSignal.addEventListener('abort', () => controller.abort())
+  }
+
+  try {
+    const response = await fetch(url, {
+      ...init,
+      signal: controller.signal,
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => null)
+      throw new ApiError(
+        errorData?.message || `HTTP error ${response.status}`,
+        response.status,
+        errorData
+      )
+    }
+
+    return await response.json()
+  } finally {
+    clearTimeout(timeoutId)
+  }
+}
+
+/**
+ * Resolve the retry policy from options. If a RetryPolicy is provided
+ * directly, use it. Otherwise, build one from the legacy retries/retryDelay
+ * fields. If neither, return undefined (no retries).
+ */
+function resolveRetryPolicy(
+  options: ApiClientOptions,
+  defaultPolicy?: RetryPolicy
+): RetryPolicy | undefined {
+  if (options.retryPolicy) return options.retryPolicy
+  if (options.retries && options.retries > 0) {
+    return {
+      maxRetries: options.retries,
+      baseDelayMs: options.retryDelay ?? 1000,
+      maxDelayMs: (options.retryDelay ?? 1000) * 8,
+      jitterFactor: 1,
+    }
+  }
+  return defaultPolicy
 }
 
 /**
  * Generic HTTP GET request
- *
- * @param {string} url - API endpoint URL
- * @param {ApiClientOptions} options - Request options
- * @returns {Promise<T>} Parsed JSON response
- * @throws {ApiError} If request fails or response is not ok
  */
 export async function get<T>(
   url: string,
   options: ApiClientOptions = {}
 ): Promise<T> {
-  const { timeout = 10000, retries = 0, retryDelay = 1000, headers = {} } = options
+  const { timeout = 10000, headers = {}, deduplicate: dedup = false } = options
+  const policy = resolveRetryPolicy(options, retryPolicies.read)
 
-  let lastError: Error | null = null
-  let attempts = 0
+  const doFetch = () =>
+    executeFetch<T>(url, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json', ...headers },
+      signal: options.signal,
+    }, timeout)
 
-  while (attempts <= retries) {
-    try {
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), timeout)
+  const retryFetch = policy
+    ? () => withRetry(doFetch, { policy, signal: options.signal })
+    : doFetch
 
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          ...headers,
-        },
-        signal: controller.signal,
-      })
-
-      clearTimeout(timeoutId)
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null)
-        throw new ApiError(
-          errorData?.message || `HTTP error ${response.status}`,
-          response.status,
-          errorData
-        )
-      }
-
-      return await response.json()
-    } catch (error) {
-      lastError = error instanceof Error ? error : new Error('Unknown error')
-
-      // Don't retry on client errors (4xx)
-      if (error instanceof ApiError && error.status >= 400 && error.status < 500) {
-        throw error
-      }
-
-      // Retry on network errors or server errors (5xx)
-      if (attempts < retries) {
-        attempts++
-        await new Promise((resolve) => setTimeout(resolve, retryDelay))
-        continue
-      }
-
-      throw lastError
-    }
+  if (dedup) {
+    return deduplicateRequest(url, retryFetch)
   }
 
-  throw lastError || new Error('Request failed')
+  return retryFetch()
 }
 
 /**
  * Generic HTTP POST request
- *
- * @param {string} url - API endpoint URL
- * @param {unknown} body - Request body (will be JSON stringified)
- * @param {ApiClientOptions} options - Request options
- * @returns {Promise<T>} Parsed JSON response
- * @throws {ApiError} If request fails or response is not ok
  */
 export async function post<T>(
   url: string,
@@ -114,49 +138,30 @@ export async function post<T>(
   options: ApiClientOptions = {}
 ): Promise<T> {
   const { timeout = 10000, headers = {} } = options
+  const policy = resolveRetryPolicy(options)
+  const idempotencyKey = generateIdempotencyKey('post')
 
-  try {
-    const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), timeout)
-
-    const response = await fetch(url, {
+  const doFetch = () =>
+    executeFetch<T>(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Idempotency-Key': idempotencyKey,
         ...headers,
       },
       body: JSON.stringify(body),
-      signal: controller.signal,
-    })
+      signal: options.signal,
+    }, timeout)
 
-    clearTimeout(timeoutId)
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => null)
-      throw new ApiError(
-        errorData?.message || `HTTP error ${response.status}`,
-        response.status,
-        errorData
-      )
-    }
-
-    return await response.json()
-  } catch (error) {
-    if (error instanceof ApiError) {
-      throw error
-    }
-    throw new Error(error instanceof Error ? error.message : 'POST request failed')
+  if (policy) {
+    return withRetry(doFetch, { policy, signal: options.signal })
   }
+
+  return doFetch()
 }
 
 /**
  * Generic HTTP PUT request
- *
- * @param {string} url - API endpoint URL
- * @param {unknown} body - Request body (will be JSON stringified)
- * @param {ApiClientOptions} options - Request options
- * @returns {Promise<T>} Parsed JSON response
- * @throws {ApiError} If request fails or response is not ok
  */
 export async function put<T>(
   url: string,
@@ -164,86 +169,50 @@ export async function put<T>(
   options: ApiClientOptions = {}
 ): Promise<T> {
   const { timeout = 10000, headers = {} } = options
+  const policy = resolveRetryPolicy(options)
+  const idempotencyKey = generateIdempotencyKey('put')
 
-  try {
-    const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), timeout)
-
-    const response = await fetch(url, {
+  const doFetch = () =>
+    executeFetch<T>(url, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
+        'Idempotency-Key': idempotencyKey,
         ...headers,
       },
       body: JSON.stringify(body),
-      signal: controller.signal,
-    })
+      signal: options.signal,
+    }, timeout)
 
-    clearTimeout(timeoutId)
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => null)
-      throw new ApiError(
-        errorData?.message || `HTTP error ${response.status}`,
-        response.status,
-        errorData
-      )
-    }
-
-    return await response.json()
-  } catch (error) {
-    if (error instanceof ApiError) {
-      throw error
-    }
-    throw new Error(error instanceof Error ? error.message : 'PUT request failed')
+  if (policy) {
+    return withRetry(doFetch, { policy, signal: options.signal })
   }
+
+  return doFetch()
 }
 
 /**
  * Generic HTTP DELETE request
- *
- * @param {string} url - API endpoint URL
- * @param {ApiClientOptions} options - Request options
- * @returns {Promise<T>} Parsed JSON response
- * @throws {ApiError} If request fails or response is not ok
  */
 export async function del<T>(
   url: string,
   options: ApiClientOptions = {}
 ): Promise<T> {
   const { timeout = 10000, headers = {} } = options
+  const policy = resolveRetryPolicy(options)
 
-  try {
-    const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), timeout)
-
-    const response = await fetch(url, {
+  const doFetch = () =>
+    executeFetch<T>(url, {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        ...headers,
-      },
-      signal: controller.signal,
-    })
+      headers: { 'Content-Type': 'application/json', ...headers },
+      signal: options.signal,
+    }, timeout)
 
-    clearTimeout(timeoutId)
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => null)
-      throw new ApiError(
-        errorData?.message || `HTTP error ${response.status}`,
-        response.status,
-        errorData
-      )
-    }
-
-    return await response.json()
-  } catch (error) {
-    if (error instanceof ApiError) {
-      throw error
-    }
-    throw new Error(error instanceof Error ? error.message : 'DELETE request failed')
+  if (policy) {
+    return withRetry(doFetch, { policy, signal: options.signal })
   }
+
+  return doFetch()
 }
 
 /**

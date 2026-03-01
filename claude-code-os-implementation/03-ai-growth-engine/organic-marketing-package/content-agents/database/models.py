@@ -5,8 +5,8 @@ Defines SQLAlchemy ORM models for content history, API usage, and performance me
 from datetime import datetime
 from typing import Optional
 from sqlalchemy import (
-    Boolean, CheckConstraint, Column, DateTime, ForeignKey,
-    Integer, Numeric, String, Text, Index
+    Boolean, CheckConstraint, Column, DateTime, Enum, ForeignKey,
+    Integer, JSON, Numeric, String, Text, Index
 )
 from sqlalchemy.orm import relationship
 from .connection import Base
@@ -276,44 +276,24 @@ class PerformanceMetrics(Base):
         return f"<PerformanceMetrics(id={self.id}, request_id='{self.request_id}', duration={self.total_duration_ms}ms)>"
 
 
-class AEOCitationTest(Base):
-    """
-    Tracks AI assistant citation tests for AEO (Agentic Engine Optimization) monitoring.
-
-    Attributes:
-        id: Primary key
-        test_id: Unique identifier for the test
-        query: The query sent to the AI assistant
-        ai_assistant: Name of AI assistant tested (chatgpt, claude, perplexity, gemini, copilot)
-        query_category: Category of query (product_discovery, problem_solving, comparison, purchase_intent, educational)
-        brand_mentioned: Whether brand was mentioned in response
-        brand_recommended: Whether brand was explicitly recommended
-        citation_position: Position of brand mention (1-10, null if not mentioned)
-        response_text: Full or partial response from AI assistant
-        response_metadata: JSON metadata about the response
-        test_date: When the test was performed
-        tester_name: Name of person who performed the test
-        notes: Additional notes or observations
-        created_at: Timestamp when record was created
-    """
-    __tablename__ = "aeo_citation_test"
 class CitationRecord(Base):
     """
-    Tracks brand mentions and citations from AI assistants for monitoring and optimization.
+    Tracks brand mentions and citations from AI assistants for manual test monitoring.
 
     Attributes:
         id: Primary key
+        test_id: Unique identifier for the test run
         query: The test query sent to AI assistant
-        ai_platform: AI platform queried (chatgpt, claude, perplexity)
-        response_text: Full response from AI assistant
+        ai_assistant: AI assistant queried (chatgpt, claude, perplexity, gemini, copilot, other)
+        query_category: Category of query (product_discovery, comparison, etc.)
         brand_mentioned: Whether brand was cited in response
-        citation_context: Snippet showing how brand was mentioned
-        position_in_response: Position of brand mention (1st, 2nd, etc.)
-        brand_name: Name of the brand being tracked
-        competitor_mentioned: Whether competitors were also mentioned
-        response_metadata: JSON metadata about the response (maps to 'metadata' column)
-        query_timestamp: When the query was executed
-        response_time_ms: Time taken to receive response
+        brand_recommended: Whether brand was recommended
+        citation_position: Position of brand mention (1-10)
+        response_text: Full response from AI assistant
+        response_metadata: JSON metadata about the response
+        test_date: When the test was executed
+        tester_name: Name of person who ran the test
+        notes: Additional notes about the test
         created_at: Timestamp when record was created
         updated_at: Timestamp when record was last updated
         campaign_id: Optional campaign identifier
@@ -346,27 +326,6 @@ class CitationRecord(Base):
     notes = Column(Text)
 
     # Timestamps
-    created_at = Column(DateTime, default=datetime.utcnow, index=True)
-    # Query Details
-    query = Column(Text, nullable=False)
-    ai_platform = Column(String(20), nullable=False, index=True)
-
-    # Response Details
-    response_text = Column(Text, nullable=False)
-    response_time_ms = Column(Integer)
-
-    # Citation Analysis
-    brand_mentioned = Column(Boolean, default=False, index=True)
-    citation_context = Column(Text)
-    position_in_response = Column(Integer)
-    brand_name = Column(String(100), nullable=False, index=True)
-    competitor_mentioned = Column(Boolean, default=False)
-
-    # Metadata
-    response_metadata = Column("metadata", Text)  # JSON stored as text, mapped from 'metadata' column
-
-    # Timestamps
-    query_timestamp = Column(DateTime, nullable=False, index=True)
     created_at = Column(DateTime, default=datetime.utcnow, index=True)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -395,40 +354,6 @@ class CitationRecord(Base):
 
 # Models from 010 - AEO Implementation
 
-class AEOCitationTest(Base):
-    """
-    Tracks AI assistant citation tests for AEO (Agentic Engine Optimization) monitoring.
-
-    Attributes:
-        id: Primary key
-        test_id: Unique identifier for the test
-        query: The query sent to the AI assistant
-        ai_assistant: Name of AI assistant tested (chatgpt, claude, perplexity, gemini, copilot)
-        query_category: Category of query (product_discovery, problem_solving, comparison, purchase_intent, educational)
-        brand_mentioned: Whether brand was mentioned in response
-        brand_recommended: Whether brand was explicitly recommended
-        citation_position: Position of brand mention (1-10, null if not mentioned)
-        response_text: Full or partial response from AI assistant
-        response_metadata: JSON metadata about the response
-        test_date: When the test was performed
-        tester_name: Name of person who performed the test
-        notes: Additional notes or observations
-        created_at: Timestamp when record was created
-    """
-    __tablename__ = "aeo_citation_test"
-            "ai_platform IN ('chatgpt', 'claude', 'perplexity')",
-            name="check_ai_platform"
-        ),
-        CheckConstraint("response_time_ms >= 0", name="check_response_time"),
-        CheckConstraint("position_in_response >= 0", name="check_position"),
-        Index("idx_citation_platform_date", "ai_platform", "query_timestamp"),
-        Index("idx_citation_brand_mentioned", "brand_name", "brand_mentioned", "query_timestamp"),
-    )
-
-    def __repr__(self):
-        return f"<CitationRecord(id={self.id}, brand='{self.brand_name}', platform='{self.ai_platform}', mentioned={self.brand_mentioned})>"
-
-
 class CompetitorCitation(Base):
     """
     Tracks competitor mentions in AI assistant responses for comparison analysis.
@@ -455,30 +380,6 @@ class CompetitorCitation(Base):
     # Primary Key
     id = Column(Integer, primary_key=True, autoincrement=True)
 
-    # Test Identification
-    test_id = Column(String(50), unique=True, nullable=False, index=True)
-
-    # Query Details
-    query = Column(Text, nullable=False)
-    ai_assistant = Column(String(20), nullable=False, index=True)
-    query_category = Column(String(30), nullable=False, index=True)
-
-    # Citation Metrics
-    brand_mentioned = Column(Boolean, default=False, nullable=False, index=True)
-    brand_recommended = Column(Boolean, default=False, nullable=False)
-    citation_position = Column(Integer)
-
-    # Response Details
-    response_text = Column(Text)
-    response_metadata = Column(Text)  # JSON stored as text
-
-    # Test Context
-    test_date = Column(DateTime, nullable=False, index=True)
-    tester_name = Column(String(100))
-    notes = Column(Text)
-
-    # Timestamps
-    created_at = Column(DateTime, default=datetime.utcnow, index=True)
     # Query Details
     query = Column(Text, nullable=False)
     ai_platform = Column(String(20), nullable=False, index=True)
@@ -512,25 +413,9 @@ class CompetitorCitation(Base):
     # Table constraints
     __table_args__ = (
         CheckConstraint(
-            "ai_assistant IN ('chatgpt', 'claude', 'perplexity', 'gemini', 'copilot', 'other')",
-            name="check_ai_assistant"
-        ),
-        CheckConstraint(
-            "query_category IN ('product_discovery', 'problem_solving', 'comparison', 'purchase_intent', 'educational', 'other')",
-            name="check_query_category"
-        ),
-        CheckConstraint("citation_position >= 1 AND citation_position <= 10", name="check_citation_position"),
-        Index("idx_aeo_citation_assistant_date", "ai_assistant", "test_date"),
-        Index("idx_aeo_citation_category_date", "query_category", "test_date"),
-        Index("idx_aeo_citation_mentioned", "brand_mentioned", "test_date"),
-    )
-
-    def __repr__(self):
-        return f"<AEOCitationTest(id={self.id}, test_id='{self.test_id}', assistant='{self.ai_assistant}', mentioned={self.brand_mentioned})>"
-            "ai_platform IN ('chatgpt', 'claude', 'perplexity')",
+            "ai_platform IN ('chatgpt', 'claude', 'perplexity', 'gemini', 'copilot')",
             name="check_competitor_ai_platform"
         ),
-        CheckConstraint("response_time_ms >= 0", name="check_competitor_response_time"),
         CheckConstraint("position_in_response >= 0", name="check_competitor_position"),
         Index("idx_competitor_platform_date", "ai_platform", "query_timestamp"),
         Index("idx_competitor_name_mentioned", "competitor_name", "competitor_mentioned", "query_timestamp"),
@@ -740,364 +625,188 @@ class AlertRecord(Base):
             "alert_severity IN ('high', 'medium', 'low')",
             name="check_alert_severity"
         ),
-        CheckConstraint(
-            "status IN ('active', 'acknowledged', 'resolved', 'dismissed')",
-            name="check_alert_status"
-        ),
-        CheckConstraint(
-            "ai_platform IN ('chatgpt', 'claude', 'perplexity', 'all') OR ai_platform IS NULL",
-            name="check_alert_ai_platform"
-        ),
-        Index("idx_alert_type_severity_status", "alert_type", "alert_severity", "status"),
-        Index("idx_alert_triggered_at", "triggered_at"),
-        Index("idx_alert_brand_platform", "brand_name", "ai_platform"),
     )
 
-    def __repr__(self):
-        return f"<AlertRecord(id={self.id}, type='{self.alert_type}', severity='{self.alert_severity}', status='{self.status}')>"
 
+# ============================================================================
+# TikTok Channel Models (from Phase 2)
+# ============================================================================
 
-# Models from 011 - Citation Monitoring System
-
-class CitationRecord(Base):
+class TikTokChannel(Base):
     """
-    Tracks brand mentions and citations from AI assistants for monitoring and optimization.
+    Represents a TikTok channel with element-based theming.
 
     Attributes:
         id: Primary key
-        query: The test query sent to AI assistant
-        ai_platform: AI platform queried (chatgpt, claude, perplexity)
-        response_text: Full response from AI assistant
-        brand_mentioned: Whether brand was cited in response
-        citation_context: Snippet showing how brand was mentioned
-        position_in_response: Position of brand mention (1st, 2nd, etc.)
-        brand_name: Name of the brand being tracked
-        competitor_mentioned: Whether competitors were also mentioned
-        response_metadata: JSON metadata about the response (maps to 'metadata' column)
-        query_timestamp: When the query was executed
-        response_time_ms: Time taken to receive response
-        created_at: Timestamp when record was created
-        updated_at: Timestamp when record was last updated
-        campaign_id: Optional campaign identifier
+        element: Element theme (air, water, earth, fire)
+        channel_name: Full channel name
+        channel_handle: TikTok username/handle
+        description: Channel description
+        target_audience: Target audience description
+        content_focus: Content focus areas
+        posting_schedule: JSON schedule configuration
+        is_active: Whether channel is active
+        created_at: When channel was created
+        updated_at: When channel was last updated
     """
-    __tablename__ = "citation_records"
+    __tablename__ = "tiktok_channels"
 
     # Primary Key
     id = Column(Integer, primary_key=True, autoincrement=True)
 
-    # Query Details
-    query = Column(Text, nullable=False)
-    ai_platform = Column(String(20), nullable=False, index=True)
+    # Channel Identity
+    element = Column(String(10), nullable=False, unique=True, index=True)
+    channel_name = Column(String(100), nullable=False)
+    channel_handle = Column(String(50), unique=True, index=True)
 
-    # Response Details
-    response_text = Column(Text, nullable=False)
-    response_time_ms = Column(Integer)
+    # Channel Details
+    description = Column(Text)
+    target_audience = Column(Text)
+    content_focus = Column(Text)
 
-    # Citation Analysis
-    brand_mentioned = Column(Boolean, default=False, index=True)
-    citation_context = Column(Text)
-    position_in_response = Column(Integer)
-    brand_name = Column(String(100), nullable=False, index=True)
-    competitor_mentioned = Column(Boolean, default=False)
+    # Schedule
+    posting_schedule = Column(JSON)
 
-    # Metadata
-    response_metadata = Column("metadata", Text)  # JSON stored as text, mapped from 'metadata' column
+    # Status
+    is_active = Column(Boolean, default=True, index=True)
 
     # Timestamps
-    query_timestamp = Column(DateTime, nullable=False, index=True)
-    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    # Optional Context
-    campaign_id = Column(String(50), index=True)
-
-    # Table constraints
-    __table_args__ = (
-        CheckConstraint(
-            "ai_platform IN ('chatgpt', 'claude', 'perplexity')",
-            name="check_ai_platform"
-        ),
-        CheckConstraint("response_time_ms >= 0", name="check_response_time"),
-        CheckConstraint("position_in_response >= 0", name="check_position"),
-        Index("idx_citation_platform_date", "ai_platform", "query_timestamp"),
-        Index("idx_citation_brand_mentioned", "brand_name", "brand_mentioned", "query_timestamp"),
-    )
+    # Relationships
+    content = relationship("ChannelContent", back_populates="channel", cascade="all, delete-orphan")
+    scheduled_content = relationship("ScheduledContent", back_populates="channel", cascade="all, delete-orphan")
 
     def __repr__(self):
-        return f"<CitationRecord(id={self.id}, brand='{self.brand_name}', platform='{self.ai_platform}', mentioned={self.brand_mentioned})>"
+        return f"<TikTokChannel(id={self.id}, element='{self.element}', handle='{self.channel_handle}')>"
 
 
-class CompetitorCitation(Base):
+class ChannelContent(Base):
     """
-    Tracks competitor mentions in AI assistant responses for comparison analysis.
+    Stores content generated for TikTok channels.
 
     Attributes:
         id: Primary key
-        query: The test query sent to AI assistant
-        ai_platform: AI platform queried (chatgpt, claude, perplexity)
-        competitor_name: Name of the competitor brand
-        competitor_mentioned: Whether competitor was cited in response
-        citation_context: Snippet showing how competitor was mentioned
-        position_in_response: Position of competitor mention (1st, 2nd, etc.)
-        response_text: Full response from AI assistant
-        response_time_ms: Time taken to receive response
-        citation_record_id: Optional foreign key to citation_record for same query
-        competitor_metadata: JSON metadata about the competitor (maps to 'metadata' column)
-        query_timestamp: When the query was executed
-        created_at: Timestamp when record was created
-        updated_at: Timestamp when record was last updated
-        campaign_id: Optional campaign identifier
+        channel_id: Foreign key to TikTokChannel
+        content_type: Type of content (hook, caption, hashtags, etc.)
+        content_theme: Theme/topic of content
+        content_text: The actual content text
+        metadata: JSON metadata (keywords, tone, etc.)
+        performance_score: Content performance score
+        is_used: Whether content has been used
+        used_at: When content was used
+        created_at: When content was created
     """
-    __tablename__ = "competitor_citations"
+    __tablename__ = "channel_content"
 
     # Primary Key
     id = Column(Integer, primary_key=True, autoincrement=True)
 
-    # Query Details
-    query = Column(Text, nullable=False)
-    ai_platform = Column(String(20), nullable=False, index=True)
+    # Foreign Keys
+    channel_id = Column(Integer, ForeignKey('tiktok_channels.id'), nullable=False, index=True)
 
-    # Competitor Identification
-    competitor_name = Column(String(100), nullable=False, index=True)
-
-    # Citation Analysis
-    competitor_mentioned = Column(Boolean, default=False, index=True)
-    citation_context = Column(Text)
-    position_in_response = Column(Integer)
-
-    # Response Details
-    response_text = Column(Text, nullable=False)
-    response_time_ms = Column(Integer)
-
-    # Cross-Reference
-    citation_record_id = Column(Integer, ForeignKey("citation_records.id", ondelete="SET NULL"))
+    # Content Details
+    content_type = Column(String(50), nullable=False, index=True)
+    content_theme = Column(String(100))
+    content_text = Column(Text, nullable=False)
 
     # Metadata
-    competitor_metadata = Column("metadata", Text)  # JSON stored as text, mapped from 'metadata' column
+    content_metadata = Column("metadata", JSON)  # Mapped to 'metadata' column
+    performance_score = Column(Numeric(3, 2))
+
+    # Usage Tracking
+    is_used = Column(Boolean, default=False, index=True)
+    used_at = Column(DateTime)
 
     # Timestamps
-    query_timestamp = Column(DateTime, nullable=False, index=True)
-    created_at = Column(DateTime, default=datetime.utcnow, index=True)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
-    # Optional Context
-    campaign_id = Column(String(50), index=True)
-
-    # Table constraints
-    __table_args__ = (
-        CheckConstraint(
-            "ai_platform IN ('chatgpt', 'claude', 'perplexity')",
-            name="check_competitor_ai_platform"
-        ),
-        CheckConstraint("response_time_ms >= 0", name="check_competitor_response_time"),
-        CheckConstraint("position_in_response >= 0", name="check_competitor_position"),
-        Index("idx_competitor_platform_date", "ai_platform", "query_timestamp"),
-        Index("idx_competitor_name_mentioned", "competitor_name", "competitor_mentioned", "query_timestamp"),
-    )
+    # Relationships
+    channel = relationship("TikTokChannel", back_populates="content")
 
     def __repr__(self):
-        return f"<CompetitorCitation(id={self.id}, competitor='{self.competitor_name}', platform='{self.ai_platform}', mentioned={self.competitor_mentioned})>"
+        return f"<ChannelContent(id={self.id}, channel_id={self.channel_id}, type='{self.content_type}')>"
 
 
-class OptimizationRecommendation(Base):
+class ScheduledContent(Base):
     """
-    Stores AI-generated optimization recommendations for improving citation rates.
+    Tracks scheduled posts for TikTok channels.
 
     Attributes:
         id: Primary key
-        recommendation_type: Type of recommendation (content, keyword, structure, technical, other)
-        title: Short title of the recommendation
-        description: Detailed description of the recommendation
-        priority: Priority level (high, medium, low)
-        status: Implementation status (pending, implemented, dismissed, archived)
-        citation_record_id: Optional foreign key to related citation record
-        ai_platform: Optional AI platform this targets (chatgpt, claude, perplexity, all)
-        expected_impact: Expected impact score (0-100)
-        actual_impact: Measured impact score after implementation (0-100)
-        implementation_effort: Estimated effort (low, medium, high)
-        recommendation_metadata: JSON metadata about the recommendation (maps to 'metadata' column)
-        created_at: Timestamp when recommendation was created
-        updated_at: Timestamp when recommendation was last updated
-        implemented_at: Timestamp when recommendation was implemented
-        dismissed_at: Timestamp when recommendation was dismissed
-        dismissal_reason: Reason for dismissal if status is dismissed
-        campaign_id: Optional campaign identifier
-        user_id: Optional user identifier
+        channel_id: Foreign key to TikTokChannel
+        content_id: Foreign key to ChannelContent
+        scheduled_time: When to post
+        status: Post status (pending, posted, failed, cancelled)
+        post_url: URL of posted content
+        error_message: Error if posting failed
+        retry_count: Number of retry attempts
+        created_at: When schedule was created
+        posted_at: When actually posted
     """
-    __tablename__ = "optimization_recommendations"
+    __tablename__ = "scheduled_content"
 
     # Primary Key
     id = Column(Integer, primary_key=True, autoincrement=True)
 
-    # Recommendation Classification
-    recommendation_type = Column(String(20), nullable=False, index=True)
-    title = Column(String(255), nullable=False)
-    description = Column(Text, nullable=False)
+    # Foreign Keys
+    channel_id = Column(Integer, ForeignKey('tiktok_channels.id'), nullable=False, index=True)
+    content_id = Column(Integer, ForeignKey('channel_content.id'))
 
-    # Priority and Status
-    priority = Column(String(10), nullable=False, default="medium", index=True)
-    status = Column(String(20), nullable=False, default="pending", index=True)
+    # Schedule Details
+    scheduled_time = Column(DateTime, nullable=False, index=True)
+    status = Column(String(20), default='pending', index=True)
 
-    # Cross-Reference
-    citation_record_id = Column(Integer, ForeignKey("citation_records.id", ondelete="SET NULL"))
-    ai_platform = Column(String(20), index=True)
-
-    # Impact Metrics
-    expected_impact = Column(Integer)
-    actual_impact = Column(Integer)
-    implementation_effort = Column(String(10))
-
-    # Metadata
-    recommendation_metadata = Column("metadata", Text)  # JSON stored as text, mapped from 'metadata' column
+    # Post Results
+    post_url = Column(String(500))
+    error_message = Column(Text)
+    retry_count = Column(Integer, default=0)
 
     # Timestamps
-    created_at = Column(DateTime, default=datetime.utcnow, index=True)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    implemented_at = Column(DateTime)
-    dismissed_at = Column(DateTime)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    posted_at = Column(DateTime)
 
-    # Dismissal Details
-    dismissal_reason = Column(Text)
-
-    # Optional Context
-    campaign_id = Column(String(50), index=True)
-    user_id = Column(String(50), index=True)
-
-    # Table constraints
-    __table_args__ = (
-        CheckConstraint(
-            "recommendation_type IN ('content', 'keyword', 'structure', 'technical', 'other')",
-            name="check_recommendation_type"
-        ),
-        CheckConstraint(
-            "priority IN ('high', 'medium', 'low')",
-            name="check_priority"
-        ),
-        CheckConstraint(
-            "status IN ('pending', 'implemented', 'dismissed', 'archived')",
-            name="check_recommendation_status"
-        ),
-        CheckConstraint(
-            "ai_platform IN ('chatgpt', 'claude', 'perplexity', 'all') OR ai_platform IS NULL",
-            name="check_recommendation_ai_platform"
-        ),
-        CheckConstraint(
-            "implementation_effort IN ('low', 'medium', 'high') OR implementation_effort IS NULL",
-            name="check_implementation_effort"
-        ),
-        CheckConstraint(
-            "expected_impact >= 0 AND expected_impact <= 100 OR expected_impact IS NULL",
-            name="check_expected_impact"
-        ),
-        CheckConstraint(
-            "actual_impact >= 0 AND actual_impact <= 100 OR actual_impact IS NULL",
-            name="check_actual_impact"
-        ),
-        Index("idx_recommendation_status_priority", "status", "priority", "created_at"),
-        Index("idx_recommendation_type_platform", "recommendation_type", "ai_platform"),
-    )
+    # Relationships
+    channel = relationship("TikTokChannel", back_populates="scheduled_content")
 
     def __repr__(self):
-        return f"<OptimizationRecommendation(id={self.id}, type='{self.recommendation_type}', priority='{self.priority}', status='{self.status}')>"
+        return f"<ScheduledContent(id={self.id}, channel_id={self.channel_id}, status='{self.status}')>"
 
 
-class AlertRecord(Base):
+class PublishLog(Base):
     """
-    Tracks alerts for citation monitoring events such as rate drops or competitor gains.
+    Logs all publishing attempts and results.
 
     Attributes:
         id: Primary key
-        alert_type: Type of alert (citation_drop, competitor_gain, threshold_breach, other)
-        alert_severity: Severity level (high, medium, low)
-        status: Alert status (active, acknowledged, resolved, dismissed)
-        title: Short title of the alert
-        message: Detailed alert message
-        citation_record_id: Optional foreign key to related citation record
-        competitor_citation_id: Optional foreign key to related competitor citation
-        brand_name: Name of the brand related to alert
-        competitor_name: Optional name of competitor related to alert
-        ai_platform: Optional AI platform this relates to (chatgpt, claude, perplexity, all)
-        metric_name: Name of metric that triggered alert
-        previous_value: Previous metric value before trigger
-        current_value: Current metric value that triggered alert
-        threshold_value: Threshold value that was breached
-        change_percentage: Percentage change in metric
-        alert_metadata: JSON metadata about the alert (maps to 'metadata' column)
-        triggered_at: Timestamp when alert was triggered
-        acknowledged_at: Timestamp when alert was acknowledged
-        acknowledged_by: User who acknowledged the alert
-        resolved_at: Timestamp when alert was resolved
-        resolved_by: User who resolved the alert
-        dismissed_at: Timestamp when alert was dismissed
-        dismissed_by: User who dismissed the alert
-        dismissal_reason: Reason for dismissal if status is dismissed
-        resolution_notes: Notes about resolution if status is resolved
-        created_at: Timestamp when record was created
-        updated_at: Timestamp when record was last updated
-        campaign_id: Optional campaign identifier
-        user_id: Optional user identifier
+        scheduled_content_id: Foreign key to ScheduledContent
+        attempt_number: Which attempt this was
+        status: Result of attempt
+        error_details: Error information if failed
+        api_response: Raw API response
+        attempt_time: When attempt was made
     """
-    __tablename__ = "alert_records"
+    __tablename__ = "publish_log"
 
     # Primary Key
     id = Column(Integer, primary_key=True, autoincrement=True)
 
-    # Alert Classification
-    alert_type = Column(String(20), nullable=False, index=True)
-    alert_severity = Column(String(10), nullable=False, default="medium", index=True)
-    status = Column(String(20), nullable=False, default="active", index=True)
+    # Foreign Keys
+    scheduled_content_id = Column(Integer, ForeignKey('scheduled_content.id'), nullable=False, index=True)
 
-    # Alert Content
-    title = Column(String(255), nullable=False)
-    message = Column(Text, nullable=False)
+    # Log Details
+    attempt_number = Column(Integer, nullable=False)
+    status = Column(String(20), nullable=False, index=True)
+    error_details = Column(Text)
+    api_response = Column(JSON)
 
-    # Cross-References
-    citation_record_id = Column(Integer, ForeignKey("citation_records.id", ondelete="SET NULL"))
-    competitor_citation_id = Column(Integer, ForeignKey("competitor_citations.id", ondelete="SET NULL"))
+    # Timestamp
+    attempt_time = Column(DateTime, default=datetime.utcnow, nullable=False)
 
-    # Context
-    brand_name = Column(String(100), index=True)
-    competitor_name = Column(String(100), index=True)
-    ai_platform = Column(String(20), index=True)
+    def __repr__(self):
+        return f"<PublishLog(id={self.id}, scheduled_id={self.scheduled_content_id}, status='{self.status}')>"
 
-    # Metrics
-    metric_name = Column(String(100))
-    previous_value = Column(Numeric(10, 2))
-    current_value = Column(Numeric(10, 2))
-    threshold_value = Column(Numeric(10, 2))
-    change_percentage = Column(Numeric(10, 2))
-
-    # Metadata
-    alert_metadata = Column("metadata", Text)  # JSON stored as text, mapped from 'metadata' column
-
-    # Timestamps
-    triggered_at = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
-    acknowledged_at = Column(DateTime)
-    resolved_at = Column(DateTime)
-    dismissed_at = Column(DateTime)
-    created_at = Column(DateTime, default=datetime.utcnow, index=True)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-    # Action Tracking
-    acknowledged_by = Column(String(50))
-    resolved_by = Column(String(50))
-    dismissed_by = Column(String(50))
-    dismissal_reason = Column(Text)
-    resolution_notes = Column(Text)
-
-    # Optional Context
-    campaign_id = Column(String(50), index=True)
-    user_id = Column(String(50), index=True)
-
-    # Table constraints
-    __table_args__ = (
-        CheckConstraint(
-            "alert_type IN ('citation_drop', 'competitor_gain', 'threshold_breach', 'other')",
-            name="check_alert_type"
-        ),
-        CheckConstraint(
-            "alert_severity IN ('high', 'medium', 'low')",
-            name="check_alert_severity"
 
 # ============================================================================
 # Klaviyo Email Platform Models (from worktree 014)
@@ -1251,3 +960,95 @@ class KlaviyoSegment(Base):
 
     def __repr__(self):
         return f"<KlaviyoSegment(id={self.id}, name='{self.name}', profiles={self.profile_count})>"
+
+
+# ============================================================================
+# AEO Citation Tracking Models (from AEO Optimizer implementation)
+# ============================================================================
+
+class CitationTracking(Base):
+    """
+    Tracks automated citation monitoring across AI platforms.
+
+    This model records the results of automated queries to AI platforms
+    (ChatGPT, Perplexity, Claude, Google AI) to monitor whether and how
+    the brand is being cited. It captures competitor citations and calculates
+    opportunity scores for optimization.
+
+    Attributes:
+        id: Primary key
+        tracking_id: Unique identifier for this tracking run
+        platform: AI platform queried (chatgpt, perplexity, claude, google_ai)
+        query: The query sent to the AI platform
+        brand_mentioned: Whether the brand was mentioned in the response
+        citation_url: URL cited by the AI platform (if any)
+        citation_context: Snippet of text around the brand mention
+        competitor_citations: JSON of competitor brands cited in the response
+        opportunity_score: Calculated optimization opportunity (0-100)
+        response_text: Full response text from the AI platform
+        response_time_ms: Response latency in milliseconds
+        query_category: Category of the query (product_discovery, comparison, etc.)
+        batch_id: Identifier for grouping queries in a single monitoring run
+        created_at: When the tracking record was created
+        updated_at: When the tracking record was last updated
+    """
+    __tablename__ = "citation_tracking"
+
+    # Primary Key
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
+    # Tracking Identification
+    tracking_id = Column(String(50), unique=True, nullable=False, index=True)
+    batch_id = Column(String(50), index=True)
+
+    # Platform and Query
+    platform = Column(String(20), nullable=False, index=True)
+    query = Column(Text, nullable=False)
+    query_category = Column(String(30), index=True)
+
+    # Citation Results
+    brand_mentioned = Column(Boolean, default=False, nullable=False, index=True)
+    citation_url = Column(String(500))
+    citation_context = Column(Text)
+
+    # Competitor Analysis
+    competitor_citations = Column(Text)  # JSON stored as text
+
+    # Scoring
+    opportunity_score = Column(Integer, default=0)
+
+    # Response Details
+    response_text = Column(Text)
+    response_time_ms = Column(Integer)
+
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Table constraints
+    __table_args__ = (
+        CheckConstraint(
+            "platform IN ('chatgpt', 'perplexity', 'claude', 'google_ai')",
+            name="check_tracking_platform"
+        ),
+        CheckConstraint(
+            "query_category IN ('product_discovery', 'problem_solving', 'comparison', "
+            "'purchase_intent', 'educational', 'other') OR query_category IS NULL",
+            name="check_tracking_query_category"
+        ),
+        CheckConstraint(
+            "opportunity_score >= 0 AND opportunity_score <= 100",
+            name="check_opportunity_score"
+        ),
+        Index("idx_tracking_platform_date", "platform", "created_at"),
+        Index("idx_tracking_mentioned_date", "brand_mentioned", "created_at"),
+        Index("idx_tracking_batch", "batch_id", "platform"),
+        Index("idx_tracking_opportunity", "opportunity_score", "created_at"),
+    )
+
+    def __repr__(self):
+        return (
+            f"<CitationTracking(id={self.id}, tracking_id='{self.tracking_id}', "
+            f"platform='{self.platform}', mentioned={self.brand_mentioned}, "
+            f"score={self.opportunity_score})>"
+        )

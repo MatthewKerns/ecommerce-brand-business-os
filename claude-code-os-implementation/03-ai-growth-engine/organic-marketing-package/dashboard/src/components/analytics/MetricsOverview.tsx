@@ -17,8 +17,10 @@ import {
   LucideIcon,
 } from "lucide-react";
 import { MetricCard } from "@/components/MetricCard";
-import { useMetrics } from "@/hooks/useMetrics";
-import { useMemo, useState } from "react";
+import { useAsyncState } from "@/hooks/useAsyncState";
+import { apiClient } from "@/lib/api-client";
+import type { AggregatedMetrics } from "@/lib/metrics-fetcher";
+import { useCallback, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 
 /**
@@ -116,8 +118,22 @@ export function MetricsOverview({
   showFilters = true,
   compact = false,
 }: MetricsOverviewProps) {
-  // Fetch metrics from API with optional polling
-  const { metrics, isLoading, error } = useMetrics({ pollingInterval });
+  // Fetch metrics from API using useAsyncState for unified state management
+  const fetchMetrics = useCallback(
+    async (_signal: AbortSignal) => apiClient.get<AggregatedMetrics>("/api/metrics"),
+    []
+  );
+
+  const {
+    data: metrics,
+    isLoading,
+    error,
+    isFallback,
+  } = useAsyncState<AggregatedMetrics>({
+    asyncFn: fetchMetrics,
+    retryCount: 2,
+    retryDelay: 1000,
+  });
 
   // State for category filtering
   const [selectedCategories, setSelectedCategories] =
@@ -362,8 +378,8 @@ export function MetricsOverview({
     };
   }, [metrics]);
 
-  // Show error state if metrics fetch fails
-  if (error) {
+  // Show error state if metrics fetch fails and no fallback available
+  if (error && !metrics) {
     return (
       <div className={className}>
         <h2 className="mb-4 text-2xl font-bold text-slate-900">
@@ -383,6 +399,16 @@ export function MetricsOverview({
 
   return (
     <div className={cn("space-y-6", className)}>
+      {/* Fallback data banner */}
+      {isFallback && (
+        <div className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3">
+          <TrendingUp className="h-4 w-4 flex-shrink-0 text-amber-600" />
+          <p className="text-sm text-amber-700">
+            Showing cached data. Live metrics are temporarily unavailable.
+          </p>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>

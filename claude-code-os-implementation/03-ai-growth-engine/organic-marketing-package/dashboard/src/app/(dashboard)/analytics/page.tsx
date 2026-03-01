@@ -1,4 +1,7 @@
+"use client";
+
 import { BarChart3 } from "lucide-react";
+import { MetricsErrorBoundary } from "@/components/error-boundaries";
 
 /**
  * Analytics Dashboard Page
@@ -14,7 +17,7 @@ import { BarChart3 } from "lucide-react";
  *
  * @route /analytics
  */
-export default function AnalyticsPage() {
+function AnalyticsContent() {
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -130,5 +133,13 @@ export default function AnalyticsPage() {
         ))}
       </div>
     </div>
+  );
+}
+
+export default function AnalyticsPage() {
+  return (
+    <MetricsErrorBoundary>
+      <AnalyticsContent />
+    </MetricsErrorBoundary>
   );
 }
