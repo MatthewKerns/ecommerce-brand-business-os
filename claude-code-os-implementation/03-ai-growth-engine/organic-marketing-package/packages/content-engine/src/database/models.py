@@ -49,6 +49,9 @@ class ContentHistory(Base):
         target_keyword: Primary target keyword for SEO
         meta_description: SEO meta description
         internal_links: JSON array of internal linking suggestions
+        version_number: Version number for content versioning
+        parent_content_id: Foreign key to parent content for versioning
+        is_draft: Whether this is a draft version
     """
     __tablename__ = "content_history"
 
@@ -94,6 +97,11 @@ class ContentHistory(Base):
     target_keyword = Column(String(200))
     meta_description = Column(String(160))
     internal_links = Column(Text)  # JSON stored as text
+
+    # Versioning
+    version_number = Column(Integer, default=1)
+    parent_content_id = Column(Integer, ForeignKey("content_history.id", ondelete="SET NULL"), index=True)
+    is_draft = Column(Boolean, default=False, index=True)
 
     # Relationships
     api_usage_records = relationship("APIUsage", back_populates="content", cascade="all, delete-orphan")
