@@ -1,0 +1,61 @@
+{
+  "files_to_modify": {
+    "mcf-connector": []
+  },
+  "files_to_create": {
+    "mcf-connector": [
+      "src/clients/tiktok-shop-client.ts",
+      "src/clients/amazon-mcf-client.ts",
+      "src/core/order-transformer.ts",
+      "src/core/order-validator.ts",
+      "src/core/inventory-sync.ts",
+      "src/core/tracking-sync.ts",
+      "src/types/tiktok-order.ts",
+      "src/types/mcf-order.ts",
+      "src/types/config.ts",
+      "src/index.ts",
+      "package.json",
+      "tsconfig.json",
+      ".env.example"
+    ]
+  },
+  "files_to_reference": [
+    "./claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/04-email-marketing-automation/implementation/src/core/email/gmail-client.ts",
+    "./claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/04-email-marketing-automation/implementation/package.json",
+    "./claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/04-email-marketing-automation/implementation/tsconfig.json"
+  ],
+  "patterns": {
+    "api_client_pattern": "Classes with config interfaces, OAuth2 authentication, and exponential backoff retry logic (see gmail-client.ts)",
+    "type_definitions": "Comprehensive TypeScript interfaces with Zod validation schemas",
+    "error_handling": "Try-catch blocks with specific error types and retry logic for transient failures",
+    "configuration": "Environment variables loaded via dotenv with type-safe config interfaces"
+  },
+  "existing_implementations": {
+    "description": "Email marketing automation package provides patterns for API clients, OAuth2 authentication, and retry logic",
+    "relevant_files": [
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/04-email-marketing-automation/implementation/src/core/email/gmail-client.ts"
+    ],
+    "tech_stack": "TypeScript, Node.js, googleapis, axios, zod, dotenv"
+  },
+  "external_apis": {
+    "tiktok_shop": {
+      "base_url": "https://open-api.tiktokglobalshop.com",
+      "auth_type": "OAuth 2.0",
+      "endpoints_needed": [
+        "GET /order/list/",
+        "GET /order/detail/",
+        "POST /fulfillment/shipping_info/"
+      ]
+    },
+    "amazon_mcf": {
+      "base_url": "https://sellingpartnerapi-na.amazon.com",
+      "auth_type": "LWA OAuth + AWS Signature",
+      "endpoints_needed": [
+        "POST /fba/outbound/2020-07-01/fulfillmentOrders",
+        "GET /fba/outbound/2020-07-01/fulfillmentOrders/{sellerFulfillmentOrderId}",
+        "GET /fba/outbound/2020-07-01/tracking",
+        "GET /fba/inventory/v1/summaries"
+      ]
+    }
+  }
+}

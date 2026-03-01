@@ -1,0 +1,216 @@
+=== AUTO-BUILD PROGRESS ===
+
+Project: TikTok Content Templates & Best Practices Library
+Workspace: tasks/017-tiktok-content-templates-best-practices-library
+Started: 2026-02-27
+
+Workflow Type: simple
+Rationale: Documentation-only task creating a structured library of TikTok content
+templates. No backend services, APIs, or multi-service integration required. Simple
+workflow is appropriate for single-location documentation creation.
+
+Session 1 (Planner):
+- Created implementation_plan.json
+- Phases: 7
+- Total subtasks: 13
+- Created init.sh
+- Created project_index.json
+- Created context.json
+
+Phase Summary:
+
+Phase 1 - Directory Structure & Master Index: 1 subtask, no dependencies
+  - Create master README and directory structure
+
+Phase 2 - Hook Templates Library: 3 subtasks, depends on phase-1-structure
+  - Product demo hooks (3+ templates)
+  - Problem-solution hooks (3+ templates)
+  - Social proof and educational hooks (4+ templates)
+
+Phase 3 - Video Script Frameworks: 3 subtasks, depends on phase-1-structure
+  - Unboxing framework
+  - Comparison and tutorial frameworks
+  - Story-driven and review frameworks
+
+Phase 4 - Category-Specific Templates: 2 subtasks, depends on phase-2-hooks, phase-3-scripts
+  - Toys & games category templates
+  - General e-commerce category templates
+
+Phase 5 - Performance Tracking Framework: 1 subtask, depends on phase-2-hooks, phase-3-scripts
+  - Template performance tracker and save rate analysis
+
+Phase 6 - A/B Testing Framework: 1 subtask, depends on phase-5-tracking
+  - A/B testing framework and variant templates
+
+Phase 7 - Customization Workflow: 1 subtask, depends on phase-4-categories
+  - Template customization guide
+
+Services Involved:
+- documentation: Pure markdown content creation
+
+Parallelism Analysis:
+- Max parallel phases: 1
+- Recommended workers: 1
+- Parallel groups: None (sequential documentation task)
+- Speedup estimate: Sequential execution appropriate for documentation
+
+Verification Strategy:
+- Risk level: trivial
+- Skip validation: true (documentation-only)
+- Acceptance criteria:
+  * Master README exists and links to all sections
+  * 10+ hook templates created across 4 categories
+  * 5+ complete video script frameworks with timing and structure
+  * Category-specific templates for toys & games and general e-commerce
+  * Performance tracking framework with save rate correlation
+  * A/B testing framework with variant examples
+  * Customization workflow guide created
+
+Files to Create:
+- Master README
+- 4 hook template files (product-demos, problem-solution, social-proof, educational)
+- 5 script framework files (unboxing, comparison, tutorial, story-driven, review)
+- 2 category template files (toys-and-games, general-ecommerce)
+- 2 performance tracking files (template-tracker, save-rate-analysis)
+- 2 A/B testing files (testing-framework, variant-templates)
+- 1 customization guide (how-to-customize)
+- Supporting README files for each directory
+
+Total: ~19 markdown files
+
+=== STARTUP COMMAND ===
+
+This is a documentation-only task. No services need to be started.
+
+To continue building this spec, a coder agent will:
+1. Read implementation_plan.json
+2. Find the next pending subtask
+3. Create the markdown documentation files
+4. Verify file creation
+5. Mark subtasks as complete
+
+No environment setup or service startup required.
+
+=== END SESSION 1 ===
+
+## $(date '+%Y-%m-%d %H:%M:%S') - subtask-1-1 COMPLETED
+
+**Task**: Create directory structure and master README
+**Status**: ✅ COMPLETED
+**Files Created**:
+- claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/README.md
+
+**Summary**:
+Created comprehensive master README that serves as the entry point for the TikTok Content Templates Library. The README includes:
+
+- Purpose and rationale for the library
+- Complete directory structure overview with explanations
+- Quick start guide for first-time users
+- Template format standards
+- Content strategy framework (save-focused approach)
+- TikTok best practices (format, production, posting, hashtags)
+- Template selection guide (by goal, product type, experience level)
+- A/B testing framework overview
+- Performance tracking guidance with success benchmarks
+- FAQs and next steps
+- Navigation links to all library sections
+
+**Patterns Followed**:
+- Studied claude-code-os-implementation/09-templates/agent-creation-guide.md for clear documentation structure
+- Followed claude-code-os-implementation/03-ai-growth-engine/tiktok-outreach/02-outreach-message-templates.md for template formatting patterns
+- Consistent with context.json documentation patterns
+
+**Verification**: 
+✅ File exists at expected path
+✅ Contains comprehensive structure and guidance
+✅ Follows established documentation patterns
+✅ Provides clear navigation to upcoming library sections
+
+**Commit**: a778507 - "auto-claude: subtask-1-1 - Create directory structure and master README"
+
+**Next Phase**: Phase 2 - Hook Templates Library (subtask-2-1)
+
+## 2026-02-27 17:02:15 - subtask-3-3 COMPLETED
+
+**Task**: Create story-driven and review frameworks
+**Status**: ✅ COMPLETED
+**Files Created**:
+- claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/scripts/story-driven-framework.md (636 lines)
+- claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/scripts/review-framework.md (675 lines)
+
+**Summary**:
+Created comprehensive story-driven and review frameworks following the established pattern from unboxing-framework.md.
+
+**Story-Driven Framework** (636 lines):
+- Framework overview with purpose, best use cases, target audience, typical length (45-60s), conversion goals
+- Psychological triggers and TikTok-specific advantages
+- Complete 60-second timing breakdown table with 6 beats:
+  * Hook (0-4s): Relatable problem or intriguing statement
+  * Setup (4-15s): Context and backstory
+  * Conflict/Challenge (15-30s): The struggle or turning point
+  * Resolution (30-45s): How it was solved
+  * Reflection (45-52s): What it means/lesson learned
+  * Call-to-Action (52-60s): Invite them into the journey
+- Beat-by-beat script templates with script options, visual guidance, delivery tips, pro tips
+- 45-second condensed version for faster pacing
+- 3 complete example scripts:
+  * Example 1: The Collector's Journey (60 seconds)
+  * Example 2: Tournament Wake-Up Call (55 seconds)
+  * Example 3: The Collector's Regret (50 seconds)
+- Visual recommendations (camera setup, shot variety, visual pacing)
+- Customization guide for different products, brand voices, and story types
+- Common mistakes to avoid (6 mistakes with fixes)
+- Performance benchmarks with success indicators and red flags
+- A/B testing variations (hook, pacing, tone)
+- Advanced techniques (Cold Open, Parallel Story, Multi-Part Series, Community Story)
+- Script writing checklist
+
+**Review Framework** (675 lines):
+- Framework overview with purpose, best use cases, target audience, typical length (45-75s), conversion goals
+- Psychological triggers and TikTok-specific advantages
+- Complete 60-second timing breakdown table with 6 beats:
+  * Hook (0-3s): Bold claim or key verdict
+  * Context (3-10s): Your experience/credibility
+  * Pros (10-25s): What works well
+  * Cons (25-40s): Honest limitations
+  * Verdict (40-52s): Who should/shouldn't buy
+  * Call-to-Action (52-60s): Next steps
+- Beat-by-beat script templates with script options, visual guidance, delivery tips, critical notes
+- 45-second condensed version for faster reviews
+- 3 complete example scripts:
+  * Example 1: Balanced 60-Day Review (60 seconds)
+  * Example 2: Comparison Review (70 seconds)
+  * Example 3: Long-Term Update Review (55 seconds)
+- Visual recommendations (camera setup, shot variety, visual pacing)
+- Customization guide for different products, review depths, and audiences
+- Common mistakes to avoid (6 mistakes with fixes)
+- Performance benchmarks with success indicators and red flags
+- A/B testing variations (hook, structure, depth)
+- Advanced techniques (After Using X Follow-Up Series, Scientific Comparison, Audience-Sourced Review, Real-World Stress Test)
+- Script writing checklist
+
+**Patterns Followed**:
+- Studied and followed unboxing-framework.md structure exactly
+- Maintained consistent formatting for timing breakdowns, script templates, examples
+- Included same core sections: Framework Overview, Why It Works, Complete Script Structure, Beat-by-Beat Templates, Condensed Version, Complete Examples, Visual Recommendations, Customization Guide, Common Mistakes, Performance Benchmarks, A/B Testing, Advanced Techniques, Script Checklist
+- Used similar tone and depth as established frameworks
+
+**Verification**: 
+✅ Both files exist at expected paths
+✅ Story-driven framework contains complete script structure with 60s timing breakdown
+✅ Review framework contains complete script structure with 60s timing breakdown
+✅ Both include 3 complete example scripts with line-by-line timing
+✅ Both include visual recommendations and delivery guidance
+✅ Both include customization guides and performance benchmarks
+✅ Both follow established patterns from unboxing-framework.md
+✅ Manual verification passed: Both frameworks contain complete script structures with timing and examples
+
+**Commit**: a24bbc8 - "auto-claude: subtask-3-3 - Create story-driven and review frameworks"
+
+**Phase Status**: Phase 3 - Video Script Frameworks ✅ COMPLETED (All 3 subtasks complete)
+- subtask-3-1: ✅ Scripts directory index and unboxing framework
+- subtask-3-2: ✅ Comparison and tutorial frameworks
+- subtask-3-3: ✅ Story-driven and review frameworks
+
+**Next Phase**: Phase 4 - Category-Specific Templates (subtask-4-1)
+

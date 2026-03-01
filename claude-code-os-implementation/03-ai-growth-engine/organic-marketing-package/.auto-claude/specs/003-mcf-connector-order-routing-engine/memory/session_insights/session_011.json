@@ -1,0 +1,244 @@
+{
+  "session_number": 11,
+  "timestamp": "2026-02-26T06:45:30.732571+00:00",
+  "subtasks_completed": [
+    "subtask-4-1"
+  ],
+  "discoveries": {
+    "file_insights": [
+      {
+        "file_path": "jest.config.js",
+        "type": "configuration",
+        "purpose": "Test runner configuration for TypeScript with Jest",
+        "key_elements": [
+          "ts-jest preset for TypeScript support",
+          "node test environment",
+          "Coverage collection with text, lcov, html reporters",
+          "10 second test timeout"
+        ],
+        "complexity": "low",
+        "status": "new_file"
+      },
+      {
+        "file_path": "src/core/__tests__/order-validator.test.ts",
+        "type": "test_suite",
+        "purpose": "Comprehensive test coverage for OrderValidator class",
+        "key_elements": [
+          "606 lines of test code",
+          "validateOrder method tests covering happy path and error cases",
+          "validateAddress method tests with international postal code validation",
+          "Address normalization tests",
+          "Configuration option tests (strictMode, requiredPhoneNumber, allowedCountries)"
+        ],
+        "test_count": 35,
+        "coverage_areas": [
+          "Order validation (required fields, status validation, item validation)",
+          "Address validation (recipient name, phone, postal code, country code)",
+          "Postal code format validation (US 5-digit, ZIP+4, Canadian, UK formats)",
+          "Address normalization (whitespace trimming, field truncation to MCF limits)",
+          "Multiple error handling",
+          "Configuration-driven validation rules"
+        ],
+        "complexity": "high",
+        "status": "new_file"
+      },
+      {
+        "file_path": "src/core/order-validator.ts",
+        "type": "implementation",
+        "purpose": "Order and address validation with normalization for TikTok MCF integration",
+        "key_elements": [
+          "OrderValidator class with configuration options",
+          "validateOrder method with full order validation pipeline",
+          "validateAddress method with country-specific postal code validation",
+          "Address normalization with MCF field length limits",
+          "Support for multiple countries (US, CA, GB, AU, FR, DE, IT, ES, JP)",
+          "Strict vs lenient validation modes",
+          "Optional phone number requirement"
+        ],
+        "complexity": "high",
+        "status": "new_file"
+      }
+    ],
+    "patterns_discovered": [
+      {
+        "name": "Configuration-Driven Validation",
+        "description": "OrderValidator accepts configuration object to customize validation behavior",
+        "evidence": [
+          "strictMode flag controls postal code validation strictness",
+          "requiredPhoneNumber controls whether phone is mandatory",
+          "allowedCountries restricts supported countries"
+        ],
+        "benefit": "Flexible validation rules for different regions/requirements"
+      },
+      {
+        "name": "Country-Specific Postal Code Validation",
+        "description": "Different regex patterns for postal codes by country",
+        "evidence": [
+          "US: 5-digit or ZIP+4 format validation",
+          "CA: Canadian postal code (A1A 1A1) format",
+          "GB: UK postcode format",
+          "Fallback for unsupported countries"
+        ],
+        "benefit": "Accurate address validation for international orders"
+      },
+      {
+        "name": "Multi-Level Error Tracking",
+        "description": "Separates validation into errors and warnings with structured error codes",
+        "evidence": [
+          "ErrorCode enum for categorized error types",
+          "errors array for blocking issues",
+          "warnings array for non-blocking issues",
+          "Field-specific error tracking with path notation (e.g., items[0].sku_id)"
+        ],
+        "benefit": "Clear error communication and differentiation of severity"
+      },
+      {
+        "name": "Data Normalization Pipeline",
+        "description": "Converts TikTok order format to normalized MCF format",
+        "evidence": [
+          "normalizedOrder object with simplified structure",
+          "normalizedAddress object with MCF field names",
+          "Whitespace trimming and field truncation",
+          "Phone number formatting with country code"
+        ],
+        "benefit": "Consistent data format for downstream MCF integration"
+      },
+      {
+        "name": "Comprehensive Test Coverage",
+        "description": "35 test cases covering happy path, validation errors, and edge cases",
+        "evidence": [
+          "Valid order acceptance tests",
+          "Invalid field rejection tests",
+          "Format validation tests (postal codes)",
+          "Configuration option tests",
+          "Normalization output tests"
+        ],
+        "benefit": "High confidence in validator reliability across scenarios"
+      }
+    ],
+    "gotchas_discovered": [
+      {
+        "category": "postal_code_validation",
+        "issue": "US ZIP+4 format handling requires specific regex pattern",
+        "detail": "Must support both 5-digit (12345) and ZIP+4 (12345-6789) formats with proper validation",
+        "impact": "Orders with valid ZIP+4 codes could be rejected if pattern doesn't account for hyphen and 4-digit extension",
+        "mitigation": "Pattern used: /^\\d{5}(-\\d{4})?$/ captures both formats"
+      },
+      {
+        "category": "field_length_limits",
+        "issue": "MCF has character limits for different address fields",
+        "detail": "Name max 50 chars, addressLine max 180 chars. Test includes truncation verification.",
+        "impact": "Long address names/streets from TikTok could exceed MCF limits and cause submission failures",
+        "mitigation": "Normalization includes .substring() truncation to MCF limits"
+      },
+      {
+        "category": "optional_fields",
+        "issue": "seller_sku field can be undefined or empty",
+        "detail": "Test warns on missing seller_sku but doesn't fail validation",
+        "impact": "Orders lacking seller_sku may cause issues in downstream fulfillment systems",
+        "mitigation": "Warning logged but validation passes; seller should handle missing SKUs"
+      },
+      {
+        "category": "phone_number_requirement",
+        "issue": "Phone number requirement is configurable per validator instance",
+        "detail": "Some regions may not require phone numbers; default is required=true",
+        "impact": "Inconsistent behavior if validators created with different configurations without documentation",
+        "mitigation": "Config option explicitly tested with createOrderValidator({ requiredPhoneNumber: false })"
+      },
+      {
+        "category": "country_code_validation",
+        "issue": "Only 9 countries supported; any other country code is rejected",
+        "detail": "Supported: US, CA, GB, AU, FR, DE, IT, ES, JP",
+        "impact": "Orders from other countries will be rejected unless allowedCountries config is modified",
+        "mitigation": "Configuration option available to extend supported countries"
+      },
+      {
+        "category": "whitespace_normalization",
+        "issue": "Multiple consecutive spaces collapsed to single space",
+        "detail": "String like '  John   Doe  ' becomes 'John Doe'",
+        "impact": "Name formatting from TikTok with unusual spacing will be normalized",
+        "mitigation": "Test explicitly verifies normalization behavior"
+      }
+    ],
+    "approach_outcome": {
+      "success": true,
+      "task_completion": "Create order validator with address normalization",
+      "delivery_status": "SUCCESS",
+      "implementation_scope": [
+        "OrderValidator class with createOrderValidator factory function",
+        "Complete order validation including status checks, item validation, and required field validation",
+        "Address validation with country-specific postal code format checking",
+        "Address normalization converting TikTok format to MCF format",
+        "Configuration system for validation strictness and regional requirements",
+        "Comprehensive test suite with 35 test cases covering all major scenarios"
+      ],
+      "key_achievements": [
+        "Multi-country postal code format support (US, CA, GB, AU, FR, DE, IT, ES, JP)",
+        "Configurable strict vs lenient validation modes",
+        "MCF field length limit enforcement during normalization",
+        "Structured error reporting with field paths and error codes",
+        "Clear separation of errors vs warnings in validation results",
+        "Factory function pattern for validator instantiation with defaults"
+      ],
+      "test_coverage": "35 tests covering validation logic, address normalization, postal code formats, configuration options, and edge cases",
+      "code_quality": "high - well-structured with clear separation of concerns, comprehensive error handling, and extensive test coverage"
+    },
+    "recommendations": [
+      {
+        "priority": "high",
+        "category": "feature_enhancement",
+        "recommendation": "Add phone number format validation by country",
+        "rationale": "Currently only checks presence of phone number; different countries have different formats (e.g., US +1-xxx-xxx-xxxx vs UK +44 20 xxxx xxxx)",
+        "impact": "Would prevent invalid phone numbers from reaching fulfillment systems"
+      },
+      {
+        "priority": "high",
+        "category": "documentation",
+        "recommendation": "Document supported countries list and how to extend it",
+        "rationale": "Currently hardcoded 9-country support; unclear how to add new countries or modify restrictions",
+        "impact": "Would prevent integration issues when expanding to new markets"
+      },
+      {
+        "priority": "medium",
+        "category": "feature_enhancement",
+        "recommendation": "Add state/region validation for country-level support",
+        "rationale": "Tests mention state field (CA) but no validation that states/regions are valid for the country",
+        "impact": "Could catch orders with invalid state codes early"
+      },
+      {
+        "priority": "medium",
+        "category": "error_handling",
+        "recommendation": "Log warnings with structured format for monitoring",
+        "rationale": "Missing seller_sku is warned but no indication how often this occurs in production",
+        "impact": "Would help identify if seller_sku is systemically missing from TikTok data"
+      },
+      {
+        "priority": "low",
+        "category": "performance",
+        "recommendation": "Consider caching compiled regex patterns for postal code validation",
+        "rationale": "Country-specific postal code regexes are compiled per validation call",
+        "impact": "Minor performance improvement for high-volume order validation"
+      },
+      {
+        "priority": "low",
+        "category": "testing",
+        "recommendation": "Add integration tests with real MCF API",
+        "rationale": "Unit tests validate format compliance but don't verify MCF acceptance",
+        "impact": "Would catch MCF-specific requirements not covered by spec"
+      }
+    ],
+    "subtask_id": "subtask-4-1",
+    "session_num": 11,
+    "success": true,
+    "changed_files": [
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/05-mcf-connector-integration/implementation/jest.config.js",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/05-mcf-connector-integration/implementation/src/core/__tests__/order-validator.test.ts",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/05-mcf-connector-integration/implementation/src/core/order-validator.ts"
+    ]
+  },
+  "what_worked": [
+    "Implemented subtask: subtask-4-1"
+  ],
+  "what_failed": [],
+  "recommendations_for_next_session": []
+}

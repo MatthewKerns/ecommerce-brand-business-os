@@ -1,0 +1,33 @@
+{
+  "project_type": "monorepo",
+  "services": {
+    "ai-content-agents": {
+      "path": "./ai-content-agents",
+      "tech_stack": ["python", "anthropic-api"],
+      "port": null,
+      "dev_command": null,
+      "test_command": "pytest",
+      "description": "Python-based content generation toolkit using Anthropic API"
+    }
+  },
+  "infrastructure": {
+    "docker": false,
+    "database": "none",
+    "ci_cd": "none"
+  },
+  "conventions": {
+    "language": "python",
+    "linter": "none",
+    "formatter": "none",
+    "testing": "pytest",
+    "class_pattern": "BaseClass inheritance pattern",
+    "config_pattern": "Centralized config/config.py with path constants",
+    "error_handling": "try/except with print statements"
+  },
+  "existing_structure": {
+    "agents_dir": "ai-content-agents/agents",
+    "config_dir": "ai-content-agents/config",
+    "output_dir": "ai-content-agents/output",
+    "business_os_dir": "claude-code-os-implementation"
+  }
+}

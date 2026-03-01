@@ -1,0 +1,1195 @@
+{
+  "id": "roadmap-20250226020000",
+  "project_name": "Organic Marketing Package",
+  "version": "1.0",
+  "vision": "An AI-powered organic marketing engine that drives traffic, builds community, and converts customers with zero ad spend - then sells as a service to other e-commerce brands",
+  "target_audience": {
+    "primary": "E-commerce brand owners spending unsustainably on paid ads who want to build organic marketing channels",
+    "secondary": [
+      "Amazon FBA sellers looking to diversify to TikTok Shop",
+      "New e-commerce brands who cannot afford paid advertising",
+      "Marketing agencies seeking white-label organic marketing solutions",
+      "Toys & Games product sellers (initial niche)"
+    ]
+  },
+  "phases": [
+    {
+      "id": "phase-1",
+      "name": "Foundation & Infrastructure",
+      "description": "Establish core platform infrastructure, API integrations, and basic data flow. Get TikTok Shop and Amazon MCF connected.",
+      "order": 1,
+      "status": "planned",
+      "features": [
+        "feature-1",
+        "feature-2",
+        "feature-3",
+        "feature-4",
+        "feature-5",
+        "feature-29"
+      ],
+      "milestones": [
+        {
+          "id": "milestone-1-1",
+          "title": "TikTok Shop Connected",
+          "description": "TikTok Shop seller account approved and API integration functional for order and product data",
+          "features": [
+            "feature-1"
+          ],
+          "status": "planned"
+        },
+        {
+          "id": "milestone-1-2",
+          "title": "Amazon MCF Connected",
+          "description": "Amazon SP-API integration live with Multi-Channel Fulfillment capabilities",
+          "features": [
+            "feature-2"
+          ],
+          "status": "planned"
+        },
+        {
+          "id": "milestone-1-3",
+          "title": "MCF Connector MVP",
+          "description": "TikTok Shop orders can be automatically routed to Amazon MCF for fulfillment",
+          "features": [
+            "feature-3"
+          ],
+          "status": "planned"
+        }
+      ]
+    },
+    {
+      "id": "phase-2",
+      "name": "Content Automation Engine",
+      "description": "Build the TikTok content automation system with 4 elemental channels, AI-powered content generation, and scheduling capabilities.",
+      "order": 2,
+      "status": "planned",
+      "features": [
+        "feature-6",
+        "feature-7",
+        "feature-8",
+        "feature-9",
+        "feature-10",
+        "feature-30",
+        "feature-31"
+      ],
+      "milestones": [
+        {
+          "id": "milestone-2-1",
+          "title": "TikTok Channels Operational",
+          "description": "4 elemental TikTok channels created and posting content through automation",
+          "features": [
+            "feature-6",
+            "feature-7"
+          ],
+          "status": "planned"
+        },
+        {
+          "id": "milestone-2-2",
+          "title": "AI Content Generation Live",
+          "description": "AI agents connected and generating product content for TikTok and blog",
+          "features": [
+            "feature-8",
+            "feature-9"
+          ],
+          "status": "planned"
+        }
+      ]
+    },
+    {
+      "id": "phase-3",
+      "name": "Blog & AEO Engine",
+      "description": "Deploy blog content engine optimized for both traditional SEO and Agentic Engine Optimization (AEO) to capture organic search and AI assistant recommendations.",
+      "order": 3,
+      "status": "planned",
+      "features": [
+        "feature-11",
+        "feature-12",
+        "feature-13",
+        "feature-14"
+      ],
+      "milestones": [
+        {
+          "id": "milestone-3-1",
+          "title": "Blog Deployed",
+          "description": "SEO-optimized blog live on infinitycards.com with first 10 articles published",
+          "features": [
+            "feature-11",
+            "feature-12"
+          ],
+          "status": "planned"
+        },
+        {
+          "id": "milestone-3-2",
+          "title": "AEO Optimization Live",
+          "description": "Schema markup, structured data, and AI-citation optimization implemented",
+          "features": [
+            "feature-13",
+            "feature-14"
+          ],
+          "status": "planned"
+        }
+      ]
+    },
+    {
+      "id": "phase-4",
+      "name": "Email Marketing & Conversion",
+      "description": "Build email capture system with gamified mechanisms, nurture sequences, and post-purchase flows to convert traffic into customers.",
+      "order": 4,
+      "status": "planned",
+      "features": [
+        "feature-15",
+        "feature-16",
+        "feature-17",
+        "feature-18",
+        "feature-19"
+      ],
+      "milestones": [
+        {
+          "id": "milestone-4-1",
+          "title": "Email Platform Connected",
+          "description": "Klaviyo integrated with website and e-commerce data flowing",
+          "features": [
+            "feature-15"
+          ],
+          "status": "planned"
+        },
+        {
+          "id": "milestone-4-2",
+          "title": "Gamified Capture Live",
+          "description": "Scratch & win or spin-to-win mechanism capturing emails at 5%+ rate",
+          "features": [
+            "feature-16"
+          ],
+          "status": "planned"
+        },
+        {
+          "id": "milestone-4-3",
+          "title": "Automated Flows Active",
+          "description": "Welcome, nurture, abandoned cart, and post-purchase sequences running",
+          "features": [
+            "feature-17",
+            "feature-18",
+            "feature-19"
+          ],
+          "status": "planned"
+        }
+      ]
+    },
+    {
+      "id": "phase-5",
+      "name": "Analytics & ROI Tracking",
+      "description": "Build comprehensive analytics dashboard tracking full-funnel metrics from TikTok views to purchases with clear ROI attribution.",
+      "order": 5,
+      "status": "planned",
+      "features": [
+        "feature-20",
+        "feature-21",
+        "feature-22",
+        "feature-23"
+      ],
+      "milestones": [
+        {
+          "id": "milestone-5-1",
+          "title": "Full Funnel Tracking",
+          "description": "Complete attribution from TikTok → Website → Email → Purchase tracked",
+          "features": [
+            "feature-20",
+            "feature-21"
+          ],
+          "status": "planned"
+        },
+        {
+          "id": "milestone-5-2",
+          "title": "ROI Dashboard Live",
+          "description": "Real-time dashboard showing organic marketing ROI and proving system value",
+          "features": [
+            "feature-22",
+            "feature-23"
+          ],
+          "status": "planned"
+        }
+      ]
+    },
+    {
+      "id": "phase-6",
+      "name": "Service Packaging & Scale",
+      "description": "Package the proven system as a sellable service for other e-commerce brands with white-label capabilities and client management.",
+      "order": 6,
+      "status": "planned",
+      "features": [
+        "feature-24",
+        "feature-25",
+        "feature-26",
+        "feature-27",
+        "feature-28"
+      ],
+      "milestones": [
+        {
+          "id": "milestone-6-1",
+          "title": "Service Ready",
+          "description": "System proven on Infinity Vault with documented results, ready for first client",
+          "features": [
+            "feature-24",
+            "feature-25"
+          ],
+          "status": "planned"
+        },
+        {
+          "id": "milestone-6-2",
+          "title": "Multi-Brand Support",
+          "description": "Platform supports multiple brand accounts with white-label options",
+          "features": [
+            "feature-26",
+            "feature-27",
+            "feature-28"
+          ],
+          "status": "planned"
+        }
+      ]
+    }
+  ],
+  "features": [
+    {
+      "id": "feature-1",
+      "title": "TikTok Shop API Integration",
+      "description": "Build comprehensive TikTok Shop API integration including seller account setup, Content API for video management, Shop API for product/order sync, and Data API for analytics. This is the foundation for all TikTok-related functionality.",
+      "rationale": "TikTok Shop is projected to drive $23.41B in US sales in 2025. This integration is required before any content automation or order fulfillment can work. Addresses market gap-6 for e-commerce-specific TikTok automation.",
+      "priority": "must",
+      "complexity": "high",
+      "impact": "high",
+      "phase_id": "phase-1",
+      "dependencies": [],
+      "status": "planned",
+      "acceptance_criteria": [
+        "TikTok Shop seller account approved with all required documentation",
+        "TikTok Shop API app approved with Content, Shop, and Data scopes",
+        "API client library functional for OAuth flow, product sync, and order retrieval",
+        "Rate limiting and error handling implemented per TikTok API guidelines",
+        "Test environment validated with real product data"
+      ],
+      "user_stories": [
+        "As a brand owner, I want my TikTok Shop connected to the system so that I can automate content and track sales",
+        "As the system, I need to sync products and orders from TikTok Shop so that fulfillment can be automated"
+      ],
+      "linked_spec_id": "001-tiktok-shop-api-integration",
+      "competitor_insight_ids": [
+        "pain-6-1",
+        "pain-6-2",
+        "pain-6-3",
+        "pain-6-4"
+      ]
+    },
+    {
+      "id": "feature-2",
+      "title": "Amazon SP-API MCF Integration",
+      "description": "Build Amazon Selling Partner API integration focused on Multi-Channel Fulfillment (MCF) capabilities. Enable order creation, shipment tracking, and inventory management through Amazon's proven fulfillment infrastructure.",
+      "rationale": "Amazon MCF provides battle-tested fulfillment infrastructure that solves TikTok's FBT reliability issues. This is the core differentiator addressing market gap-3 (TikTok Shop to Amazon MCF bridge that no competitor offers).",
+      "priority": "must",
+      "complexity": "high",
+      "impact": "high",
+      "phase_id": "phase-1",
+      "dependencies": [],
+      "status": "planned",
+      "acceptance_criteria": [
+        "Amazon Seller Central account configured with FBA inventory",
+        "SP-API app approved with Fulfillment scope",
+        "MCF order creation working with proper address formatting",
+        "Shipment tracking numbers retrievable and sync-able",
+        "Inventory levels queryable for stock management"
+      ],
+      "user_stories": [
+        "As a brand owner, I want to use Amazon's fulfillment for TikTok orders so that my customers get reliable 2-3 day shipping",
+        "As the system, I need to create MCF orders and track shipments so customers receive timely delivery updates"
+      ],
+      "linked_spec_id": "002-amazon-sp-api-mcf-integration",
+      "competitor_insight_ids": [
+        "pain-6-1",
+        "pain-6-2",
+        "pain-6-3"
+      ]
+    },
+    {
+      "id": "feature-3",
+      "title": "MCF Connector - Order Routing Engine",
+      "description": "Build the core connector that automatically routes TikTok Shop orders to Amazon MCF for fulfillment. Includes order validation, address normalization, inventory checking, and fulfillment status sync back to TikTok.",
+      "rationale": "This is the unique technical integration that no competitor offers. Directly addresses competitor pain-6-1 (TikTok FBT logistics chaos causing six-figure losses) and pain-6-2 (severe delivery delays). Transforms a critical weakness of TikTok Shop into a strength.",
+      "priority": "must",
+      "complexity": "high",
+      "impact": "high",
+      "phase_id": "phase-1",
+      "dependencies": [
+        "feature-1",
+        "feature-2"
+      ],
+      "status": "planned",
+      "acceptance_criteria": [
+        "New TikTok Shop orders automatically detected within 5 minutes",
+        "Order data validated and transformed for MCF requirements",
+        "MCF fulfillment orders created with correct product mapping",
+        "Tracking numbers synced back to TikTok Shop within 4 hours of shipment",
+        "Failed orders flagged for manual review with clear error messages",
+        "Inventory sync prevents overselling across channels"
+      ],
+      "user_stories": [
+        "As a brand owner, I want TikTok orders fulfilled through Amazon so that I have reliable delivery without FBT problems",
+        "As a customer, I want consistent fast shipping regardless of where I purchased so that I trust the brand"
+      ],
+      "linked_spec_id": "003-mcf-connector-order-routing-engine",
+      "competitor_insight_ids": [
+        "pain-6-1",
+        "pain-6-2",
+        "pain-6-3",
+        "pain-6-4"
+      ]
+    },
+    {
+      "id": "feature-4",
+      "title": "Configuration & Secrets Management",
+      "description": "Establish secure configuration management for API keys, OAuth tokens, environment settings, and deployment configurations. Support development, staging, and production environments.",
+      "rationale": "Required infrastructure for any production system handling sensitive API credentials. Addresses technical debt identified in discovery about undefined configuration approach.",
+      "priority": "must",
+      "complexity": "medium",
+      "impact": "medium",
+      "phase_id": "phase-1",
+      "dependencies": [],
+      "status": "planned",
+      "acceptance_criteria": [
+        "Secrets stored securely (not in code repository)",
+        "Environment-specific configuration files working",
+        "API token refresh handled automatically",
+        "Configuration documented for onboarding new services",
+        "Encryption at rest for sensitive credentials"
+      ],
+      "user_stories": [
+        "As a developer, I want secure configuration management so that I can deploy safely without exposing credentials",
+        "As the system, I need automatic token refresh so that API integrations don't break unexpectedly"
+      ],
+      "linked_spec_id": "005-configuration-secrets-management",
+      "competitor_insight_ids": []
+    },
+    {
+      "id": "feature-5",
+      "title": "Core System Architecture & Testing Infrastructure",
+      "description": "Establish the foundational system architecture including project structure, API design patterns, database schema, CI/CD pipeline, and comprehensive test infrastructure. Create the scaffolding for all subsequent features.",
+      "rationale": "Competitors like GoHighLevel suffer from 'constant glitches' and reliability issues (pain-4-1, pain-4-2). Building proper architecture and testing from the start prevents these issues and builds competitive advantage through reliability.",
+      "priority": "must",
+      "complexity": "medium",
+      "impact": "high",
+      "phase_id": "phase-1",
+      "dependencies": [],
+      "status": "planned",
+      "acceptance_criteria": [
+        "Monorepo or service structure defined and documented",
+        "Database schema designed for multi-channel data",
+        "API design patterns established (REST/GraphQL)",
+        "CI/CD pipeline running automated tests on commits",
+        "Test coverage requirements defined (minimum 70%)",
+        "Error handling and logging standards implemented"
+      ],
+      "user_stories": [
+        "As a developer, I want clear architecture patterns so that I can build features consistently",
+        "As a user, I expect the system to work reliably without glitches so that I can trust my marketing automation"
+      ],
+      "linked_spec_id": "004-core-system-architecture-testing-infrastructure",
+      "competitor_insight_ids": [
+        "pain-4-1",
+        "pain-4-2",
+        "pain-7-3"
+      ]
+    },
+    {
+      "id": "feature-6",
+      "title": "4-Channel TikTok Content Strategy System",
+      "description": "Implement the 4 elemental TikTok channel strategy (Air, Water, Fire, Earth) with distinct content themes, posting schedules, and audience targeting for each channel. Build channel management infrastructure.",
+      "rationale": "Unique content strategy that differentiates from competitors' generic social posting (addresses market gap-6). The 4-channel approach maximizes reach while testing different content angles. Focus on 'saves' metric aligns with algorithm and purchase behavior.",
+      "priority": "must",
+      "complexity": "medium",
+      "impact": "high",
+      "phase_id": "phase-2",
+      "dependencies": [
+        "feature-1"
+      ],
+      "status": "planned",
+      "acceptance_criteria": [
+        "4 TikTok channels created with consistent branding per element theme",
+        "Content calendar system with channel-specific scheduling",
+        "Channel performance tracking with save rate as primary metric",
+        "Content categorization by element/theme",
+        "Cross-posting rules to prevent content duplication penalties"
+      ],
+      "user_stories": [
+        "As a brand owner, I want multiple themed TikTok channels so that I can test different content approaches and reach wider audiences",
+        "As a content creator, I want clear channel guidelines so that I know what content goes where"
+      ],
+      "linked_spec_id": "007-4-channel-tiktok-content-strategy-system",
+      "competitor_insight_ids": [
+        "pain-5-2",
+        "pain-5-3"
+      ]
+    },
+    {
+      "id": "feature-7",
+      "title": "TikTok Content Scheduling & Auto-Publishing",
+      "description": "Build reliable TikTok content scheduling with automatic publishing, retry mechanisms, failure notifications, and publish confirmation. Support all TikTok content types including standard videos and shop-linked posts.",
+      "rationale": "Directly addresses Hootsuite pain-1-3 (scheduled posts failing without notification) and Later pain-5-1 (posts freeze/fail, users spend same time as manual posting). Reliability is a key differentiator.",
+      "priority": "must",
+      "complexity": "medium",
+      "impact": "high",
+      "phase_id": "phase-2",
+      "dependencies": [
+        "feature-1",
+        "feature-6"
+      ],
+      "status": "planned",
+      "acceptance_criteria": [
+        "Content queued and published at scheduled times with 99%+ reliability",
+        "Failed posts trigger immediate notification with clear error reason",
+        "Automatic retry logic for transient failures",
+        "Publish confirmation stored with TikTok video ID",
+        "Support for TikTok Shop product tagging in videos",
+        "Bulk scheduling capability for content batches"
+      ],
+      "user_stories": [
+        "As a brand owner, I want to schedule content in advance so that I can batch my work and maintain consistent posting",
+        "As a brand owner, I want immediate notification if posts fail so that I can fix issues before they impact my strategy"
+      ],
+      "linked_spec_id": "008-tiktok-content-scheduling-auto-publishing",
+      "competitor_insight_ids": [
+        "pain-1-3",
+        "pain-5-1"
+      ]
+    },
+    {
+      "id": "feature-8",
+      "title": "AI Content Agent Integration",
+      "description": "Connect existing AI content agents (BlogAgent, SocialAgent from separate repository) to the organic marketing system. Enable AI-powered content generation for TikTok scripts, blog articles, and email copy.",
+      "rationale": "AI-powered content automation addresses pain point of manual content creation that doesn't scale. Reduces labor costs making affordable done-for-you service possible (market gap-7). Connects existing assets from sibling directory.",
+      "priority": "must",
+      "complexity": "medium",
+      "impact": "high",
+      "phase_id": "phase-2",
+      "dependencies": [
+        "feature-5"
+      ],
+      "status": "under_review",
+      "acceptance_criteria": [
+        "BlogAgent integrated for article generation",
+        "SocialAgent integrated for TikTok script generation",
+        "Content generation queue with prioritization",
+        "Human review workflow for AI-generated content",
+        "Brand voice guidelines enforced in generation prompts",
+        "Content versioning and edit history maintained"
+      ],
+      "user_stories": [
+        "As a brand owner, I want AI to generate content so that I can maintain high posting frequency without hiring writers",
+        "As a content creator, I want AI-generated drafts so that I can focus on editing rather than writing from scratch"
+      ],
+      "competitor_insight_ids": [
+        "pain-7-5"
+      ]
+    },
+    {
+      "id": "feature-9",
+      "title": "TikTok Content Templates & Best Practices Library",
+      "description": "Build a library of proven TikTok content templates, hooks, and scripts optimized for e-commerce products. Include category-specific templates (toys & games initially) with A/B testing capability.",
+      "rationale": "Reduces learning curve (addresses pain-4-5, pain-3-4) by providing ready-to-use templates. Encapsulates expertise so non-experts can create high-performing content. Supports saves-focused strategy.",
+      "priority": "should",
+      "complexity": "low",
+      "impact": "medium",
+      "phase_id": "phase-2",
+      "dependencies": [
+        "feature-6"
+      ],
+      "status": "planned",
+      "acceptance_criteria": [
+        "10+ TikTok hook templates categorized by content type",
+        "5+ video script frameworks for product content",
+        "Template performance tracking with save rate correlation",
+        "Category filtering (toys & games, general e-commerce)",
+        "Easy template customization workflow",
+        "A/B test setup for template variants"
+      ],
+      "user_stories": [
+        "As a brand owner, I want proven content templates so that I don't have to figure out what works from scratch",
+        "As a content creator, I want hooks that work so that my videos get saved and drive purchases"
+      ],
+      "linked_spec_id": "017-tiktok-content-templates-best-practices-library",
+      "competitor_insight_ids": [
+        "pain-4-5",
+        "pain-3-4"
+      ]
+    },
+    {
+      "id": "feature-10",
+      "title": "Content Performance Monitoring & Alerts",
+      "description": "Build real-time monitoring for TikTok content performance including views, saves, shares, and shop clicks. Create alert system for underperforming content and platform issues.",
+      "rationale": "Addresses TikTok native tool pain-6-5 (videos not posting, 0 views, sales drying up overnight). Proactive monitoring prevents revenue loss from undetected platform issues.",
+      "priority": "should",
+      "complexity": "medium",
+      "impact": "medium",
+      "phase_id": "phase-2",
+      "dependencies": [
+        "feature-1",
+        "feature-7"
+      ],
+      "status": "under_review",
+      "acceptance_criteria": [
+        "Real-time dashboard showing content performance metrics",
+        "Alert triggers for 0-view posts, save rate drops, shop button missing",
+        "Daily/weekly performance summary reports",
+        "Comparison against historical benchmarks",
+        "Integration with notification system (email/Slack)"
+      ],
+      "user_stories": [
+        "As a brand owner, I want to know immediately if my content isn't performing so that I can investigate and fix issues",
+        "As a brand owner, I want performance trends so that I can identify what content works best"
+      ],
+      "competitor_insight_ids": [
+        "pain-6-5"
+      ]
+    },
+    {
+      "id": "feature-11",
+      "title": "Blog Platform Deployment",
+      "description": "Deploy SEO-optimized blog on infinitycards.com with proper technical setup including fast loading, mobile responsiveness, structured data, and content management system integration.",
+      "rationale": "Blog is core component of organic traffic strategy, working alongside TikTok and email. Addresses need for compounding organic channels beyond social media. Required for AEO implementation.",
+      "priority": "must",
+      "complexity": "medium",
+      "impact": "high",
+      "phase_id": "phase-3",
+      "dependencies": [
+        "feature-5"
+      ],
+      "status": "planned",
+      "acceptance_criteria": [
+        "Blog live on infinitycards.com/blog or blog.infinitycards.com",
+        "Page load speed under 3 seconds on mobile",
+        "Mobile-responsive design tested on multiple devices",
+        "CMS integrated for easy content publishing",
+        "Basic SEO setup (meta tags, sitemaps, robots.txt)",
+        "Analytics tracking implemented"
+      ],
+      "user_stories": [
+        "As a brand owner, I want a professional blog so that I can build organic search traffic",
+        "As a potential customer, I want fast-loading helpful content so that I trust the brand's expertise"
+      ],
+      "linked_spec_id": "009-blog-platform-deployment",
+      "competitor_insight_ids": []
+    },
+    {
+      "id": "feature-12",
+      "title": "SEO-Optimized Content Pipeline",
+      "description": "Build automated pipeline for creating and publishing SEO-optimized blog content. Include keyword research integration, on-page SEO checklist enforcement, internal linking, and content scheduling.",
+      "rationale": "Addresses market gap-1 (siloed tools) by integrating SEO content into the unified system rather than requiring separate SEO tools. Automation reduces manual work per competitor pain points about time-consuming workflows (pain-2-6).",
+      "priority": "should",
+      "complexity": "medium",
+      "impact": "high",
+      "phase_id": "phase-3",
+      "dependencies": [
+        "feature-8",
+        "feature-11"
+      ],
+      "status": "planned",
+      "acceptance_criteria": [
+        "Keyword research workflow with target keyword assignment per article",
+        "On-page SEO checklist (title, meta, headings, image alt, internal links)",
+        "Automated internal linking suggestions based on content relevance",
+        "Content scheduling integrated with blog CMS",
+        "SEO score/grade for each article before publishing",
+        "Integration with AI content agent for draft generation"
+      ],
+      "user_stories": [
+        "As a brand owner, I want SEO-optimized content automatically so that articles rank without manual optimization expertise",
+        "As a content creator, I want SEO guidance so that I know what to include for ranking"
+      ],
+      "linked_spec_id": "012-seo-optimized-content-pipeline",
+      "competitor_insight_ids": [
+        "pain-2-6"
+      ]
+    },
+    {
+      "id": "feature-13",
+      "title": "AEO (Agentic Engine Optimization) Implementation",
+      "description": "Implement comprehensive AEO strategy to get brand recommended by AI assistants (ChatGPT, Claude, Perplexity). Include structured data markup, FAQ schema, clear definitive answers, and AI-citation optimization.",
+      "rationale": "Addresses the highest-opportunity market gap-2. No existing tools optimize for AI assistants, yet Gartner predicts 25% drop in traditional search by 2026. First-mover advantage in AEO space is a key differentiator.",
+      "priority": "must",
+      "complexity": "medium",
+      "impact": "high",
+      "phase_id": "phase-3",
+      "dependencies": [
+        "feature-11"
+      ],
+      "status": "planned",
+      "acceptance_criteria": [
+        "FAQ schema markup implemented on all product and content pages",
+        "Product schema with complete attributes for AI parsing",
+        "Content structured with clear, definitive answers to common questions",
+        "AI assistant testing workflow (query ChatGPT/Claude/Perplexity)",
+        "60% citation rate target tracked and measured",
+        "AEO checklist integrated into content creation workflow"
+      ],
+      "user_stories": [
+        "As a brand owner, I want AI assistants to recommend my products so that I capture the next generation of shoppers",
+        "As a potential customer, I want to find relevant products when I ask AI assistants for recommendations"
+      ],
+      "linked_spec_id": "010-aeo-agentic-engine-optimization-implementation",
+      "competitor_insight_ids": []
+    },
+    {
+      "id": "feature-14",
+      "title": "AI Citation Monitoring & Optimization",
+      "description": "Build monitoring system to track when and how AI assistants mention the brand. Include periodic testing queries, citation tracking, and optimization recommendations based on what content gets cited.",
+      "rationale": "Unique capability that no competitor offers (market gap-2). Enables data-driven AEO improvement over time. As AI search grows to 400M+ OpenAI weekly users, this becomes increasingly valuable.",
+      "priority": "should",
+      "complexity": "medium",
+      "impact": "high",
+      "phase_id": "phase-3",
+      "dependencies": [
+        "feature-13"
+      ],
+      "status": "planned",
+      "acceptance_criteria": [
+        "Weekly automated testing of target queries across ChatGPT, Claude, Perplexity",
+        "Citation database tracking mentions over time",
+        "Comparison against competitor citations",
+        "Recommendations for content optimization based on citation patterns",
+        "Alert when citation rate drops or competitor gains citations"
+      ],
+      "user_stories": [
+        "As a brand owner, I want to know when AI assistants recommend my brand so that I can track AEO success",
+        "As a marketer, I want optimization recommendations so that I can improve my AI citation rate"
+      ],
+      "linked_spec_id": "011-ai-citation-monitoring-optimization",
+      "competitor_insight_ids": []
+    },
+    {
+      "id": "feature-15",
+      "title": "Email Platform Integration (Klaviyo)",
+      "description": "Integrate Klaviyo (or alternative) for email marketing with full e-commerce data sync including customer profiles, order history, browse behavior, and segmentation capabilities.",
+      "rationale": "Email is highest-margin revenue channel for e-commerce. Integration into unified system addresses market gap-1 (siloed tools). Using Klaviyo's proven e-commerce capabilities while wrapping it in better experience addresses their pain points.",
+      "priority": "must",
+      "complexity": "medium",
+      "impact": "high",
+      "phase_id": "phase-4",
+      "dependencies": [
+        "feature-1",
+        "feature-5"
+      ],
+      "status": "planned",
+      "acceptance_criteria": [
+        "Klaviyo account connected via API",
+        "Customer profiles syncing from all channels (TikTok, website)",
+        "Order data flowing for purchase-based segmentation",
+        "List management with compliance (unsubscribe handling)",
+        "Basic segments created (new subscribers, customers, VIPs)"
+      ],
+      "user_stories": [
+        "As a brand owner, I want all my customer data in one email platform so that I can send targeted campaigns",
+        "As a customer, I want relevant emails based on my interests so that I stay engaged with the brand"
+      ],
+      "linked_spec_id": "014-email-platform-integration-klaviyo",
+      "competitor_insight_ids": [
+        "pain-3-1",
+        "pain-3-2"
+      ]
+    },
+    {
+      "id": "feature-16",
+      "title": "Gamified Email Capture (Scratch & Win)",
+      "description": "Implement gamified email capture mechanism (scratch & win or spin-to-win wheel) on website to dramatically increase email signup rates. Include A/B testing, prize configuration, and conversion tracking.",
+      "rationale": "Addresses market gap-8 (gamified capture not integrated into organic marketing workflows). Higher capture rates accelerate list building critical for 3,000 subscriber goal. Fun interactive experience differentiates from boring popups.",
+      "priority": "must",
+      "complexity": "medium",
+      "impact": "high",
+      "phase_id": "phase-4",
+      "dependencies": [
+        "feature-15"
+      ],
+      "status": "under_review",
+      "acceptance_criteria": [
+        "Scratch & win or spin wheel implemented on website",
+        "5%+ email capture rate (vs industry 1-2% for standard popups)",
+        "Prize pool configurable (discounts, free shipping, etc.)",
+        "A/B testing capability for offer variations",
+        "Mobile-optimized experience",
+        "Automatic Klaviyo list addition on capture",
+        "Unique code delivery via email for prize redemption"
+      ],
+      "user_stories": [
+        "As a website visitor, I want an engaging way to get a discount so that I'm motivated to give my email",
+        "As a brand owner, I want higher email capture rates so that I can build my list faster"
+      ],
+      "competitor_insight_ids": []
+    },
+    {
+      "id": "feature-17",
+      "title": "Welcome & Nurture Email Sequences",
+      "description": "Build automated welcome series and nurture email sequences that educate new subscribers, build trust, and guide them toward first purchase. Use best-practice templates with personalization.",
+      "rationale": "Automated sequences are proven highest-ROI email tactic. Addresses Klaviyo pain-3-4 (steep learning curve) by providing pre-built sequences users can deploy immediately. Simpler interface differentiates from overwhelming options.",
+      "priority": "must",
+      "complexity": "medium",
+      "impact": "high",
+      "phase_id": "phase-4",
+      "dependencies": [
+        "feature-15",
+        "feature-16"
+      ],
+      "status": "planned",
+      "acceptance_criteria": [
+        "5-7 email welcome series deployed and automated",
+        "Nurture sequence for non-buyers (education, social proof, offers)",
+        "Personalization based on signup source and interests",
+        "Performance tracking (open rate, click rate, conversion)",
+        "Easy editing interface for sequence customization",
+        "A/B testing for subject lines and content"
+      ],
+      "user_stories": [
+        "As a new subscriber, I want valuable emails that help me understand the brand so that I feel confident buying",
+        "As a brand owner, I want automated emails doing the selling so that I don't manually follow up with every lead"
+      ],
+      "linked_spec_id": "015-welcome-nurture-email-sequences",
+      "competitor_insight_ids": [
+        "pain-3-4"
+      ]
+    },
+    {
+      "id": "feature-18",
+      "title": "Abandoned Cart Recovery",
+      "description": "Implement abandoned cart email sequence with proper timing, personalization, and escalating offers to recover lost sales from shoppers who didn't complete checkout.",
+      "rationale": "Abandoned cart is the highest-converting email automation. Integration with TikTok Shop and website carts provides unified recovery capability that siloed tools lack (market gap-1).",
+      "priority": "should",
+      "complexity": "low",
+      "impact": "high",
+      "phase_id": "phase-4",
+      "dependencies": [
+        "feature-15"
+      ],
+      "status": "planned",
+      "acceptance_criteria": [
+        "Cart abandonment detection within 30 minutes",
+        "3-email recovery sequence (reminder, urgency, offer)",
+        "Product images and cart contents in emails",
+        "Direct cart recovery links",
+        "Recovery rate tracking and reporting",
+        "Integration with both TikTok Shop and website carts"
+      ],
+      "user_stories": [
+        "As a shopper, I want a reminder about items I left in cart so that I don't forget to complete my purchase",
+        "As a brand owner, I want to recover lost sales automatically so that I maximize revenue from existing traffic"
+      ],
+      "linked_spec_id": "016-abandoned-cart-recovery",
+      "competitor_insight_ids": []
+    },
+    {
+      "id": "feature-19",
+      "title": "Post-Purchase & Review Request Flows",
+      "description": "Build automated post-purchase email flows including order confirmation, shipping updates, delivery follow-up, and review requests. Create positive experience and generate social proof.",
+      "rationale": "Post-purchase experience builds loyalty and generates reviews critical for TikTok Shop success. Addresses poor TikTok customer service issues (pain-6-6) by providing proactive communication.",
+      "priority": "should",
+      "complexity": "low",
+      "impact": "medium",
+      "phase_id": "phase-4",
+      "dependencies": [
+        "feature-3",
+        "feature-15"
+      ],
+      "status": "under_review",
+      "acceptance_criteria": [
+        "Order confirmation email immediate after purchase",
+        "Shipping notification with tracking link",
+        "Delivery follow-up 2-3 days after delivery",
+        "Review request at optimal timing (7-10 days post-delivery)",
+        "Easy review submission process",
+        "Thank you for review follow-up"
+      ],
+      "user_stories": [
+        "As a customer, I want updates on my order so that I know when to expect delivery",
+        "As a brand owner, I want happy customers leaving reviews so that I build social proof"
+      ],
+      "competitor_insight_ids": [
+        "pain-6-6"
+      ]
+    },
+    {
+      "id": "feature-20",
+      "title": "Unified Analytics Data Pipeline",
+      "description": "Build data pipeline aggregating analytics from all channels (TikTok, website, email, sales) into unified data warehouse. Enable cross-channel attribution and full-funnel analysis.",
+      "rationale": "Directly addresses market gap-4 (no clear ROI tracking for organic marketing). Competitors track engagement metrics, not revenue attribution. This is a core differentiator enabling proof of organic marketing value.",
+      "priority": "must",
+      "complexity": "high",
+      "impact": "high",
+      "phase_id": "phase-5",
+      "dependencies": [
+        "feature-1",
+        "feature-11",
+        "feature-15"
+      ],
+      "status": "planned",
+      "acceptance_criteria": [
+        "TikTok data flowing (views, saves, shares, shop clicks)",
+        "Website analytics connected (GA4 or equivalent)",
+        "Email metrics syncing (opens, clicks, conversions)",
+        "Sales data from TikTok Shop and website",
+        "Customer journey tracking across touchpoints",
+        "Data refresh at least daily"
+      ],
+      "user_stories": [
+        "As a brand owner, I want all my marketing data in one place so that I can see the full picture",
+        "As a marketer, I want to track the customer journey so that I know which channels drive sales"
+      ],
+      "linked_spec_id": "013-unified-analytics-data-pipeline",
+      "competitor_insight_ids": [
+        "pain-5-3"
+      ]
+    },
+    {
+      "id": "feature-21",
+      "title": "Full-Funnel Attribution Tracking",
+      "description": "Implement attribution model tracking customer journey from first TikTok view through email signup through purchase. Enable ROI calculation for organic marketing investment.",
+      "rationale": "Core capability addressing market gap-4. Proves value of organic marketing with hard numbers rather than vanity metrics. Essential for proving system value to potential service clients.",
+      "priority": "must",
+      "complexity": "high",
+      "impact": "high",
+      "phase_id": "phase-5",
+      "dependencies": [
+        "feature-20"
+      ],
+      "status": "under_review",
+      "acceptance_criteria": [
+        "First-touch and multi-touch attribution models available",
+        "TikTok → Website → Email → Purchase journey trackable",
+        "Revenue attributed to organic channels with confidence",
+        "Comparison against paid channel performance",
+        "Time-to-conversion metrics by channel",
+        "Cohort analysis for acquisition quality"
+      ],
+      "user_stories": [
+        "As a brand owner, I want to know exactly how much revenue my TikTok content generates so that I can prove organic marketing ROI",
+        "As a marketer, I want attribution data so that I can optimize my channel mix"
+      ],
+      "competitor_insight_ids": []
+    },
+    {
+      "id": "feature-22",
+      "title": "Advanced Analytics & Reporting Enhancement",
+      "description": "Enhance the existing dashboard foundation with advanced analytics capabilities including real-time metrics, custom visualizations, predictive analytics, and ML-powered insights. Build on Phase 1 dashboard to provide deep analytical capabilities.",
+      "rationale": "Extends dashboard foundation from Phase 1 with advanced analytics. Addresses competitor interface complaints (pain-1-1 outdated interface, pain-5-4 cluttered dashboard) through progressive enhancement rather than new system.",
+      "priority": "should",
+      "complexity": "medium",
+      "impact": "high",
+      "phase_id": "phase-5",
+      "dependencies": [
+        "feature-20",
+        "feature-29"
+      ],
+      "status": "under_review",
+      "acceptance_criteria": [
+        "Dashboard loads in under 3 seconds",
+        "Key metrics prominently displayed (saves, email signups, revenue)",
+        "Channel comparison view",
+        "Trend visualization over time",
+        "Mobile-responsive design",
+        "Customizable metric widgets"
+      ],
+      "user_stories": [
+        "As a brand owner, I want a simple dashboard so that I can quickly see how my marketing is performing",
+        "As a marketer, I want real-time data so that I can make timely optimization decisions"
+      ],
+      "competitor_insight_ids": [
+        "pain-1-1",
+        "pain-4-4",
+        "pain-5-4"
+      ]
+    },
+    {
+      "id": "feature-23",
+      "title": "ROI & Success Metrics Reporting",
+      "description": "Generate automated reports showing return on investment for organic marketing activities. Include ad spend reduction metrics, organic revenue growth, and comparison against success targets.",
+      "rationale": "Directly supports success metrics from product vision (50-80% ad spend reduction, $15K/month organic revenue). Provides evidence for selling system as service with documented results.",
+      "priority": "should",
+      "complexity": "medium",
+      "impact": "high",
+      "phase_id": "phase-5",
+      "dependencies": [
+        "feature-21",
+        "feature-22"
+      ],
+      "status": "under_review",
+      "acceptance_criteria": [
+        "Weekly/monthly ROI reports generated automatically",
+        "Ad spend reduction calculated and tracked over time",
+        "Organic revenue metrics with growth trends",
+        "Success metric progress against targets",
+        "Exportable PDF reports for stakeholders",
+        "Email delivery of scheduled reports"
+      ],
+      "user_stories": [
+        "As a brand owner, I want ROI reports so that I can prove the value of organic marketing investment",
+        "As a potential service client, I want to see documented results so that I trust the system works"
+      ],
+      "competitor_insight_ids": []
+    },
+    {
+      "id": "feature-24",
+      "title": "Results Documentation & Case Study Generator",
+      "description": "Build system to automatically document Infinity Vault results and generate case studies demonstrating organic marketing success. Include before/after metrics, testimonials, and visual evidence.",
+      "rationale": "Story-based selling is a key differentiator. 'Founder spent all money on ads, built this solution, has the receipts.' Case studies provide social proof for selling system as service.",
+      "priority": "should",
+      "complexity": "low",
+      "impact": "high",
+      "phase_id": "phase-6",
+      "dependencies": [
+        "feature-23"
+      ],
+      "status": "under_review",
+      "acceptance_criteria": [
+        "Automated monthly results snapshots stored",
+        "Before/after comparison generator",
+        "Key metrics visualized for case studies",
+        "Testimonial collection workflow",
+        "Case study template with brand formatting",
+        "Export to PDF and web formats"
+      ],
+      "user_stories": [
+        "As a service seller, I want documented case studies so that I can prove results to potential clients",
+        "As a potential client, I want to see real results so that I trust the service will work for me"
+      ],
+      "competitor_insight_ids": [
+        "pain-4-7"
+      ]
+    },
+    {
+      "id": "feature-25",
+      "title": "Service Onboarding System",
+      "description": "Build onboarding workflow for new service clients including account setup, TikTok/Amazon connection guidance, brand voice capture, and initial content strategy creation. Smooth guided experience.",
+      "rationale": "Addresses competitor pain points around poor onboarding (pain-7-4 'worst onboarding ever', pain-4-5 steep learning curves). Differentiate through exceptional client experience from day one.",
+      "priority": "could",
+      "complexity": "medium",
+      "impact": "medium",
+      "phase_id": "phase-6",
+      "dependencies": [
+        "feature-1",
+        "feature-2",
+        "feature-15"
+      ],
+      "status": "under_review",
+      "acceptance_criteria": [
+        "Step-by-step onboarding wizard",
+        "Account connection guidance with troubleshooting",
+        "Brand voice questionnaire and capture",
+        "Initial content strategy generated based on inputs",
+        "Onboarding completion tracking",
+        "Proactive check-in triggers for stuck clients"
+      ],
+      "user_stories": [
+        "As a new client, I want guided setup so that I can get started without confusion",
+        "As a service provider, I want efficient onboarding so that clients see value quickly"
+      ],
+      "competitor_insight_ids": [
+        "pain-4-5",
+        "pain-7-4"
+      ]
+    },
+    {
+      "id": "feature-26",
+      "title": "Multi-Brand Account Management",
+      "description": "Enable management of multiple brand accounts within a single system instance. Support agency-style usage with separate brand spaces, permissions, and consolidated reporting.",
+      "rationale": "Required for scaling to multiple service clients. Enables agency model for white-label reselling. Addresses market gap-7 (affordable done-for-you organic marketing) through efficient multi-client management.",
+      "priority": "could",
+      "complexity": "high",
+      "impact": "medium",
+      "phase_id": "phase-6",
+      "dependencies": [
+        "feature-20",
+        "feature-22"
+      ],
+      "status": "under_review",
+      "acceptance_criteria": [
+        "Multiple brand accounts supported in single instance",
+        "Data isolation between brands",
+        "User permissions per brand",
+        "Consolidated admin dashboard across brands",
+        "Per-brand billing and usage tracking",
+        "Easy switching between brand contexts"
+      ],
+      "user_stories": [
+        "As an agency, I want to manage multiple clients so that I can scale my service business",
+        "As a client, I want my data separate from others so that I have privacy and security"
+      ],
+      "competitor_insight_ids": []
+    },
+    {
+      "id": "feature-27",
+      "title": "White-Label Customization",
+      "description": "Enable white-label capabilities for agencies including custom branding, domain, and client-facing dashboards. Support reselling the organic marketing system under agency brand.",
+      "rationale": "Addresses secondary persona of marketing agencies seeking white-label solutions. Creates additional revenue stream through partner channel. GoHighLevel success shows demand for white-label marketing tools.",
+      "priority": "wont",
+      "complexity": "high",
+      "impact": "medium",
+      "phase_id": "phase-6",
+      "dependencies": [
+        "feature-26"
+      ],
+      "status": "under_review",
+      "acceptance_criteria": [
+        "Custom logo and branding per agency",
+        "Custom domain support (CNAME)",
+        "Client-facing dashboard without system branding",
+        "Agency admin controls and client management",
+        "White-label email sending domain",
+        "Agency pricing and margin controls"
+      ],
+      "user_stories": [
+        "As an agency, I want to white-label the system so that I can sell it as my own service",
+        "As an agency client, I expect the platform to reflect my agency's brand"
+      ],
+      "competitor_insight_ids": []
+    },
+    {
+      "id": "feature-28",
+      "title": "Transparent Billing & Easy Cancellation",
+      "description": "Implement transparent billing system with clear pricing, no hidden fees, easy cancellation, and prorated refunds. Build trust through ethical billing practices.",
+      "rationale": "Directly addresses widespread competitor billing complaints: Hootsuite unauthorized billing (pain-1-5), Sprout Social predatory contracts (pain-2-2), GoHighLevel difficult cancellation (pain-4-6), Later poor refunds (pain-5-5), Omnisend hidden pricing (pain-7-1).",
+      "priority": "should",
+      "complexity": "medium",
+      "impact": "high",
+      "phase_id": "phase-6",
+      "dependencies": [
+        "feature-26"
+      ],
+      "status": "under_review",
+      "acceptance_criteria": [
+        "Clear pricing displayed upfront",
+        "No hidden fees or surprise charges",
+        "Self-service cancellation without support contact required",
+        "Prorated refunds for unused service",
+        "Clear trial-to-paid transition with warning emails",
+        "Monthly billing option without long-term contracts"
+      ],
+      "user_stories": [
+        "As a customer, I want clear pricing so that I know exactly what I'm paying",
+        "As a customer, I want easy cancellation so that I'm not locked in if the service doesn't work for me"
+      ],
+      "competitor_insight_ids": [
+        "pain-1-5",
+        "pain-2-2",
+        "pain-4-6",
+        "pain-5-5",
+        "pain-7-1"
+      ]
+    },
+    {
+      "id": "feature-29",
+      "title": "Dashboard Foundation & Management UI",
+      "description": "Create unified dashboard application that serves as the central management interface for all organic marketing components. Built with Next.js + React, using Clerk authentication and workspace-based multi-tenancy. Provides progressive enhancement architecture that grows with each implementation phase.",
+      "rationale": "Resolves critical timing conflicts in roadmap where Phase 2-4 features require UI before dashboard planned in Phase 5. Provides unified interface preventing tool fragmentation. Enables immediate visibility into system performance and health. Foundation for Phase 6 service packaging.",
+      "priority": "must",
+      "complexity": "high",
+      "impact": "critical",
+      "phase_id": "phase-1",
+      "dependencies": [],
+      "status": "planned",
+      "acceptance_criteria": [
+        "Authentication system with Clerk integration working",
+        "Workspace-based multi-tenancy implemented",
+        "Navigation structure with sidebar and routing",
+        "System health monitoring dashboard",
+        "Basic metrics and KPI display",
+        "Configuration management interface",
+        "API key management system",
+        "Mobile responsive design",
+        "Loading states and error handling",
+        "Supports 10+ concurrent users per workspace"
+      ],
+      "user_stories": [
+        "As a brand owner, I want a single dashboard to see all my marketing channels so I can understand overall performance at a glance",
+        "As a marketing manager, I want to access all tools from one interface so I don't waste time switching between applications",
+        "As a brand owner, I want real-time system health monitoring so I know immediately if something fails",
+        "As a developer, I want a modular dashboard architecture so I can easily add new features in future phases",
+        "As a mobile user, I want to access the dashboard from my phone so I can check metrics on the go"
+      ],
+      "linked_spec_id": "006-dashboard-foundation-management-ui",
+      "competitor_insight_ids": [
+        "pain-1-1",
+        "pain-5-4",
+        "pain-3-3",
+        "pain-6-2"
+      ]
+    },
+    {
+      "id": "feature-30",
+      "title": "Video Generation Plugin Architecture",
+      "description": "Implement plugin-based architecture for video generation following clean architecture principles. Create domain interfaces, service layer with dependency injection, provider registry, and mock provider for testing.",
+      "rationale": "Current TikTok video generation is tightly coupled and cannot swap providers. This architecture enables modularity, testability with mock providers, and easy integration of multiple video generation services (Remotion, RunwayML, Synthesia, FFmpeg).",
+      "priority": "must",
+      "complexity": "high",
+      "impact": "high",
+      "phase_id": "phase-2",
+      "dependencies": [
+        "feature-6",
+        "feature-8"
+      ],
+      "status": "completed",
+      "acceptance_criteria": [
+        "Domain interfaces defined for video generation contracts",
+        "VideoGenerationService with dependency injection implemented",
+        "Provider registry with intelligent selection logic",
+        "Mock provider for testing without infrastructure",
+        "Channel strategy pattern for 4 elemental channels",
+        "Configuration management system centralized",
+        "Full type safety with Python type hints"
+      ],
+      "user_stories": [
+        "As a developer, I want to test video generation without real infrastructure so I can develop faster",
+        "As a system architect, I want to swap video providers without changing business logic so the system remains flexible",
+        "As a brand owner, I want reliable video generation that can use different providers based on my needs"
+      ],
+      "linked_spec_id": "030-video-generation-architecture",
+      "competitor_insight_ids": []
+    },
+    {
+      "id": "feature-31",
+      "title": "Video Provider Plugin Implementations",
+      "description": "Implement concrete video generation providers as plugins (Remotion, FFmpeg, RunwayML, Synthesia) following the established plugin architecture from feature-30.",
+      "rationale": "With the architecture in place, actual video providers are needed for production use. Each provider offers different capabilities: Remotion for React-based programmatic video, FFmpeg for local processing, RunwayML for AI generation, Synthesia for AI avatars.",
+      "priority": "must",
+      "complexity": "high",
+      "impact": "high",
+      "phase_id": "phase-2",
+      "dependencies": [
+        "feature-30"
+      ],
+      "status": "planned",
+      "acceptance_criteria": [
+        "RemotionProvider fully integrated with React-based video generation",
+        "FFmpegProvider handles local video processing and effects",
+        "RunwayMLProvider integrated with AI video generation API",
+        "SynthesiaProvider supports AI avatar generation",
+        "All providers follow plugin architecture pattern",
+        "Provider capability matrix documented and tested",
+        "Automatic provider selection based on script requirements",
+        "Performance benchmarks for each provider documented"
+      ],
+      "user_stories": [
+        "As a content creator, I want programmatic video generation with Remotion so I can create dynamic product videos",
+        "As a brand owner, I want AI-generated videos with RunwayML so I can create unique content at scale",
+        "As a marketer, I want AI avatar videos with Synthesia so I can create professional spokesperson content",
+        "As a developer, I want local video processing with FFmpeg so I can handle simple edits without external APIs"
+      ],
+      "linked_spec_id": "031-video-provider-implementations",
+      "competitor_insight_ids": [
+        "pain-1-2",
+        "pain-5-3"
+      ]
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-02-26T02:30:00Z",
+    "updated_at": "2026-02-27T16:26:59.058Z",
+    "generated_by": "roadmap_features agent",
+    "prioritization_framework": "MoSCoW",
+    "competitor_analysis_used": true,
+    "total_competitor_pain_points_addressed": 37,
+    "market_gaps_addressed": 8
+  }
+}

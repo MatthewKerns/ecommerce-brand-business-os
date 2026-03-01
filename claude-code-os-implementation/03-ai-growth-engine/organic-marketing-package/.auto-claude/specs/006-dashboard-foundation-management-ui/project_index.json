@@ -1,0 +1,37 @@
+{
+  "project_type": "monorepo",
+  "services": {
+    "ai-content-agents": {
+      "path": "./ai-content-agents",
+      "tech_stack": ["python", "anthropic-api"],
+      "port": null,
+      "dev_command": "python generate_content.py",
+      "test_command": "python test_setup.py",
+      "description": "Python-based AI content generation agents (blog, social, amazon, competitor)"
+    },
+    "dashboard": {
+      "path": "./dashboard",
+      "tech_stack": ["nextjs", "react", "typescript", "clerk", "tailwindcss"],
+      "port": 3000,
+      "dev_command": "npm run dev",
+      "test_command": "npm test",
+      "description": "Next.js dashboard application - TO BE CREATED"
+    }
+  },
+  "infrastructure": {
+    "docker": false,
+    "database": null,
+    "authentication": "clerk",
+    "multi_tenancy": "workspace-based"
+  },
+  "conventions": {
+    "linter": "eslint",
+    "formatter": "prettier",
+    "testing": "jest",
+    "styling": "tailwindcss"
+  },
+  "existing_components": {
+    "business_os": "./claude-code-os-implementation",
+    "organic_marketing": "./claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package"
+  }
+}

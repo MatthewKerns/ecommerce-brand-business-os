@@ -1,0 +1,52 @@
+{
+  "files_to_modify": {
+    "content-agents": [
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/database/models.py",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/config/config.py",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/api/main.py"
+    ]
+  },
+  "files_to_create": {
+    "content-agents": [
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/agents/tiktok_channel_agent.py",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/api/routes/tiktok_channels.py",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/tests/test_tiktok_channel_agent.py",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/tests/test_api_tiktok_channels.py"
+    ]
+  },
+  "files_to_reference": [
+    "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/agents/social_agent.py",
+    "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/agents/tiktok_shop_agent.py",
+    "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/agents/base_agent.py",
+    "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/api/routes/social.py",
+    "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/database/models.py"
+  ],
+  "patterns": {
+    "agent_pattern": "All agents inherit from BaseAgent (agents/base_agent.py) which provides:\n- Anthropic API client initialization\n- Brand context loading from config files\n- Common content generation methods (generate_content, generate_and_save)\n- Logging via get_logger(agent_name)\n- Error handling with custom exceptions",
+    "route_pattern": "API routes use FastAPI APIRouter with:\n- Prefix (e.g., '/social', '/blog')\n- Tags for OpenAPI documentation\n- Pydantic request/response models\n- Dependency injection via Depends()\n- Error response models for consistent error handling",
+    "database_pattern": "SQLAlchemy ORM models in database/models.py:\n- Inherit from Base (from connection.py)\n- Use CheckConstraint for data validation\n- Include timestamps (created_at, updated_at)\n- Define relationships with back_populates\n- Add indexes for frequently queried fields",
+    "testing_pattern": "Tests use pytest with:\n- Fixtures in tests/conftest.py\n- Mock API responses in tests/fixtures/mock_responses.py\n- Coverage reporting with pytest-cov\n- API tests using FastAPI TestClient"
+  },
+  "existing_implementations": {
+    "description": "Found existing social media agent (social_agent.py) with content calendar generation and TikTok Shop agent (tiktok_shop_agent.py) with video script generation. Database models exist for ContentHistory, APIUsage, and PerformanceMetrics. API routes follow consistent pattern in api/routes/.",
+    "relevant_files": [
+      "agents/social_agent.py - has generate_content_calendar method",
+      "agents/tiktok_shop_agent.py - has platform_specs and content_strategy",
+      "database/models.py - ContentHistory, APIUsage, PerformanceMetrics",
+      "api/routes/social.py - example of route structure and Pydantic models",
+      "config/config.py - TIKTOK_OUTPUT_DIR, CONTENT_PILLARS, CHANNELS"
+    ],
+    "channel_themes": {
+      "air": "Educational, Tips & Tricks, How-Tos, Quick Knowledge",
+      "water": "Smooth, Aesthetic, ASMR, Satisfying Content",
+      "fire": "High-Energy, Challenges, Competitions, Hype Content",
+      "earth": "Grounded, Community Stories, Testimonials, Real Experience"
+    }
+  },
+  "technical_notes": {
+    "output_directory": "output/tiktok/channels/",
+    "channel_management": "Need to create new database models for TikTokChannel and ChannelContent to track channel-specific posts and performance",
+    "scheduling": "Content calendar needs channel field to prevent cross-posting duplicates",
+    "metrics": "Primary metric is 'save rate' - needs to be tracked in PerformanceMetrics or new ChannelMetrics model"
+  }
+}

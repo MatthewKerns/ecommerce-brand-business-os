@@ -1,0 +1,50 @@
+{
+  "files_to_modify": {
+    "backend": [
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/database/models.py",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/api/main.py"
+    ]
+  },
+  "files_to_create": {
+    "backend": [
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/agents/citation_monitoring_agent.py",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/api/routes/citation_monitoring.py",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/integrations/ai_assistants/__init__.py",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/integrations/ai_assistants/chatgpt_client.py",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/integrations/ai_assistants/perplexity_client.py",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/integrations/ai_assistants/claude_client.py",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/scheduler/citation_scheduler.py",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/tests/test_citation_monitoring_agent.py",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/tests/test_citation_monitoring_api.py"
+    ]
+  },
+  "files_to_reference": {
+    "agent_pattern": "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/agents/base_agent.py",
+    "database_pattern": "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/database/models.py",
+    "api_route_pattern": "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/api/routes/blog.py",
+    "integration_pattern": "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/integrations/tiktok_shop/client.py"
+  },
+  "patterns": {
+    "agent_pattern": "All agents inherit from BaseAgent, load brand context, use generate_content() method, and save_output() to persist results",
+    "database_pattern": "SQLAlchemy models with Base inheritance, constraints, indexes, relationships, and descriptive docstrings",
+    "api_route_pattern": "FastAPI routers with Pydantic request/response models, dependency injection for request_id, comprehensive error handling",
+    "integration_pattern": "Client classes with authentication, rate limiting, error handling, and logging",
+    "configuration_pattern": "Centralized config in config/config.py with environment variable support via python-dotenv"
+  },
+  "existing_implementations": {
+    "description": "Content generation agents (blog, social, amazon, competitor) with database tracking, API endpoints, and integration clients",
+    "relevant_files": [
+      "agents/base_agent.py",
+      "database/models.py",
+      "api/routes/blog.py",
+      "integrations/tiktok_shop/client.py"
+    ]
+  },
+  "feature_requirements": {
+    "weekly_automated_testing": "Query AI assistants (ChatGPT, Claude, Perplexity) weekly with target queries",
+    "citation_database": "Track brand mentions over time with metadata (query, response, timestamp, AI platform)",
+    "competitor_comparison": "Compare citation rates against competitors",
+    "optimization_recommendations": "Analyze citation patterns and suggest content improvements",
+    "alerts": "Notify when citation rate drops or competitor gains citations"
+  }
+}

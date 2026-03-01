@@ -1,0 +1,33 @@
+{
+  "project_type": "single",
+  "services": {
+    "content-agents": {
+      "path": "./claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents",
+      "tech_stack": ["python", "fastapi", "sqlalchemy", "pydantic", "anthropic"],
+      "port": 8000,
+      "dev_command": "uvicorn api.main:app --reload --host 0.0.0.0 --port 8000",
+      "test_command": "pytest tests/",
+      "main_file": "api/main.py",
+      "config_file": "config/config.py"
+    }
+  },
+  "infrastructure": {
+    "docker": false,
+    "database": "sqlite",
+    "api_framework": "fastapi",
+    "orm": "sqlalchemy"
+  },
+  "conventions": {
+    "linter": "ruff",
+    "formatter": "black",
+    "testing": "pytest",
+    "code_style": "Type hints required, Pydantic for validation",
+    "agent_pattern": "All agents inherit from BaseAgent",
+    "output_pattern": "Content saved to output/{type}/ directories"
+  },
+  "external_dependencies": {
+    "anthropic_api": "Claude API for content generation",
+    "sp_api": "Amazon Seller Partner API (optional)",
+    "tiktok_api": "TikTok Shop API (optional)"
+  }
+}

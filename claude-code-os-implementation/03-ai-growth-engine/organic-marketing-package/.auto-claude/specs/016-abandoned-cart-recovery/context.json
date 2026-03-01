@@ -1,0 +1,53 @@
+{
+  "files_to_modify": {
+    "backend": [
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/database/models.py",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/api/main.py"
+    ]
+  },
+  "files_to_create": {
+    "backend": [
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/database/migrations/002_abandoned_cart_schema.sql",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/api/routes/cart.py",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/services/email_service.py",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/services/cart_service.py",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/schedulers/cart_recovery.py",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/templates/email/cart_reminder.html",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/templates/email/cart_urgency.html",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/templates/email/cart_offer.html"
+    ]
+  },
+  "files_to_reference": [
+    "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/database/models.py",
+    "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/api/routes/blog.py",
+    "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/database/migrations/001_initial_schema.sql",
+    "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/integrations/tiktok_shop/client.py"
+  ],
+  "patterns": {
+    "database_models": "SQLAlchemy ORM models inherit from Base, use relationship() for foreign keys, include __repr__ and __table_args__ with constraints and indexes",
+    "api_routes": "FastAPI routers use APIRouter with prefix, tags, and response models. Endpoints use Pydantic request/response models, dependency injection for request_id, and structured error handling with HTTPException",
+    "migrations": "SQL migrations follow numbered format (001_, 002_) with descriptive comments, CREATE TABLE statements with constraints, and CREATE INDEX for performance",
+    "error_handling": "Use HTTPException with status_code and detail dict containing error, message, request_id, and timestamp",
+    "logging": "Use Python logging module with request_id prefix: logger.info(f'[{request_id}] message')"
+  },
+  "existing_implementations": {
+    "description": "Content generation system with agents, API routes, database tracking, and TikTok Shop integration exists. No email service, cart tracking, or background job scheduler exists yet.",
+    "relevant_files": [
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/database/models.py",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/api/routes/blog.py",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/integrations/tiktok_shop/client.py"
+    ],
+    "dependencies_needed": [
+      "celery",
+      "redis",
+      "sendgrid",
+      "jinja2"
+    ]
+  },
+  "technical_decisions": {
+    "email_provider": "SendGrid for transactional emails (industry standard, reliable API)",
+    "scheduler": "Celery with Redis backend for distributed task scheduling",
+    "templating": "Jinja2 for HTML email templates",
+    "cart_recovery_timing": "30 min, 24 hours, 48 hours for 3-email sequence"
+  }
+}

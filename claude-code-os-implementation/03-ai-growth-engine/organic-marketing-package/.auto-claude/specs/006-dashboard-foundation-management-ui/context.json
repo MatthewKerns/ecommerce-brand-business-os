@@ -1,0 +1,55 @@
+{
+  "files_to_modify": {
+    "dashboard": []
+  },
+  "files_to_create": {
+    "dashboard": [
+      "package.json",
+      "next.config.js",
+      "tsconfig.json",
+      "tailwind.config.js",
+      ".env.example",
+      "src/app/layout.tsx",
+      "src/app/page.tsx",
+      "src/middleware.ts",
+      "src/components/Navigation.tsx",
+      "src/components/Dashboard.tsx",
+      "src/components/SystemHealth.tsx",
+      "src/components/MetricCard.tsx",
+      "src/components/ApiKeyManager.tsx"
+    ]
+  },
+  "files_to_reference": [
+    "./ai-content-agents/.env.example",
+    "./ai-content-agents/config/config.py"
+  ],
+  "patterns": {
+    "authentication": "Clerk with Next.js middleware - standard Clerk pattern for Next.js 14+ App Router",
+    "routing": "Next.js 14 App Router - file-based routing with src/app directory",
+    "styling": "TailwindCSS with component-based classes",
+    "state_management": "React hooks (useState, useEffect, useContext) for client-side state",
+    "api_integration": "Next.js API routes in src/app/api for backend communication",
+    "multi_tenancy": "Workspace context from Clerk organization metadata"
+  },
+  "existing_implementations": {
+    "description": "No existing frontend. Greenfield Next.js application. Python agents exist for content generation and can be integrated via API endpoints.",
+    "relevant_files": [
+      "./ai-content-agents/agents/base_agent.py",
+      "./ai-content-agents/agents/blog_agent.py",
+      "./ai-content-agents/agents/social_agent.py",
+      "./ai-content-agents/config/config.py"
+    ],
+    "integration_points": [
+      "Dashboard will need REST API layer to communicate with Python agents",
+      "System health monitoring needs to check Python agent availability",
+      "Configuration management UI to modify agent settings"
+    ]
+  },
+  "tech_decisions": {
+    "framework": "Next.js 14+ with App Router (latest stable)",
+    "authentication": "Clerk (includes workspace/org management out of box)",
+    "styling": "TailwindCSS + shadcn/ui components",
+    "language": "TypeScript for type safety",
+    "deployment": "Vercel (Next.js native platform)"
+  }
+}

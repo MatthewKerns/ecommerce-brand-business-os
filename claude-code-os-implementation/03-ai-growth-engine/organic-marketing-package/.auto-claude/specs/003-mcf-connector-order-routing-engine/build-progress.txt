@@ -1,0 +1,167 @@
+=== AUTO-BUILD PROGRESS ===
+
+Project: MCF Connector - Order Routing Engine
+Workspace: .auto-claude/worktrees/tasks/003-mcf-connector-order-routing-engine
+Started: 2026-02-26
+
+Workflow Type: feature
+Rationale: Multi-service feature that integrates TikTok Shop orders with Amazon MCF fulfillment.
+Requires sequential phases: setup infrastructure, build integrations independently, then wire
+them together with business logic.
+
+Session 1 (Planner):
+- Created implementation_plan.json with comprehensive subtask breakdown
+- Created project_index.json with tech stack and project structure
+- Created context.json with files to create and patterns to follow
+- Created init.sh environment setup script
+- Phases: 7
+- Total subtasks: 20
+
+Phase Summary:
+- Phase 1 (Setup): 3 subtasks - Project scaffolding, TypeScript config, type definitions
+- Phase 2 (TikTok Integration): 3 subtasks - TikTok Shop API client and order types
+- Phase 3 (Amazon MCF Integration): 3 subtasks - Amazon MCF API client (parallel with Phase 2)
+- Phase 4 (Order Processing): 3 subtasks - Validation, transformation, routing logic
+- Phase 5 (Tracking Sync): 2 subtasks - Tracking number sync back to TikTok
+- Phase 6 (Inventory Sync): 2 subtasks - Inventory checking (parallel with Phase 5)
+- Phase 7 (Integration): 3 subtasks - Main entry point, integration tests, e2e verification
+
+Services Involved:
+- mcf-connector: TypeScript/Node.js connector for TikTok Shop → Amazon MCF integration
+
+Technology Stack:
+- TypeScript 5.3+
+- Node.js
+- axios (HTTP client)
+- zod (validation)
+- dotenv (environment variables)
+- jest (testing)
+
+External API Integrations:
+1. TikTok Shop API
+   - OAuth 2.0 authentication
+   - Endpoints: order list, order detail, shipping info update
+
+2. Amazon MCF (SP-API)
+   - LWA OAuth + AWS Signature v4
+   - Endpoints: fulfillment orders, tracking, inventory summaries
+
+Parallelism Analysis:
+- Max parallel phases: 2
+- Recommended workers: 2
+- Parallel groups:
+  1. Phase 2 (TikTok Integration) + Phase 3 (Amazon MCF Integration)
+     - Both depend only on Phase 1 (Setup)
+     - No file conflicts - different API clients
+  2. Phase 5 (Tracking Sync) + Phase 6 (Inventory Sync)
+     - Both depend on Phase 4 (Order Processing)
+     - No file conflicts - different features
+- Speedup estimate: 1.4x faster than sequential
+
+Existing Patterns to Follow:
+- gmail-client.ts: Class-based API client with OAuth2 and retry logic
+- email-marketing package.json: Dependencies and scripts structure
+- email-marketing tsconfig.json: TypeScript configuration
+
+Key Implementation Notes:
+- Follow gmail-client.ts pattern for API clients (config interface, retry logic with exponential backoff)
+- Use Zod schemas for type validation on all external API data
+- Amazon SP-API requires both LWA OAuth AND AWS Signature v4 authentication
+- All credentials must be in environment variables (never in code)
+- Rate limiting and retry logic required for both APIs
+- Order validation includes address normalization
+- Inventory sync must prevent overselling across channels
+
+Verification Strategy:
+- Risk Level: HIGH
+- Test Types Required: unit, integration, e2e
+- Security Scanning: REQUIRED (check for hardcoded credentials)
+- Coverage Target: 80%+
+
+Acceptance Criteria:
+✓ New TikTok Shop orders automatically detected within 5 minutes
+✓ Order data validated and transformed for MCF requirements
+✓ MCF fulfillment orders created with correct product mapping
+✓ Tracking numbers synced back to TikTok Shop within 4 hours of shipment
+✓ Failed orders flagged for manual review with clear error messages
+✓ Inventory sync prevents overselling across channels
+
+=== STARTUP COMMAND ===
+
+To continue building this spec, run:
+
+  cd /Users/matthewkerns/workspace/ecommerce-brand-business-os/claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/.auto-claude
+  source .venv/bin/activate
+  python run.py --spec 003 --parallel 2
+
+The orchestrator will:
+1. Find the next pending subtask (respecting phase dependencies)
+2. Spawn a coder agent to implement it
+3. Run verification tests
+4. Mark subtask complete and commit changes
+5. Move to the next subtask
+
+With 2 parallel workers, phases 2+3 and phases 5+6 will run concurrently for faster completion.
+
+=== FILE STRUCTURE ===
+
+Implementation will create this directory structure:
+
+claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/05-mcf-connector-integration/implementation/
+├── package.json
+├── tsconfig.json
+├── .env.example
+├── README.md
+├── src/
+│   ├── index.ts                    # Main entry point
+│   ├── config.ts                   # Configuration loader
+│   ├── types/
+│   │   ├── config.ts               # Config interfaces
+│   │   ├── common.ts               # Shared types
+│   │   ├── tiktok-order.ts         # TikTok order types + Zod schemas
+│   │   └── mcf-order.ts            # Amazon MCF order types + Zod schemas
+│   ├── clients/
+│   │   ├── tiktok-shop-client.ts   # TikTok Shop API client
+│   │   └── amazon-mcf-client.ts    # Amazon MCF API client
+│   └── core/
+│       ├── order-validator.ts      # Order validation + address normalization
+│       ├── order-transformer.ts    # TikTok → MCF transformation
+│       ├── order-router.ts         # Main orchestrator
+│       ├── tracking-sync.ts        # Tracking number sync
+│       └── inventory-sync.ts       # Inventory checking
+└── tests/
+    ├── unit/
+    │   ├── order-validator.test.ts
+    │   ├── order-transformer.test.ts
+    │   └── order-router.test.ts
+    └── integration/
+        └── order-flow.test.ts      # End-to-end flow test
+
+=== NEXT STEPS ===
+
+Phase 1 will create:
+1. package.json with all dependencies (axios, zod, dotenv, googleapis, etc.)
+2. tsconfig.json following email-marketing-automation patterns
+3. .env.example with required environment variables
+4. Type definitions for config and common types
+
+After Phase 1 completes, the coder agents will build:
+- TikTok Shop API client (Phase 2)
+- Amazon MCF API client (Phase 3) - IN PARALLEL
+- Order processing logic (Phase 4)
+- Tracking sync (Phase 5)
+- Inventory sync (Phase 6) - IN PARALLEL
+- Integration and testing (Phase 7)
+
+=== END SESSION 1 ===
+
+Session 2 (Coder - subtask-1-1):
+- ✅ Created package.json with dependencies and scripts
+- Followed email-marketing-automation/implementation/package.json pattern
+- Added core dependencies: axios, zod, date-fns, dotenv
+- Added dev dependencies: TypeScript, Jest, ESLint, Prettier
+- Updated keywords for TikTok Shop and Amazon MCF integration
+- Committed: de2736b - "auto-claude: subtask-1-1 - Create package.json with dependencies and scripts"
+- Status: COMPLETED
+
+=== END SESSION 2 ===

@@ -1,0 +1,39 @@
+{
+  "project_type": "monorepo",
+  "services": {
+    "email-automation": {
+      "path": "./claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/04-email-marketing-automation/implementation",
+      "tech_stack": ["typescript", "nodejs"],
+      "port": 3001,
+      "dev_command": "npm run dev",
+      "test_command": "npm test"
+    },
+    "dashboard": {
+      "path": "./claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/dashboard",
+      "tech_stack": ["nextjs", "react", "typescript", "clerk"],
+      "port": 3000,
+      "dev_command": "npm run dev",
+      "test_command": "npm run lint"
+    },
+    "content-agents": {
+      "path": "./claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents",
+      "tech_stack": ["python", "sqlalchemy"],
+      "port": null,
+      "dev_command": "python generate_content.py",
+      "test_command": "pytest"
+    }
+  },
+  "infrastructure": {
+    "docker": false,
+    "database": "sqlite",
+    "storage": "google-sheets",
+    "email": "gmail-api",
+    "auth": "clerk"
+  },
+  "conventions": {
+    "linter": "eslint",
+    "formatter": "prettier",
+    "testing": "jest",
+    "python_testing": "pytest"
+  }
+}

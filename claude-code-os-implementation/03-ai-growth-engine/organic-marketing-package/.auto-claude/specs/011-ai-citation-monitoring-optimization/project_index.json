@@ -1,0 +1,34 @@
+{
+  "project_type": "single",
+  "services": {
+    "backend": {
+      "path": "./claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents",
+      "tech_stack": ["python", "fastapi", "sqlalchemy", "anthropic"],
+      "port": 8000,
+      "dev_command": "uvicorn api.main:app --reload --host 0.0.0.0 --port 8000",
+      "test_command": "pytest tests/",
+      "database": "sqlite"
+    }
+  },
+  "infrastructure": {
+    "docker": false,
+    "database": "sqlite",
+    "ci_cd": false
+  },
+  "conventions": {
+    "linter": "flake8",
+    "formatter": "black",
+    "testing": "pytest",
+    "api_framework": "fastapi",
+    "orm": "sqlalchemy",
+    "validation": "pydantic"
+  },
+  "directory_structure": {
+    "agents": "Agent implementations inheriting from BaseAgent",
+    "api": "FastAPI application and routes",
+    "config": "Configuration and environment management",
+    "database": "SQLAlchemy models and connection",
+    "tests": "Pytest test suite",
+    "output": "Generated content storage"
+  }
+}

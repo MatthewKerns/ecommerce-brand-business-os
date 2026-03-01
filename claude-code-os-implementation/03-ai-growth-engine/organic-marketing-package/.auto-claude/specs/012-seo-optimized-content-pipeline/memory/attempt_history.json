@@ -1,0 +1,177 @@
+{
+  "subtasks": {
+    "subtask-1-1": {
+      "attempts": [
+        {
+          "session": 2,
+          "timestamp": "2026-02-26T19:41:02.494098",
+          "approach": "Implemented: Create keyword research utility",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-1-2": {
+      "attempts": [
+        {
+          "session": 3,
+          "timestamp": "2026-02-26T19:44:32.543608",
+          "approach": "Implemented: Create SEO analyzer utility for on-page SEO validation",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-1-3": {
+      "attempts": [
+        {
+          "session": 4,
+          "timestamp": "2026-02-26T19:49:26.120637",
+          "approach": "Implemented: Create internal linking utility",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-2-1": {
+      "attempts": [
+        {
+          "session": 5,
+          "timestamp": "2026-02-26T19:52:26.668143",
+          "approach": "Implemented: Create SEOAgent class inheriting from BaseAgent",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-2-2": {
+      "attempts": [
+        {
+          "session": 6,
+          "timestamp": "2026-02-26T19:54:26.022066",
+          "approach": "Implemented: Implement SEO scoring and grading system",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-3-1": {
+      "attempts": [
+        {
+          "session": 7,
+          "timestamp": "2026-02-26T19:57:24.151187",
+          "approach": "Implemented: Add SEO checklist enforcement to BlogAgent",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-3-2": {
+      "attempts": [
+        {
+          "session": 8,
+          "timestamp": "2026-02-26T20:00:01.678013",
+          "approach": "Implemented: Add automatic meta description generation to BlogAgent",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-4-1": {
+      "attempts": [
+        {
+          "session": 9,
+          "timestamp": "2026-02-26T20:02:08.966920",
+          "approach": "Implemented: Add SEO fields to ContentHistory model",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-4-2": {
+      "attempts": [
+        {
+          "session": 10,
+          "timestamp": "2026-02-26T20:07:09.040513",
+          "approach": "Implemented: Create database migration for SEO fields",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-5-1": {
+      "attempts": [
+        {
+          "session": 11,
+          "timestamp": "2026-02-26T20:09:40.318270",
+          "approach": "Implemented: Create Pydantic models for SEO API",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-5-2": {
+      "attempts": [
+        {
+          "session": 12,
+          "timestamp": "2026-02-26T20:13:45.717776",
+          "approach": "Implemented: Create SEO API router with endpoints",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-5-3": {
+      "attempts": [
+        {
+          "session": 13,
+          "timestamp": "2026-02-26T20:15:57.943158",
+          "approach": "Implemented: Update BlogRequest API to include SEO options",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-6-1": {
+      "attempts": [
+        {
+          "session": 14,
+          "timestamp": "2026-02-26T20:23:08.687835",
+          "approach": "Implemented: End-to-end SEO content generation workflow",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-6-2": {
+      "attempts": [
+        {
+          "session": 15,
+          "timestamp": "2026-02-26T20:28:46.257446",
+          "approach": "Implemented: Create integration tests for SEO pipeline",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    }
+  },
+  "stuck_subtasks": [],
+  "metadata": {
+    "created_at": "2026-02-26T19:27:42.849027",
+    "last_updated": "2026-02-26T20:28:46.257473"
+  }
+}

@@ -1,0 +1,447 @@
+{
+  "feature": "TikTok Content Templates & Best Practices Library",
+  "workflow_type": "simple",
+  "workflow_rationale": "This is a documentation-only task creating a structured library of TikTok content templates. No backend services, APIs, or multi-service integration required. Simple workflow is appropriate for single-location documentation creation.",
+  "phases": [
+    {
+      "id": "phase-1-structure",
+      "name": "Directory Structure & Master Index",
+      "type": "setup",
+      "description": "Create the directory structure and master README for the TikTok content templates library",
+      "depends_on": [],
+      "parallel_safe": true,
+      "subtasks": [
+        {
+          "id": "subtask-1-1",
+          "description": "Create directory structure and master README",
+          "service": "documentation",
+          "files_to_modify": [],
+          "files_to_create": [
+            "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/README.md"
+          ],
+          "patterns_from": [
+            "claude-code-os-implementation/09-templates/agent-creation-guide.md"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "test -f ./claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/README.md && echo 'OK'",
+            "expected": "OK"
+          },
+          "status": "completed",
+          "notes": "Created comprehensive master README for TikTok content templates library. Includes library structure overview, quick start guide, content strategy framework, template selection guide, A/B testing framework, performance tracking guidance, and TikTok best practices. File structure follows patterns from agent-creation-guide.md and outreach message templates.",
+          "updated_at": "2026-02-27T16:32:41.758946+00:00"
+        }
+      ]
+    },
+    {
+      "id": "phase-2-hooks",
+      "name": "Hook Templates Library",
+      "type": "implementation",
+      "description": "Create 10+ TikTok hook templates categorized by content type",
+      "depends_on": [
+        "phase-1-structure"
+      ],
+      "parallel_safe": true,
+      "subtasks": [
+        {
+          "id": "subtask-2-1",
+          "description": "Create hooks directory index and product demo hooks (3+ templates)",
+          "service": "documentation",
+          "files_to_modify": [],
+          "files_to_create": [
+            "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/hooks/README.md",
+            "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/hooks/product-demos.md"
+          ],
+          "patterns_from": [
+            "claude-code-os-implementation/03-ai-growth-engine/tiktok-outreach/02-outreach-message-templates.md"
+          ],
+          "verification": {
+            "type": "manual",
+            "instructions": "Verify product-demos.md contains at least 3 hook templates with examples"
+          },
+          "status": "completed",
+          "notes": "Created comprehensive hooks library with README.md (173 lines) and product-demos.md (437 lines). Delivered 7 hook templates (exceeding minimum of 3): Scratch Test, Collection Reveal, Pain Point, Warranty Flex, Tournament Prep, Unboxing Moment, and The Flex. Each template includes category, use cases, multiple examples, psychological reasoning, variations, and next-beat guidance. README provides hooks framework, testing methodology, and strategic guidance following patterns from outreach message templates.",
+          "updated_at": "2026-02-27T16:36:21.853421+00:00"
+        },
+        {
+          "id": "subtask-2-2",
+          "description": "Create problem-solution hooks (3+ templates)",
+          "service": "documentation",
+          "files_to_modify": [],
+          "files_to_create": [
+            "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/hooks/problem-solution.md"
+          ],
+          "patterns_from": [
+            "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/hooks/product-demos.md"
+          ],
+          "verification": {
+            "type": "manual",
+            "instructions": "Verify problem-solution.md contains at least 3 hook templates with examples"
+          },
+          "status": "completed",
+          "notes": "Created comprehensive problem-solution hooks file (412 lines). Delivered 6 hook templates (exceeding minimum of 3): Relatable Pain, Before/After Tease, Hidden Problem, Costly Mistake, Target Hook, and Question Loop. Each template includes category, use cases, multiple examples with variations, psychological reasoning (Why It Works), and next-beat guidance. Also included Advanced Problem-Solution Formulas, Hook + Solution Pairing Guide, Testing metrics with red flags/green lights, Customization Checklist, and Common Mistakes section following patterns from product-demos.md.",
+          "updated_at": "2026-02-27T16:39:28.894998+00:00"
+        },
+        {
+          "id": "subtask-2-3",
+          "description": "Create social proof and educational hooks (4+ templates total)",
+          "service": "documentation",
+          "files_to_modify": [],
+          "files_to_create": [
+            "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/hooks/social-proof.md",
+            "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/hooks/educational.md"
+          ],
+          "patterns_from": [
+            "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/hooks/product-demos.md"
+          ],
+          "verification": {
+            "type": "manual",
+            "instructions": "Verify social-proof.md and educational.md each contain at least 2 hook templates"
+          },
+          "status": "completed",
+          "notes": "Created social-proof.md with 6 hook templates and educational.md with 7 hook templates. All templates follow the established pattern from product-demos.md with Category, When to Use, Hook, Visual, Examples, Why It Works, Variations, and Next Beat sections. Each file includes comprehensive strategy sections, advanced formulas, visual pairing guides, testing guidelines, and customization checklists.",
+          "updated_at": "2026-02-27T16:43:46.432890+00:00"
+        }
+      ]
+    },
+    {
+      "id": "phase-3-scripts",
+      "name": "Video Script Frameworks",
+      "type": "implementation",
+      "description": "Create 5+ complete video script frameworks for product content",
+      "depends_on": [
+        "phase-1-structure"
+      ],
+      "parallel_safe": true,
+      "subtasks": [
+        {
+          "id": "subtask-3-1",
+          "description": "Create scripts directory index and unboxing framework",
+          "service": "documentation",
+          "files_to_modify": [],
+          "files_to_create": [
+            "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/scripts/README.md",
+            "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/scripts/unboxing-framework.md"
+          ],
+          "patterns_from": [
+            "claude-code-os-implementation/09-templates/agent-creation-guide.md"
+          ],
+          "verification": {
+            "type": "manual",
+            "instructions": "Verify unboxing-framework.md contains complete script structure with timing, sections, and examples"
+          },
+          "status": "completed",
+          "notes": "Created comprehensive scripts directory index (README.md, 358 lines) and unboxing framework (unboxing-framework.md, 585 lines). README provides complete script framework library with universal structure, timing guidelines, framework selection guide, testing methodology, and best practices. Unboxing framework includes detailed timing breakdown (0-45s beat-by-beat), 6 script sections with templates, 3 complete example scripts (45s, 40s, 35s versions), visual recommendations, customization guide for different products/audiences, common mistakes to avoid, performance benchmarks, and A/B testing strategies. All content follows established patterns from hooks library and agent-creation-guide.md.",
+          "updated_at": "2026-02-27T16:48:44.014508+00:00"
+        },
+        {
+          "id": "subtask-3-2",
+          "description": "Create comparison and tutorial frameworks",
+          "service": "documentation",
+          "files_to_modify": [],
+          "files_to_create": [
+            "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/scripts/comparison-framework.md",
+            "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/scripts/tutorial-framework.md"
+          ],
+          "patterns_from": [
+            "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/scripts/unboxing-framework.md"
+          ],
+          "verification": {
+            "type": "manual",
+            "instructions": "Verify both frameworks contain complete script structures with timing and examples"
+          },
+          "status": "completed",
+          "notes": "Created comprehensive comparison-framework.md (780 lines) and tutorial-framework.md (851 lines). Comparison framework includes: 60-second timing breakdown with 7 beats (Hook, Context, Feature Comparisons, Price/Value, Verdict, CTA), 4 complete example scripts (60s, 45s, 50s, 40s versions), visual recommendations, customization guide for different comparison types, common mistakes, performance benchmarks, A/B testing variations, and advanced techniques (Regret Purchase, Scientific Test, Timeline Comparison, Hidden Cost Reveal). Tutorial framework includes: flexible timing structures (30-90s), 7-beat structure (Hook, Context, Materials, Step-by-Step Process, Pro Tip, Result Showcase, CTA), 4 complete example scripts (60s organization, 45s storage, 30s technique, 75s maintenance), visual recommendations with camera setup guidance, customization for different tutorial types, common mistakes, performance benchmarks with high save rates (15%+), A/B testing strategies, and advanced techniques (Before I Knew This, Comparison Tutorial, Mistake-Prevention, Follow Along, Troubleshooting). Both frameworks follow the established pattern from unboxing-framework.md with complete script structures, timing breakdowns, multiple examples, and practical guidance.",
+          "updated_at": "2026-02-27T16:56:03.016435+00:00"
+        },
+        {
+          "id": "subtask-3-3",
+          "description": "Create story-driven and review frameworks",
+          "service": "documentation",
+          "files_to_modify": [],
+          "files_to_create": [
+            "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/scripts/story-driven-framework.md",
+            "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/scripts/review-framework.md"
+          ],
+          "patterns_from": [
+            "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/scripts/unboxing-framework.md"
+          ],
+          "verification": {
+            "type": "manual",
+            "instructions": "Verify both frameworks contain complete script structures with timing and examples"
+          },
+          "status": "completed",
+          "notes": "Created comprehensive story-driven-framework.md (655 lines) and review-framework.md (681 lines). Story-driven framework includes: 60-second timing breakdown with 6 beats (Hook, Setup, Conflict/Challenge, Resolution, Reflection, CTA), 3 complete example scripts (60s, 55s, 50s versions), visual recommendations, customization guide for different story types and brand voices, common mistakes, performance benchmarks with high completion rates (80%+), A/B testing variations, and advanced techniques (Cold Open, Parallel Story, Multi-Part Series, Community Story). Review framework includes: 60-second timing breakdown with 6 beats (Hook, Context, Pros, Cons, Verdict, CTA), 3 complete example scripts (60s balanced review, 70s comparison review, 55s long-term update), visual recommendations with camera setup, customization for different review depths and audiences, common mistakes, performance benchmarks with high save rates (10%+), A/B testing strategies, and advanced techniques (After Using X Follow-Up, Scientific Comparison, Audience-Sourced Review, Real-World Stress Test). Both frameworks follow the established pattern from unboxing-framework.md with complete script structures, timing breakdowns, multiple examples, and practical guidance.",
+          "updated_at": "2026-02-27T17:02:15.000000+00:00"
+        }
+      ]
+    },
+    {
+      "id": "phase-4-categories",
+      "name": "Category-Specific Templates",
+      "type": "implementation",
+      "description": "Create category filtering and specific templates for toys & games and general e-commerce",
+      "depends_on": [
+        "phase-2-hooks",
+        "phase-3-scripts"
+      ],
+      "parallel_safe": false,
+      "subtasks": [
+        {
+          "id": "subtask-4-1",
+          "description": "Create toys & games category templates with adapted hooks and scripts",
+          "service": "documentation",
+          "files_to_modify": [],
+          "files_to_create": [
+            "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/categories/toys-and-games.md"
+          ],
+          "patterns_from": [
+            "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/hooks/product-demos.md",
+            "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/scripts/unboxing-framework.md"
+          ],
+          "verification": {
+            "type": "manual",
+            "instructions": "Verify toys-and-games.md contains category-specific adaptations of hooks and scripts"
+          },
+          "status": "completed",
+          "notes": "Created comprehensive toys-and-games.md (975 lines) with category-specific adaptations. Includes: Category Overview targeting parents/gift-buyers/educators with key purchase drivers (educational value, safety, engagement). Delivered 6 adapted hook templates (Play Test, Gift Confidence, Educational Reveal, Age Range Flex, Durability Challenge, Screen-Free Win) following product-demos.md pattern. Created 3 complete adapted script frameworks (Unboxing, Tutorial, Comparison) following unboxing-framework.md pattern with timing breakdowns and complete examples. Added category-specific best practices (age clarity, safety signals, dual audience targeting), seasonal content calendar, performance benchmarks, customization checklist, common mistakes, A/B testing strategies, platform-specific optimizations, and success metrics dashboard. All content follows established patterns with Category, When to Use, Hook Templates, Why It Works, Variations, Next Beat structure for hooks, and beat-by-beat timing breakdowns with multiple example scripts for frameworks.",
+          "updated_at": "2026-02-27T17:08:35.691050+00:00"
+        },
+        {
+          "id": "subtask-4-2",
+          "description": "Create general e-commerce category templates",
+          "service": "documentation",
+          "files_to_modify": [],
+          "files_to_create": [
+            "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/categories/general-ecommerce.md"
+          ],
+          "patterns_from": [
+            "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/categories/toys-and-games.md"
+          ],
+          "verification": {
+            "type": "manual",
+            "instructions": "Verify general-ecommerce.md contains broadly applicable template adaptations"
+          },
+          "status": "completed",
+          "notes": "Created comprehensive general-ecommerce.md (1269 lines) with broadly applicable template adaptations. Includes: Category Overview targeting broad consumer base with universal purchase drivers (value, problem-solving, social proof, convenience). Delivered 8 adapted hook templates (Value Reveal, Problem Amplification, Social Proof Cascade, Comparison Simplifier, Lifestyle Integration, Objection Crusher, Time/Effort Saver, Discovery Moment) following toys-and-games.md pattern. Created 3 complete adapted script frameworks (Universal Product Demo, Comparison Framework, Problem-Solution Story) with timing breakdowns and complete examples. Added universal best practices (hook selection strategy, trust-building elements, visual guidelines, conversion optimization tactics), performance benchmarks with red flags/green lights, common mistakes with examples, comprehensive A/B testing strategies (4 test variables with setups and expected outcomes), success metrics dashboard, seasonal content calendar, template customization checklist, advanced techniques (Cost Per Use, Replacement Stack, Before I Knew This series, Specific Person targeting, Real World Stress Test), and quick reference hook selection flowchart. All content follows established pattern with Category, When to Use, Hook Templates, Why It Works, Variations, Next Beat structure for hooks, and beat-by-beat timing breakdowns with multiple example scripts for frameworks.",
+          "updated_at": "2026-02-27T17:14:20.409498+00:00"
+        }
+      ]
+    },
+    {
+      "id": "phase-5-tracking",
+      "name": "Performance Tracking Framework",
+      "type": "implementation",
+      "description": "Create template performance tracking system with save rate correlation",
+      "depends_on": [
+        "phase-2-hooks",
+        "phase-3-scripts"
+      ],
+      "parallel_safe": true,
+      "subtasks": [
+        {
+          "id": "subtask-5-1",
+          "description": "Create template performance tracker and save rate analysis framework",
+          "service": "documentation",
+          "files_to_modify": [],
+          "files_to_create": [
+            "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/performance-tracking/template-tracker.md",
+            "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/performance-tracking/save-rate-analysis.md"
+          ],
+          "patterns_from": [
+            "claude-code-os-implementation/03-ai-growth-engine/tiktok-outreach/02-outreach-message-templates.md"
+          ],
+          "verification": {
+            "type": "manual",
+            "instructions": "Verify template-tracker.md includes spreadsheet structure for tracking template performance and save-rate-analysis.md explains correlation methodology"
+          },
+          "status": "completed",
+          "notes": "Created comprehensive template-tracker.md (313 lines) and save-rate-analysis.md (414 lines). Template tracker includes: spreadsheet structure with 40+ tracking columns organized into Core Video Info, Template Tracking, Performance Metrics (24h/7d/30d), Business Impact, Attribution & Conversion, and Analysis sections. Also includes performance tier classification (S/A/B/C), weekly/monthly review frameworks, save rate benchmarks by template type, automated tracking setup guidance, performance dashboard structure, and daily/weekly/monthly tracking workflows. Save rate analysis includes: save rate definition and benchmarks, algorithm signal hierarchy explanation, 7 primary/secondary correlations (watch time, hook quality, CTA type, content format, video length, music choice, text overlay density), cross-metric correlation matrix, save rate → revenue pathway analysis, predictive save rate modeling with pre-launch scorecard, optimization playbook for low/medium/high save rates, audience segment analysis, monthly reporting framework, A/B testing protocol, and quick-win hacks. Both files follow patterns from outreach message templates with clear structure, practical examples, actionable frameworks, and data-driven guidance.",
+          "updated_at": "2026-02-27T17:18:53.575469+00:00"
+        }
+      ]
+    },
+    {
+      "id": "phase-6-ab-testing",
+      "name": "A/B Testing Framework",
+      "type": "implementation",
+      "description": "Create A/B testing framework and variant templates",
+      "depends_on": [
+        "phase-5-tracking"
+      ],
+      "parallel_safe": false,
+      "subtasks": [
+        {
+          "id": "subtask-6-1",
+          "description": "Create A/B testing framework and variant templates",
+          "service": "documentation",
+          "files_to_modify": [],
+          "files_to_create": [
+            "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/ab-testing/testing-framework.md",
+            "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/ab-testing/variant-templates.md"
+          ],
+          "patterns_from": [
+            "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/performance-tracking/template-tracker.md"
+          ],
+          "verification": {
+            "type": "manual",
+            "instructions": "Verify testing-framework.md includes A/B test methodology and variant-templates.md provides example hook/script variants for testing"
+          },
+          "status": "completed",
+          "notes": "Created comprehensive testing-framework.md (465 lines) and variant-templates.md (580 lines). Testing framework includes: Testing Philosophy, Test Variable definitions (hooks, scripts, CTAs, visual styles, captions), A/B Testing Methodology with Golden Rule (test ONE variable at a time), step-by-step test setup process (hypothesis, metrics, variants, sample size, tracking), results analysis with winner declaration criteria (20% minimum improvement), testing calendar (monthly plan), advanced multivariate testing guidance, common mistakes to avoid, quick-start testing plan, A/B testing tracker spreadsheet structure, testing maturity levels, integration with content calendar, comprehensive checklist, and tools/resources references. Variant templates includes: 20 ready-to-use test scenarios organized by element type (Hook Variants: Tests 1-5, Script Structure Variants: Tests 6-10, CTA Variants: Tests 11-15, Visual Style Variants: Tests 16-18, Caption/Hashtag Variants: Tests 19-20). Each test provides side-by-side Variant A (Control) vs Variant B (Test) comparisons with hypothesis, primary metric, expected winner, and key differences. Also includes testing scenarios by content goal (maximize saves, follows, link clicks, engagement), custom variant creation template, and pro tips. Both files follow the established pattern from template-tracker.md with clear structure, data-driven frameworks, actionable guidance, and practical examples. All verification requirements met: testing-framework.md includes comprehensive A/B test methodology, variant-templates.md provides extensive hook/script/CTA variant examples for immediate testing.",
+          "updated_at": "2026-02-27T17:23:54.630831+00:00"
+        }
+      ]
+    },
+    {
+      "id": "phase-7-customization",
+      "name": "Customization Workflow",
+      "type": "implementation",
+      "description": "Create easy template customization workflow guide",
+      "depends_on": [
+        "phase-4-categories"
+      ],
+      "parallel_safe": true,
+      "subtasks": [
+        {
+          "id": "subtask-7-1",
+          "description": "Create template customization guide",
+          "service": "documentation",
+          "files_to_modify": [],
+          "files_to_create": [
+            "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/customization/how-to-customize.md"
+          ],
+          "patterns_from": [
+            "claude-code-os-implementation/03-ai-growth-engine/tiktok-outreach/02-outreach-message-templates.md"
+          ],
+          "verification": {
+            "type": "manual",
+            "instructions": "Verify how-to-customize.md provides step-by-step workflow for adapting templates to specific products/brands"
+          },
+          "status": "completed",
+          "notes": "Created comprehensive how-to-customize.md (803 lines) with step-by-step workflow for adapting TikTok content templates to specific products/brands. Includes: 5-Step Customization Workflow (Select Template, Extract Framework, Gather Specifics, Execute Customization, Brand Voice Alignment), Goal-First Template Selection guide, 3-Layer Framework explanation (Psychological/Strategic/Brand Voice), Product Specifics gathering checklist with customer language audit, detailed hook and script customization process with examples, Brand Voice Alignment with decision matrix and adaptation examples, 3 comprehensive Before/After customization examples (different products/audiences/categories), 4 Advanced Customization Strategies (Pain Point Ladder, Feature Translation, Objection Pre-Emption, Audience Segmentation), complete customization checklist (6 categories, 20+ items), 6 Common Customization Mistakes with fixes, 4 Quick Customization Formulas for fast implementation, workflow summary and next steps, resource references to other library files. Pattern followed: tiktok-outreach/02-outreach-message-templates.md with clear framework structure, step-by-step guidance, specific practical examples, actionable templates/formulas, common mistakes section, and professional yet accessible tone. Verification passed: how-to-customize.md provides comprehensive step-by-step workflow for adapting templates to specific products/brands with practical examples, checklists, and formulas.",
+          "updated_at": "2026-02-27T17:29:01.702197+00:00"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "total_phases": 7,
+    "total_subtasks": 13,
+    "services_involved": [
+      "documentation"
+    ],
+    "parallelism": {
+      "max_parallel_phases": 1,
+      "parallel_groups": [],
+      "recommended_workers": 1,
+      "speedup_estimate": "Sequential execution - documentation task"
+    },
+    "startup_command": "No service startup required - documentation task only"
+  },
+  "verification_strategy": {
+    "risk_level": "trivial",
+    "skip_validation": true,
+    "test_creation_phase": null,
+    "test_types_required": [],
+    "security_scanning_required": false,
+    "staging_deployment_required": false,
+    "acceptance_criteria": [
+      "Master README exists and links to all sections",
+      "10+ hook templates created across 4 categories",
+      "5+ complete video script frameworks with timing and structure",
+      "Category-specific templates for toys & games and general e-commerce",
+      "Performance tracking framework with save rate correlation",
+      "A/B testing framework with variant examples",
+      "Customization workflow guide created"
+    ],
+    "verification_steps": [
+      {
+        "name": "File Existence Check",
+        "command": "find ./claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok -name '*.md' | wc -l",
+        "expected_outcome": "At least 19 markdown files created",
+        "type": "manual",
+        "required": true,
+        "blocking": false
+      },
+      {
+        "name": "Content Quality Review",
+        "command": null,
+        "expected_outcome": "All templates include: title, purpose, template structure, customization guide, examples, and performance tips",
+        "type": "manual",
+        "required": true,
+        "blocking": false
+      }
+    ],
+    "reasoning": "Trivial risk - documentation-only changes, no code execution, no functional impact. Validation can be skipped per guidelines."
+  },
+  "qa_acceptance": {
+    "unit_tests": {
+      "required": false,
+      "commands": [],
+      "minimum_coverage": null
+    },
+    "integration_tests": {
+      "required": false,
+      "commands": [],
+      "services_to_test": []
+    },
+    "e2e_tests": {
+      "required": false,
+      "commands": [],
+      "flows": []
+    },
+    "browser_verification": {
+      "required": false,
+      "pages": []
+    },
+    "database_verification": {
+      "required": false,
+      "checks": []
+    }
+  },
+  "qa_signoff": {
+    "status": "approved",
+    "qa_session": 2,
+    "issues_found": [
+      {
+        "description": "None - All acceptance criteria met. Previous issue (file location) has been fixed."
+      }
+    ],
+    "tests_passed": {},
+    "timestamp": "2026-02-27T17:43:48.496467+00:00",
+    "ready_for_qa_revalidation": false
+  },
+  "status": "human_review",
+  "planStatus": "review",
+  "updated_at": "2026-02-27T17:44:05.984Z",
+  "last_updated": "2026-02-27T17:43:48.496517+00:00",
+  "qa_iteration_history": [
+    {
+      "iteration": 1,
+      "status": "rejected",
+      "timestamp": "2026-02-27T17:33:45.441756+00:00",
+      "issues": [
+        {
+          "description": "1 critical issue: general-ecommerce.md file is in wrong directory location (./content-templates/ instead of ./claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/). File needs to be moved to correct location."
+        }
+      ],
+      "duration_seconds": 252.37
+    },
+    {
+      "iteration": 2,
+      "status": "approved",
+      "timestamp": "2026-02-27T17:44:05.969321+00:00",
+      "issues": [],
+      "duration_seconds": 507.55
+    }
+  ],
+  "qa_stats": {
+    "total_iterations": 2,
+    "last_iteration": 2,
+    "last_status": "approved",
+    "issues_by_type": {
+      "unknown": 1
+    }
+  }
+}

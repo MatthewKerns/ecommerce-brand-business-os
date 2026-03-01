@@ -1,0 +1,50 @@
+{
+  "files_to_modify": {
+    "email-automation": [
+      "src/core/sequences/sequence-engine.ts",
+      "src/core/ai/content-generator.ts"
+    ],
+    "dashboard": [
+      "src/app/sequences/page.tsx",
+      "src/components/sequences/SequenceEditor.tsx"
+    ]
+  },
+  "files_to_create": {
+    "email-automation": [
+      "src/templates/welcome-series.ts",
+      "src/templates/nurture-series.ts",
+      "src/core/analytics/tracking.ts",
+      "src/core/analytics/ab-testing.ts"
+    ],
+    "dashboard": [
+      "src/app/sequences/new/page.tsx",
+      "src/app/sequences/[id]/edit/page.tsx",
+      "src/components/sequences/TemplateSelector.tsx",
+      "src/components/sequences/PersonalizationEditor.tsx",
+      "src/components/sequences/ABTestManager.tsx",
+      "src/components/analytics/SequenceMetrics.tsx"
+    ]
+  },
+  "files_to_reference": [
+    "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/04-email-marketing-automation/implementation/src/core/sequences/sequence-engine.ts",
+    "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/04-email-marketing-automation/implementation/src/core/ai/content-generator.ts",
+    "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/04-email-marketing-automation/implementation/src/types/lead.ts",
+    "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/04-email-marketing-automation/email-marketing-plan.md"
+  ],
+  "patterns": {
+    "sequence_pattern": "Sequences use SequenceEngine class with step types (email, wait, condition, ab_test, goal). Each sequence has enrollment tracking and metrics.",
+    "content_generation": "ContentGenerator supports multiple AI providers (Gemini, OpenAI, Claude). Templates have systemPrompt + userPromptTemplate with variable substitution.",
+    "lead_tracking": "Lead model has engagement metrics (emailsSent, emailsOpened, emailsClicked), custom fields, and sequence enrollment status.",
+    "dashboard_pattern": "Next.js 14 with App Router, Clerk auth, Tailwind CSS, TypeScript. Pages in src/app/, components in src/components/."
+  },
+  "existing_implementations": {
+    "description": "Full email marketing automation system exists with sequence engine, AI content generation, lead management, and Gmail integration. Dashboard has Clerk auth and basic structure.",
+    "relevant_files": [
+      "04-email-marketing-automation/implementation/src/core/sequences/sequence-engine.ts",
+      "04-email-marketing-automation/implementation/src/core/ai/content-generator.ts",
+      "04-email-marketing-automation/implementation/src/core/email/gmail-client.ts",
+      "04-email-marketing-automation/implementation/src/types/lead.ts",
+      "dashboard/src/app/layout.tsx"
+    ]
+  }
+}

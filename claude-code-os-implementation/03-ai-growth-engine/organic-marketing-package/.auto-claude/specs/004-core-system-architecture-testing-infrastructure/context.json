@@ -1,0 +1,69 @@
+{
+  "files_to_modify": {
+    "ai-content-agents": [
+      "requirements.txt",
+      "config/config.py"
+    ]
+  },
+  "files_to_create": {
+    "root": [
+      ".github/workflows/ci.yml",
+      "pyproject.toml",
+      "pytest.ini"
+    ],
+    "ai-content-agents": [
+      "tests/__init__.py",
+      "tests/test_base_agent.py",
+      "tests/test_blog_agent.py",
+      "tests/test_social_agent.py",
+      "tests/test_amazon_agent.py",
+      "tests/test_competitor_agent.py",
+      "logging_config.py",
+      "api/__init__.py",
+      "api/main.py",
+      "api/routes.py",
+      "database/schema.sql",
+      "database/models.py",
+      "database/__init__.py"
+    ],
+    "documentation": [
+      "docs/ARCHITECTURE.md",
+      "docs/API_DESIGN.md",
+      "docs/DATABASE_SCHEMA.md",
+      "docs/TESTING_GUIDE.md",
+      "docs/ERROR_HANDLING.md"
+    ]
+  },
+  "files_to_reference": [
+    "ai-content-agents/agents/base_agent.py",
+    "ai-content-agents/config/config.py",
+    "ai-content-agents/test_setup.py"
+  ],
+  "patterns": {
+    "agent_pattern": "All agents inherit from BaseAgent class in agents/base_agent.py",
+    "config_pattern": "Centralized configuration in config/config.py with Path objects",
+    "brand_context_loading": "Load markdown files from claude-code-os-implementation/ directories",
+    "output_pattern": "Save to output/ directory with timestamp-based filenames",
+    "api_client_pattern": "Use anthropic.Anthropic client with API key from env"
+  },
+  "existing_implementations": {
+    "description": "Python content generation agents using Anthropic API with brand context loading",
+    "relevant_files": [
+      "ai-content-agents/agents/base_agent.py",
+      "ai-content-agents/config/config.py",
+      "ai-content-agents/generate_content.py"
+    ],
+    "base_dependencies": [
+      "anthropic>=0.39.0",
+      "python-dotenv>=1.0.0"
+    ]
+  },
+  "new_infrastructure_needs": {
+    "database": "SQLite for local dev, PostgreSQL for production - store content history, API usage, performance metrics",
+    "api": "FastAPI REST API to expose agents as web services",
+    "testing": "pytest with fixtures for agents, mock Anthropic API responses",
+    "ci_cd": "GitHub Actions for automated testing on push",
+    "logging": "Python logging module with structured logging to files and console",
+    "error_handling": "Custom exception classes, proper error propagation, user-friendly messages"
+  }
+}

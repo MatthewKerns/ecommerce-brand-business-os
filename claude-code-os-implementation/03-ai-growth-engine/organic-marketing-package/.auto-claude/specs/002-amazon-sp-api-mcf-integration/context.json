@@ -1,0 +1,60 @@
+{
+  "files_to_create": {
+    "ai-content-agents": [
+      "integrations/__init__.py",
+      "integrations/amazon_sp_api/__init__.py",
+      "integrations/amazon_sp_api/auth.py",
+      "integrations/amazon_sp_api/mcf_client.py",
+      "integrations/amazon_sp_api/models.py",
+      "tests/test_amazon_mcf.py"
+    ],
+    "config": [
+      "ai-content-agents/.env.example (update with Amazon credentials)"
+    ]
+  },
+  "files_to_modify": {
+    "ai-content-agents": [
+      "ai-content-agents/requirements.txt",
+      "ai-content-agents/config/config.py"
+    ]
+  },
+  "files_to_reference": [
+    "ai-content-agents/agents/base_agent.py",
+    "ai-content-agents/config/config.py",
+    "ai-content-agents/.env.example"
+  ],
+  "patterns": {
+    "api_client_pattern": "Create standalone API client modules in integrations/ directory",
+    "auth_pattern": "Use OAuth/LWA authentication with refresh tokens stored in environment variables",
+    "config_pattern": "Add API credentials to config/config.py, load from environment variables",
+    "testing_pattern": "Create tests in tests/ directory using pytest"
+  },
+  "existing_implementations": {
+    "description": "No existing Amazon SP-API integration. Will create new integrations module. Existing agents use BaseAgent pattern with Anthropic API - similar pattern for external API integrations.",
+    "relevant_files": [
+      "ai-content-agents/agents/base_agent.py (for API client pattern)",
+      "ai-content-agents/config/config.py (for configuration pattern)"
+    ]
+  },
+  "external_dependencies": {
+    "amazon_sp_api": {
+      "library": "python-amazon-sp-api",
+      "purpose": "Official Amazon SP-API Python client library",
+      "authentication": "LWA OAuth with refresh tokens",
+      "endpoints_needed": [
+        "POST /fba/outbound/createFulfillmentOrder",
+        "GET /fba/outbound/getFulfillmentOrder",
+        "GET /fba/outbound/getPackageTrackingDetails",
+        "GET /fba/inventory/summaries"
+      ]
+    }
+  },
+  "environment_variables_needed": [
+    "AMAZON_SP_API_CLIENT_ID",
+    "AMAZON_SP_API_CLIENT_SECRET",
+    "AMAZON_SP_API_REFRESH_TOKEN",
+    "AMAZON_SELLER_ID",
+    "AMAZON_MARKETPLACE_ID",
+    "AMAZON_REGION"
+  ]
+}

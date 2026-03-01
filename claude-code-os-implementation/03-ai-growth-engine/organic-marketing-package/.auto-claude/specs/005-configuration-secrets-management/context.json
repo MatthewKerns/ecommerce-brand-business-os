@@ -1,0 +1,60 @@
+{
+  "files_to_modify": {
+    "ai-content-agents": [
+      "ai-content-agents/config/config.py",
+      "ai-content-agents/.env.example"
+    ],
+    "email-automation": [
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/04-email-marketing-automation/implementation/src/index.ts"
+    ],
+    "documentation": [
+      "README.md"
+    ]
+  },
+  "files_to_create": {
+    "ai-content-agents": [
+      "ai-content-agents/config/secrets.py",
+      "ai-content-agents/config/environments.py",
+      "ai-content-agents/.env.development",
+      "ai-content-agents/.env.staging",
+      "ai-content-agents/.env.production"
+    ],
+    "email-automation": [
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/04-email-marketing-automation/implementation/src/config/index.ts",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/04-email-marketing-automation/implementation/src/config/secrets.ts",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/04-email-marketing-automation/implementation/.env.example"
+    ],
+    "documentation": [
+      "CONFIGURATION.md"
+    ]
+  },
+  "files_to_reference": [
+    "ai-content-agents/config/config.py",
+    "ai-content-agents/.env.example",
+    "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/04-email-marketing-automation/implementation/src/core/email/gmail-client.ts",
+    "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/04-email-marketing-automation/implementation/src/core/ai/content-generator.ts"
+  ],
+  "patterns": {
+    "python_config_pattern": "Centralized config/config.py file using os.getenv() with python-dotenv",
+    "typescript_config_pattern": "Config interfaces passed to class constructors (GmailConfig, AIConfig)",
+    "env_pattern": ".env files gitignored, .env.example checked in",
+    "oauth_pattern": "Gmail OAuth2 already handles token refresh automatically via googleapis library"
+  },
+  "existing_implementations": {
+    "description": "Python side has basic environment variable loading via python-dotenv. TypeScript side has structured config interfaces but no centralized config loading. OAuth2 refresh tokens already working for Gmail.",
+    "relevant_files": [
+      "ai-content-agents/config/config.py",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/04-email-marketing-automation/implementation/src/core/email/gmail-client.ts"
+    ],
+    "gaps": [
+      "No encryption at rest for sensitive credentials",
+      "No environment-specific configuration files (dev/staging/prod)",
+      "No centralized configuration validation",
+      "No configuration documentation for onboarding"
+    ]
+  },
+  "dependencies": {
+    "python_new": ["cryptography"],
+    "typescript_new": ["@google-cloud/secret-manager (optional)", "joi or zod for validation"]
+  }
+}

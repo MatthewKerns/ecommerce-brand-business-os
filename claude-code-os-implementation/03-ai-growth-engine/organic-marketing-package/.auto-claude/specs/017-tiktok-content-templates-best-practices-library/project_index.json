@@ -1,0 +1,22 @@
+{
+  "project_type": "single",
+  "services": {
+    "documentation": {
+      "path": "./claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package",
+      "tech_stack": ["markdown", "documentation"],
+      "port": null,
+      "dev_command": null,
+      "test_command": null
+    }
+  },
+  "infrastructure": {
+    "docker": false,
+    "database": null
+  },
+  "conventions": {
+    "documentation_format": "markdown",
+    "file_organization": "category-based directories",
+    "template_structure": "yaml frontmatter + markdown content"
+  },
+  "notes": "This is a documentation project creating TikTok content templates. No services to run, pure content creation."
+}

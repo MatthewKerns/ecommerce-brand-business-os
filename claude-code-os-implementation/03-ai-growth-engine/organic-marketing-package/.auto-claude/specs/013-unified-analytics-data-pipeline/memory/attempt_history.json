@@ -1,0 +1,177 @@
+{
+  "subtasks": {
+    "subtask-1-1": {
+      "attempts": [
+        {
+          "session": 2,
+          "timestamp": "2026-02-26T19:41:20.470374",
+          "approach": "Implemented: Create analytics data models (TikTok metrics, website analytics, email metrics, sales data)",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-1-2": {
+      "attempts": [
+        {
+          "session": 3,
+          "timestamp": "2026-02-26T19:45:12.145271",
+          "approach": "Implemented: Add database initialization for analytics tables",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-2-1": {
+      "attempts": [
+        {
+          "session": 4,
+          "timestamp": "2026-02-26T19:49:54.981803",
+          "approach": "Implemented: Extend TikTok Shop client to fetch analytics data",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-2-2": {
+      "attempts": [
+        {
+          "session": 5,
+          "timestamp": "2026-02-26T19:52:47.887128",
+          "approach": "Implemented: Create TikTok ETL script to ingest data into warehouse",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-3-1": {
+      "attempts": [
+        {
+          "session": 6,
+          "timestamp": "2026-02-26T19:55:35.487829",
+          "approach": "Implemented: Create website analytics ETL (GA4 or placeholder)",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-3-2": {
+      "attempts": [
+        {
+          "session": 7,
+          "timestamp": "2026-02-26T19:58:13.633976",
+          "approach": "Implemented: Create email metrics ETL (Klaviyo or placeholder)",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-3-3": {
+      "attempts": [
+        {
+          "session": 8,
+          "timestamp": "2026-02-26T20:01:20.228479",
+          "approach": "Implemented: Create sales data ETL (TikTok Shop + website orders)",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-4-1": {
+      "attempts": [
+        {
+          "session": 9,
+          "timestamp": "2026-02-26T20:05:32.023574",
+          "approach": "Implemented: Create scheduler orchestrating all ETL pipelines",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-4-2": {
+      "attempts": [
+        {
+          "session": 10,
+          "timestamp": "2026-02-26T20:07:46.343232",
+          "approach": "Implemented: Add configuration for refresh intervals and schedules",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-5-1": {
+      "attempts": [
+        {
+          "session": 11,
+          "timestamp": "2026-02-26T20:11:40.103291",
+          "approach": "Implemented: Create channel performance dashboard component",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-5-2": {
+      "attempts": [
+        {
+          "session": 12,
+          "timestamp": "2026-02-26T20:14:39.075180",
+          "approach": "Implemented: Create funnel visualization component",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-5-3": {
+      "attempts": [
+        {
+          "session": 13,
+          "timestamp": "2026-02-26T20:17:55.598547",
+          "approach": "Implemented: Create metrics overview component",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-6-1": {
+      "attempts": [
+        {
+          "session": 14,
+          "timestamp": "2026-02-26T20:22:01.082054",
+          "approach": "Implemented: Test complete data flow: TikTok \u2192 database \u2192 dashboard",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-6-2": {
+      "attempts": [
+        {
+          "session": 15,
+          "timestamp": "2026-02-26T20:25:58.887526",
+          "approach": "Implemented: Verify acceptance criteria from spec",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    }
+  },
+  "stuck_subtasks": [],
+  "metadata": {
+    "created_at": "2026-02-26T19:27:40.875682",
+    "last_updated": "2026-02-26T20:25:58.887559"
+  }
+}

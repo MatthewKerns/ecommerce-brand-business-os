@@ -1,0 +1,53 @@
+{
+  "files_to_modify": {
+    "content-agents": [
+      "database/models.py",
+      "database/init_db.py"
+    ],
+    "mcf-connector": [
+      "src/clients/tiktok-shop-client.ts"
+    ],
+    "dashboard": []
+  },
+  "files_to_create": {
+    "content-agents": [
+      "analytics/models.py",
+      "analytics/etl/__init__.py",
+      "analytics/etl/tiktok_ingestion.py",
+      "analytics/etl/website_ingestion.py",
+      "analytics/etl/email_ingestion.py",
+      "analytics/etl/sales_ingestion.py",
+      "analytics/scheduler.py"
+    ],
+    "dashboard": [
+      "src/components/analytics/ChannelDashboard.tsx",
+      "src/components/analytics/FunnelChart.tsx",
+      "src/components/analytics/MetricsOverview.tsx"
+    ]
+  },
+  "files_to_reference": [
+    "content-agents/database/models.py",
+    "content-agents/database/connection.py",
+    "mcf-connector/src/clients/tiktok-shop-client.ts",
+    "06-analytics-and-tracking/analytics-tracking-plan.md"
+  ],
+  "patterns": {
+    "database_models": "All models inherit from Base (declarative_base), use SQLAlchemy Column types, include timestamps (created_at, updated_at), relationships with back_populates, table constraints with CheckConstraint and Index",
+    "database_connection": "Use connection.py pattern with SessionLocal and get_db() context manager, support both SQLite and PostgreSQL via DATABASE_URL env var",
+    "api_clients": "TypeScript clients with retry logic, rate limiting, error handling, and webhook event emission",
+    "testing": "pytest with markers (unit, integration, e2e), FastAPI TestClient for API tests"
+  },
+  "existing_implementations": {
+    "description": "Found existing database models for content tracking (ContentHistory, APIUsage, PerformanceMetrics), MCF connector with TikTok Shop client, and comprehensive analytics tracking plan document",
+    "relevant_files": [
+      "content-agents/database/models.py",
+      "content-agents/database/connection.py",
+      "mcf-connector/src/clients/tiktok-shop-client.ts",
+      "mcf-connector/src/clients/amazon-mcf-client.ts",
+      "06-analytics-and-tracking/analytics-tracking-plan.md"
+    ],
+    "tiktok_integration": "MCF connector already has TikTok Shop API client with authentication, rate limiting, and order polling - can extend for analytics data",
+    "database_setup": "SQLAlchemy with Base declarative pattern, support for both SQLite (dev) and PostgreSQL (prod)",
+    "metrics_defined": "Analytics tracking plan defines 7 funnel stages: Awareness, Engagement, Traffic, Capture, Nurture, Conversion, Fulfillment - with specific metrics per stage"
+  }
+}

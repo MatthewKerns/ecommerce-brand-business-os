@@ -1,0 +1,45 @@
+{
+  "files_to_modify": {
+    "ai-content-agents": [
+      "config/config.py",
+      "agents/__init__.py"
+    ]
+  },
+  "files_to_create": [
+    "ai-content-agents/agents/tiktok_shop_agent.py",
+    "ai-content-agents/integrations/__init__.py",
+    "ai-content-agents/integrations/tiktok_shop/__init__.py",
+    "ai-content-agents/integrations/tiktok_shop/client.py",
+    "ai-content-agents/integrations/tiktok_shop/oauth.py",
+    "ai-content-agents/integrations/tiktok_shop/rate_limiter.py",
+    "ai-content-agents/integrations/tiktok_shop/exceptions.py",
+    "ai-content-agents/.env.example"
+  ],
+  "files_to_reference": [
+    "ai-content-agents/agents/base_agent.py",
+    "ai-content-agents/agents/social_agent.py",
+    "ai-content-agents/config/config.py"
+  ],
+  "patterns": {
+    "agent_pattern": "All agents inherit from BaseAgent class with __init__ calling super().__init__(agent_name)",
+    "config_pattern": "Configuration constants defined in config/config.py, loaded via environment variables",
+    "api_pattern": "External API integrations use client classes with error handling and authentication",
+    "output_pattern": "Content saved to OUTPUT_DIR with metadata in JSON format"
+  },
+  "existing_implementations": {
+    "description": "Found existing agent architecture with BaseAgent providing core functionality (API calls, brand context loading, file output). Social agent shows pattern for platform-specific integrations.",
+    "relevant_files": [
+      "ai-content-agents/agents/base_agent.py",
+      "ai-content-agents/agents/social_agent.py",
+      "ai-content-agents/config/config.py"
+    ]
+  },
+  "external_dependencies": {
+    "tiktok_shop_api": {
+      "docs": "https://partner.tiktokshop.com/docv2/page/",
+      "oauth_flow": "Required for seller authentication",
+      "rate_limits": "Must implement per TikTok guidelines",
+      "scopes_needed": ["Content API", "Shop API", "Data API"]
+    }
+  }
+}

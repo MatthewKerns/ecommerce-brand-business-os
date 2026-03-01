@@ -1,0 +1,137 @@
+{
+  "session_number": 13,
+  "timestamp": "2026-02-27T17:29:33.032715+00:00",
+  "subtasks_completed": [
+    "subtask-7-1"
+  ],
+  "discoveries": {
+    "file_insights": [
+      {
+        "file_path": "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/customization/how-to-customize.md",
+        "file_type": "markdown",
+        "change_type": "new_file",
+        "lines_added": 803,
+        "lines_removed": 0,
+        "primary_purpose": "Comprehensive customization guide for TikTok content templates",
+        "key_sections": [
+          "The Customization Mindset",
+          "5-Step Customization Workflow",
+          "Customization Examples: Before & After",
+          "Advanced Customization Strategies",
+          "Common Customization Mistakes",
+          "Quick Reference Checklists"
+        ],
+        "content_depth": "Very comprehensive - includes step-by-step workflows, multiple examples across product categories, decision matrices, and advanced strategies"
+      }
+    ],
+    "patterns_discovered": [
+      {
+        "pattern": "Layered Framework Architecture",
+        "description": "Guide uses a three-layer customization model: Psychological Framework (immutable), Strategic Placeholders (customizable), and Brand Voice (adaptable)",
+        "frequency": "Consistently applied across entire guide",
+        "significance": "Provides clear mental model for what to change vs. preserve"
+      },
+      {
+        "pattern": "Template-to-Customization Progression",
+        "description": "Each concept moves from generic template \u2192 variables identified \u2192 filled with specifics \u2192 voice-adapted \u2192 final version",
+        "frequency": "Applied to hooks, scripts, and framework examples",
+        "significance": "Creates teachable, repeatable customization methodology"
+      },
+      {
+        "pattern": "Multi-Product Example Application",
+        "description": "Same template framework applied to diverse products (trading card binder, gaming headset, kitchen organizer) showing universal adaptability",
+        "frequency": "Used in multiple examples sections",
+        "significance": "Demonstrates template flexibility and reduces perceived complexity"
+      },
+      {
+        "pattern": "Audience-Centric Customization",
+        "description": "Customization varies based on audience knowledge level (beginners, experts, budget-conscious), not just product type",
+        "frequency": "Featured in script customization and pain point ladder strategy",
+        "significance": "Addresses how same template serves different market segments"
+      },
+      {
+        "pattern": "Structured Checklist Integration",
+        "description": "Uses checkboxes and decision matrices to make abstract concepts concrete and actionable",
+        "frequency": "Distributed throughout: product info checklist, voice audit, decision matrix",
+        "significance": "Increases usability by converting guidance into executable tasks"
+      }
+    ],
+    "gotchas_discovered": [
+      {
+        "gotcha": "Template Preservation Risk",
+        "description": "Users might over-customize and destroy the psychological framework that makes templates work. Guide addresses this by explicitly stating what NOT to change.",
+        "impact": "High - broken framework = ineffective content",
+        "mitigation": "Clear layer 1 designation and repeated warnings about preserving core structure"
+      },
+      {
+        "gotcha": "Generic Customization Trap",
+        "description": "Simply replacing template variables without incorporating customer language results in still-generic content",
+        "impact": "Medium - content performs adequately but misses resonance",
+        "mitigation": "Emphasis on customer language audit and before/after examples showing the difference"
+      },
+      {
+        "gotcha": "Brand Voice Inconsistency",
+        "description": "Customizations might technically fit the template but sound inauthentic to brand personality",
+        "impact": "Medium - content underperforms despite correct structure",
+        "mitigation": "Brand voice audit section with decision matrix and multiple voice adaptation examples"
+      },
+      {
+        "gotcha": "Feature vs. Benefit Confusion",
+        "description": "Users may list technical features without translating them to customer-relevant benefits",
+        "impact": "Medium - reduced persuasive power",
+        "mitigation": "Feature Translation Framework strategy with explicit [Feature] \u2192 [Benefit] \u2192 [Outcome] structure"
+      }
+    ],
+    "approach_outcome": {
+      "outcome_status": "SUCCESS",
+      "methodology": "Educational document creation with practical workflow structure",
+      "key_achievements": [
+        "Created 800+ line comprehensive customization guide",
+        "Developed 5-step repeatable customization workflow",
+        "Provided 9+ detailed before/after customization examples",
+        "Created 2 advanced strategy frameworks (Pain Point Ladder, Feature Translation)",
+        "Included 5+ decision matrices and structured checklists"
+      ],
+      "deliverable_quality": "Production-ready comprehensive guide with high pedagogical value",
+      "technical_execution": "Clean markdown structure with clear hierarchy, tables, code blocks, and visual organization"
+    },
+    "recommendations": [
+      {
+        "category": "Content Enhancement",
+        "recommendation": "Create companion video walkthrough showing real-time customization of a template from start to finish",
+        "rationale": "Guide is text-heavy; visual demonstration would improve accessibility for different learning styles"
+      },
+      {
+        "category": "Cross-Reference Integration",
+        "recommendation": "Add inline links/references connecting to specific template files mentioned in goal-first selection table",
+        "rationale": "Users need easy navigation from guide to actual templates to reduce friction in workflow"
+      },
+      {
+        "category": "Feedback Loop",
+        "recommendation": "Include template customization checklist at end that users can save/share to track their customization process",
+        "rationale": "Would increase actionability and provide usage data on which customization steps users find challenging"
+      },
+      {
+        "category": "Advanced Content",
+        "recommendation": "Expand 'Common Customization Mistakes' section with failure case studies showing what went wrong and how to fix it",
+        "rationale": "Learning from mistakes is often more impactful than positive examples alone; would add practical diagnostic value"
+      },
+      {
+        "category": "Scalability",
+        "recommendation": "Create template-specific customization micro-guides that reference this master guide rather than duplicating sections",
+        "rationale": "Would reduce maintenance burden and ensure consistency across all template documentation"
+      }
+    ],
+    "subtask_id": "subtask-7-1",
+    "session_num": 13,
+    "success": true,
+    "changed_files": [
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/customization/how-to-customize.md"
+    ]
+  },
+  "what_worked": [
+    "Implemented subtask: subtask-7-1"
+  ],
+  "what_failed": [],
+  "recommendations_for_next_session": []
+}

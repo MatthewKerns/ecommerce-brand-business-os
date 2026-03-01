@@ -1,0 +1,128 @@
+=== AUTO-BUILD PROGRESS ===
+
+Project: Abandoned Cart Recovery
+Workspace: /Users/matthewkerns/workspace/ecommerce-brand-business-os/claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/.auto-claude/worktrees/tasks/016-abandoned-cart-recovery
+Started: 2026-02-27 03:28:00 UTC
+
+Workflow Type: feature
+Rationale: Multi-component feature requiring database models, API endpoints, email service, and background job scheduler. Follows backend → worker → integration pattern typical of feature workflows.
+
+Session 1 (Planner):
+- Created implementation_plan.json
+- Phases: 5
+- Total subtasks: 12
+- Created init.sh
+- Created project_index.json
+- Created context.json
+
+Phase Summary:
+- Phase 1 (Database Models & Schema): 2 subtasks, no dependencies
+  - Create database models for abandoned carts (AbandonedCart, CartItem, CartRecoveryEmail)
+  - Create SQL migration for cart schema (002_abandoned_cart_schema.sql)
+
+- Phase 2 (Cart Tracking API): 2 subtasks, depends on phase-1-database
+  - Create cart service with business logic (CartService)
+  - Create cart API routes (POST /cart/track, GET /cart/recover/{token}, GET /cart/stats)
+
+- Phase 3 (Email Service & Templates): 2 subtasks, depends on phase-1-database
+  - Create email service with SendGrid integration
+  - Create HTML email templates for 3-email recovery sequence
+
+- Phase 4 (Background Job Scheduler): 3 subtasks, depends on phase-2-api and phase-3-email
+  - Setup Celery configuration and worker
+  - Create cart recovery Celery tasks
+  - Setup Celery Beat for periodic tasks
+
+- Phase 5 (TikTok Shop & Website Integration): 3 subtasks, depends on phase-4-scheduler
+  - Add TikTok Shop cart webhook handler
+  - Create analytics and reporting endpoints
+  - End-to-end testing and verification
+
+Services Involved:
+- backend: Python FastAPI application with SQLAlchemy, Celery, and SendGrid
+
+Tech Stack:
+- FastAPI (REST API framework)
+- SQLAlchemy (ORM)
+- Celery + Redis (background job scheduler)
+- SendGrid (transactional email)
+- Jinja2 (email templating)
+- SQLite (dev) / PostgreSQL (prod)
+
+Parallelism Analysis:
+- Max parallel phases: 2
+- Recommended workers: 1 (conservative, single service)
+- Parallel groups:
+  * Phases 2 and 3 can run in parallel (both depend only on phase 1, different file sets)
+- Speedup estimate: 1.2x faster than sequential
+
+Key Dependencies to Install:
+- sendgrid
+- celery[redis]
+- jinja2
+- redis (must be running)
+
+Acceptance Criteria:
+✓ Cart abandonment detection within 30 minutes
+✓ 3-email recovery sequence (reminder at 30 min, urgency at 24h, offer at 48h)
+✓ Product images and cart contents in emails
+✓ Direct cart recovery links
+✓ Recovery rate tracking and reporting
+✓ Integration with both TikTok Shop and website carts
+
+=== STARTUP COMMAND ===
+
+To continue building this spec, run:
+
+  cd /Users/matthewkerns/workspace/ecommerce-brand-business-os/claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/.auto-claude/worktrees/tasks/016-abandoned-cart-recovery
+  ./.auto-claude/specs/016-abandoned-cart-recovery/init.sh
+
+Or use the orchestrator (if available):
+
+  source auto-claude/.venv/bin/activate && python auto-claude/run.py --spec 016 --parallel 1
+
+=== IMPLEMENTATION NOTES ===
+
+Database Schema:
+- New tables: abandoned_carts, cart_items, cart_recovery_emails
+- Follow existing ContentHistory pattern for models
+- Use relationships, constraints, and indexes
+- Migration: 002_abandoned_cart_schema.sql
+
+API Endpoints:
+- POST /api/cart/track - Track cart events (website or TikTok Shop)
+- GET /api/cart/recover/{token} - Handle recovery link clicks
+- POST /api/cart/webhook/tiktok - Receive TikTok Shop cart webhooks
+- GET /api/cart/analytics - Return recovery metrics
+
+Email Sequence Timing:
+- Email 1 (Reminder): 30 minutes after abandonment - friendly reminder
+- Email 2 (Urgency): 24 hours after abandonment - limited stock/time messaging
+- Email 3 (Offer): 48 hours after abandonment - discount code offer
+
+Celery Tasks:
+- process_abandoned_carts() - Periodic task (every 5 min) to find abandoned carts
+- send_recovery_email(cart_id, email_type) - Send specific email in sequence
+- schedule_recovery_sequence(cart_id) - Schedule all 3 emails with proper timing
+
+Testing Strategy:
+- Unit tests for models, services, and tasks
+- Integration tests for API endpoints
+- E2E test for full cart recovery flow (with mocked time and SendGrid)
+- Manual verification of email templates
+
+Environment Variables Needed:
+- SENDGRID_API_KEY - SendGrid API key for sending emails
+- REDIS_URL - Redis connection URL (default: redis://localhost:6379)
+- DATABASE_URL - Database connection (SQLite for dev)
+
+=== NEXT STEPS FOR CODER AGENT ===
+
+1. Read implementation_plan.json
+2. Start with subtask-1-1 (Create database models)
+3. Follow the patterns in database/models.py
+4. Run verification command after each subtask
+5. Mark subtask complete before moving to next
+6. Create git commit after each completed subtask
+
+=== END SESSION 1 ===

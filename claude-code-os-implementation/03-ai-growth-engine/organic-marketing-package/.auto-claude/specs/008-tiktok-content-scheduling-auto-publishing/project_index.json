@@ -1,0 +1,36 @@
+{
+  "project_type": "single",
+  "services": {
+    "backend": {
+      "path": "./claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents",
+      "tech_stack": ["python", "fastapi", "sqlalchemy", "uvicorn"],
+      "port": 8000,
+      "dev_command": "uvicorn api.main:app --reload --host 0.0.0.0 --port 8000",
+      "test_command": "pytest tests/ -v",
+      "database": "postgresql"
+    },
+    "scheduler": {
+      "path": "./claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents",
+      "tech_stack": ["python", "apscheduler"],
+      "dev_command": "python scheduler/scheduler_service.py",
+      "test_command": "pytest tests/test_scheduler.py -v",
+      "description": "Background service for executing scheduled content publishing"
+    }
+  },
+  "infrastructure": {
+    "docker": false,
+    "database": "postgresql",
+    "orm": "sqlalchemy",
+    "migrations": "alembic"
+  },
+  "conventions": {
+    "linter": "flake8",
+    "formatter": "black",
+    "testing": "pytest",
+    "code_style": "PEP 8",
+    "agent_pattern": "All agents inherit from BaseAgent",
+    "api_pattern": "FastAPI with APIRouter, prefix='/api'",
+    "error_handling": "Custom exception hierarchy from exceptions.py",
+    "logging": "Centralized via logging_config.get_logger()"
+  }
+}

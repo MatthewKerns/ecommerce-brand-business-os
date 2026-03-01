@@ -1,0 +1,153 @@
+{
+  "subtasks": {
+    "subtask-1-1": {
+      "attempts": [
+        {
+          "session": 2,
+          "timestamp": "2026-02-26T19:38:54.538218",
+          "approach": "Implemented: Create database models for abandoned carts",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-1-2": {
+      "attempts": [
+        {
+          "session": 3,
+          "timestamp": "2026-02-26T19:41:30.253561",
+          "approach": "Implemented: Create SQL migration for cart schema",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-2-1": {
+      "attempts": [
+        {
+          "session": 4,
+          "timestamp": "2026-02-26T19:44:39.598553",
+          "approach": "Implemented: Create cart service with business logic",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-2-2": {
+      "attempts": [
+        {
+          "session": 5,
+          "timestamp": "2026-02-26T19:48:06.672787",
+          "approach": "Implemented: Create cart API routes",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-3-1": {
+      "attempts": [
+        {
+          "session": 6,
+          "timestamp": "2026-02-26T19:51:29.621178",
+          "approach": "Implemented: Create email service with SendGrid integration",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-3-2": {
+      "attempts": [
+        {
+          "session": 7,
+          "timestamp": "2026-02-26T19:54:54.028538",
+          "approach": "Implemented: Create HTML email templates for recovery sequence",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-4-1": {
+      "attempts": [
+        {
+          "session": 8,
+          "timestamp": "2026-02-26T19:58:33.708440",
+          "approach": "Implemented: Setup Celery configuration and worker",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-4-2": {
+      "attempts": [
+        {
+          "session": 9,
+          "timestamp": "2026-02-26T20:01:50.999729",
+          "approach": "Implemented: Create cart recovery Celery tasks",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-4-3": {
+      "attempts": [
+        {
+          "session": 10,
+          "timestamp": "2026-02-26T20:03:35.019846",
+          "approach": "Implemented: Setup Celery Beat for periodic tasks",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-5-1": {
+      "attempts": [
+        {
+          "session": 11,
+          "timestamp": "2026-02-26T20:06:18.457531",
+          "approach": "Implemented: Add TikTok Shop cart webhook handler",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-5-2": {
+      "attempts": [
+        {
+          "session": 12,
+          "timestamp": "2026-02-26T20:08:58.224978",
+          "approach": "Implemented: Create analytics and reporting endpoints",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-5-3": {
+      "attempts": [
+        {
+          "session": 13,
+          "timestamp": "2026-02-26T20:12:05.591944",
+          "approach": "Implemented: End-to-end testing and verification",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    }
+  },
+  "stuck_subtasks": [],
+  "metadata": {
+    "created_at": "2026-02-26T19:27:53.005622",
+    "last_updated": "2026-02-26T20:12:05.591990"
+  }
+}

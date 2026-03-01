@@ -1,0 +1,184 @@
+{
+  "session_number": 6,
+  "timestamp": "2026-02-26T06:26:46.227926+00:00",
+  "subtasks_completed": [
+    "subtask-2-2"
+  ],
+  "discoveries": {
+    "file_insights": [
+      {
+        "file_path": "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/05-mcf-connector-integration/implementation/src/clients/tiktok-shop-client.ts",
+        "file_type": "TypeScript",
+        "size_lines": 470,
+        "change_type": "new_file",
+        "key_components": [
+          "TikTokShopClient class",
+          "OAuth2 token refresh",
+          "HMAC-SHA256 signature generation",
+          "Exponential backoff retry logic",
+          "Order retrieval with pagination",
+          "Tracking number updates",
+          "Request interceptor for auth headers"
+        ],
+        "complexity": "high",
+        "test_coverage": "no_tests"
+      }
+    ],
+    "patterns_discovered": [
+      {
+        "pattern_name": "Request Signing",
+        "description": "TikTok Shop API requires HMAC-SHA256 signatures on all requests. Pattern concatenates app_key + timestamp + path + query_string + body, then generates HMAC with app_secret",
+        "location": "generateSignature function",
+        "criticality": "high"
+      },
+      {
+        "pattern_name": "Axios Request Interceptor",
+        "description": "Automatic injection of authentication headers (x-tts-access-token, x-tts-app-key, x-tts-timestamp, x-tts-sign) on every request",
+        "location": "constructor interceptor",
+        "criticality": "high"
+      },
+      {
+        "pattern_name": "Exponential Backoff Retry",
+        "description": "Configurable retry logic with exponential backoff for transient failures. Defaults to 3 retries with 1s initial delay, 2x multiplier, 30s max delay",
+        "location": "executeWithRetry method",
+        "criticality": "high"
+      },
+      {
+        "pattern_name": "Error Classification",
+        "description": "Errors mapped to retryable vs non-retryable based on HTTP status, TikTok error codes, and network conditions",
+        "location": "isRetryableError and handleTikTokError functions",
+        "criticality": "medium"
+      },
+      {
+        "pattern_name": "Query String Building",
+        "description": "Sorted, URL-encoded query parameters for consistent signature generation",
+        "location": "buildQueryString function",
+        "criticality": "medium"
+      }
+    ],
+    "gotchas_discovered": [
+      {
+        "gotcha": "Signature Generation Order Matters",
+        "description": "Query parameters must be sorted alphabetically before signature generation. Incorrect ordering will cause signature validation failures on TikTok's side",
+        "severity": "high",
+        "mitigation": "buildQueryString includes sort before encoding"
+      },
+      {
+        "gotcha": "Token Refresh Uses Different Signature Method",
+        "description": "refreshAccessToken method manually builds signature and headers instead of using axios interceptor, suggesting TikTok's token refresh endpoint may have different auth requirements",
+        "severity": "medium",
+        "mitigation": "Documented in code but could fail silently if TikTok changes auth scheme"
+      },
+      {
+        "gotcha": "Null Body Handling in Signature",
+        "description": "generateSignature uses empty string for missing body, which must match TikTok's expectations. POST requests with no body must pass empty string, not null/undefined",
+        "severity": "medium",
+        "mitigation": "Handled in request interceptor with conditional check"
+      },
+      {
+        "gotcha": "Pagination Uses 'cursor' Not 'page_token'",
+        "description": "Internal parameter is page_token but TikTok API expects 'cursor' in query params. Mismatch would cause pagination to fail",
+        "severity": "high",
+        "mitigation": "Correctly mapped in getOrders method"
+      },
+      {
+        "gotcha": "Success Code is 0, Not 200",
+        "description": "TikTok API returns HTTP 200 with code: 0 for success. HTTP status alone cannot be used to determine API success",
+        "severity": "high",
+        "mitigation": "All methods check response.data.code !== 0"
+      },
+      {
+        "gotcha": "Shop Cipher Required for All Requests",
+        "description": "Every API call requires shop_cipher parameter (shopId), missing it will cause silent failures or 400 errors",
+        "severity": "high",
+        "mitigation": "Added to all relevant requests in getOrders and getOrderDetail"
+      }
+    ],
+    "approach_outcome": {
+      "status": "SUCCESS",
+      "completion_percentage": 100,
+      "session_number": 6,
+      "approach": "Single-file implementation of full-featured TikTok Shop API client with production-ready patterns",
+      "strengths": [
+        "Comprehensive error handling with retryable vs non-retryable classification",
+        "Configurable retry logic with exponential backoff",
+        "Zod schema validation for type safety",
+        "Request signing fully automated via interceptor",
+        "OAuth2 refresh token support",
+        "Clean separation of concerns with helper functions",
+        "Detailed JSDoc comments explaining TikTok-specific requirements",
+        "Type definitions for all API responses"
+      ],
+      "weaknesses": [
+        "No unit tests included",
+        "No integration test helpers",
+        "Token refresh endpoint bypasses interceptor, creating maintenance burden",
+        "No request/response logging",
+        "No timeout configuration per endpoint",
+        "UpdateTrackingResponse type doesn't match actual API response",
+        "testConnection method swallows errors without logging"
+      ],
+      "critical_decisions": [
+        "Using axios interceptor for automatic request signing reduces boilerplate",
+        "Separating token refresh logic to handle TikTok's different auth requirements",
+        "Implementing retryable error classification upfront for reliability",
+        "Using Zod schemas for runtime validation of API responses"
+      ]
+    },
+    "recommendations": [
+      {
+        "category": "Testing",
+        "priority": "high",
+        "recommendation": "Create unit tests for signature generation with TikTok test vectors",
+        "rationale": "Signature generation is critical path - wrong signatures fail silently on TikTok's end"
+      },
+      {
+        "category": "Testing",
+        "priority": "high",
+        "recommendation": "Add integration tests for order retrieval pagination with mock server",
+        "rationale": "Pagination logic is complex with cursor vs page_token mapping - easy to break"
+      },
+      {
+        "category": "Code Quality",
+        "priority": "medium",
+        "recommendation": "Extract token refresh signature logic into reusable function",
+        "rationale": "Current duplication between constructor interceptor and refreshAccessToken creates maintenance risk"
+      },
+      {
+        "category": "Code Quality",
+        "priority": "medium",
+        "recommendation": "Add structured logging to executeWithRetry for debugging production issues",
+        "rationale": "Transient failures are hard to debug without knowing which attempt failed and why"
+      },
+      {
+        "category": "Robustness",
+        "priority": "medium",
+        "recommendation": "Implement token refresh interception in response interceptor on 401 errors",
+        "rationale": "Currently no automatic token refresh on expiration, manual refresh required by caller"
+      },
+      {
+        "category": "Type Safety",
+        "priority": "low",
+        "recommendation": "Fix UpdateTrackingResponse to match actual TikTok API response schema",
+        "rationale": "Current type assumes simplified response, may cause issues with actual response format"
+      },
+      {
+        "category": "Documentation",
+        "priority": "low",
+        "recommendation": "Add usage examples showing order retrieval, pagination, and tracking updates",
+        "rationale": "Complex API client benefits from documented usage patterns"
+      }
+    ],
+    "subtask_id": "subtask-2-2",
+    "session_num": 6,
+    "success": true,
+    "changed_files": [
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/05-mcf-connector-integration/implementation/src/clients/tiktok-shop-client.ts"
+    ]
+  },
+  "what_worked": [
+    "Implemented subtask: subtask-2-2"
+  ],
+  "what_failed": [],
+  "recommendations_for_next_session": []
+}

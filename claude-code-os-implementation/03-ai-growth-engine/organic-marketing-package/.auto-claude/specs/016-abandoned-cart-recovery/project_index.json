@@ -1,0 +1,35 @@
+{
+  "project_type": "single",
+  "services": {
+    "backend": {
+      "path": "./claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents",
+      "tech_stack": ["python", "fastapi", "sqlalchemy"],
+      "port": 8000,
+      "dev_command": "uvicorn api.main:app --reload --host 0.0.0.0 --port 8000",
+      "test_command": "pytest tests/"
+    }
+  },
+  "infrastructure": {
+    "docker": false,
+    "database": "sqlite",
+    "database_production": "postgresql"
+  },
+  "conventions": {
+    "linter": "flake8",
+    "formatter": "black",
+    "testing": "pytest",
+    "api_framework": "fastapi",
+    "orm": "sqlalchemy",
+    "validation": "pydantic"
+  },
+  "integrations": {
+    "tiktok_shop": {
+      "path": "./claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/integrations/tiktok_shop",
+      "client": "client.py",
+      "oauth": "oauth.py"
+    },
+    "anthropic": {
+      "model": "claude-sonnet-4-5-20250929"
+    }
+  }
+}

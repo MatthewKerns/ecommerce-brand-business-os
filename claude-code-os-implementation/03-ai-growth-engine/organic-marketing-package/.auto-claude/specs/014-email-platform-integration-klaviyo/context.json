@@ -1,0 +1,65 @@
+{
+  "files_to_create": {
+    "content-agents": [
+      "integrations/klaviyo/__init__.py",
+      "integrations/klaviyo/client.py",
+      "integrations/klaviyo/auth.py",
+      "integrations/klaviyo/models.py",
+      "integrations/klaviyo/exceptions.py",
+      "api/routes/klaviyo.py"
+    ]
+  },
+  "files_to_modify": {
+    "content-agents": [
+      "config/config.py",
+      ".env.example",
+      "requirements.txt",
+      "api/main.py",
+      "api/routes/__init__.py",
+      "database/models.py"
+    ]
+  },
+  "files_to_reference": [
+    "integrations/tiktok_shop/client.py",
+    "integrations/tiktok_shop/oauth.py",
+    "integrations/tiktok_shop/exceptions.py",
+    "integrations/amazon_sp_api/mcf_client.py",
+    "integrations/amazon_sp_api/auth.py",
+    "integrations/amazon_sp_api/models.py",
+    "api/routes/blog.py",
+    "database/models.py"
+  ],
+  "patterns": {
+    "integration_client": "Follow TikTokShopClient pattern: client class with __init__, _make_request method, rate limiting, error handling, and specific API method implementations",
+    "authentication": "Follow SPAPIAuth pattern: separate auth module with credential management and token refresh",
+    "error_handling": "Custom exception classes inheriting from base exception (see tiktok_shop/exceptions.py)",
+    "api_routes": "FastAPI router with prefix, tags, Pydantic request/response models (see api/routes/blog.py)",
+    "database_models": "SQLAlchemy ORM models inheriting from Base with relationships and constraints (see database/models.py)",
+    "configuration": "Environment variables in .env files, loaded via config/config.py"
+  },
+  "existing_implementations": {
+    "description": "Two third-party API integrations exist: TikTok Shop and Amazon SP-API. Both follow similar patterns with client classes, authentication modules, data models, and custom exceptions.",
+    "relevant_files": [
+      "integrations/tiktok_shop/client.py - Complete API client with rate limiting and retry logic",
+      "integrations/amazon_sp_api/mcf_client.py - SP-API client using external library",
+      "api/routes/blog.py - Example FastAPI router with request/response models",
+      "database/models.py - Existing database models for content tracking"
+    ]
+  },
+  "klaviyo_specific": {
+    "api_base_url": "https://a.klaviyo.com/api",
+    "api_version": "2024-02-15",
+    "authentication_type": "api_key",
+    "key_endpoints": [
+      "/profiles",
+      "/events",
+      "/lists",
+      "/segments"
+    ],
+    "data_sync_sources": [
+      "TikTok Shop orders",
+      "Website interactions",
+      "Customer profiles from multiple channels"
+    ]
+  }
+}

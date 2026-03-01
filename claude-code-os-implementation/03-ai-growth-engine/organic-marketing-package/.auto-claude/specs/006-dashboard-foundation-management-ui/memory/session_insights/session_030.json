@@ -1,0 +1,238 @@
+{
+  "session_number": 30,
+  "timestamp": "2026-02-26T07:30:13.695769+00:00",
+  "subtasks_completed": [
+    "subtask-8-1"
+  ],
+  "discoveries": {
+    "file_insights": [
+      {
+        "file": "dashboard/src/components/KPIOverview.tsx",
+        "changes": "Converted from static mock data to real API integration",
+        "key_changes": [
+          "Removed hardcoded DEFAULT_METRICS array",
+          "Added useMetrics hook integration for API data fetching",
+          "Implemented data transformation layer via useMemo to map API response to KPI format",
+          "Added helper functions formatNumber() and formatCurrency() for display formatting",
+          "Added error state handling with user-friendly error messages",
+          "Added pollingInterval prop for real-time data updates",
+          "Updated component to fetch from /api/metrics endpoint"
+        ],
+        "complexity_increase": "Medium - introduced hook integration and data transformation logic"
+      },
+      {
+        "file": "dashboard/src/hooks/useMetrics.ts",
+        "changes": "New file - custom React hook for metrics data fetching",
+        "key_changes": [
+          "Created reusable hook for /api/metrics endpoint",
+          "Implemented optional polling with configurable intervals",
+          "Proper cleanup of polling intervals on unmount",
+          "Manual refetch capability",
+          "Loading and error state management",
+          "Type-safe with TypeScript generics"
+        ],
+        "complexity_increase": "New - introduces polling pattern and effect management"
+      },
+      {
+        "file": "dashboard/src/hooks/useHealthMonitor.ts",
+        "changes": "Refactored to use real API instead of simulated data",
+        "key_changes": [
+          "Replaced simulated health check with real API call via apiClient",
+          "Removed INITIAL_SERVICES mock data array",
+          "Added mapHealthStatus() function to translate API status values",
+          "Introduced SERVICE_ICONS mapping for dynamic icon resolution",
+          "Updated fetchHealthData() to call /api/health endpoint",
+          "Simplified status simulation logic"
+        ],
+        "complexity_increase": "Low - maintains same external interface, swaps backend from mock to real API"
+      },
+      {
+        "file": "dashboard/src/lib/api-client.ts",
+        "changes": "New file - centralized HTTP client library",
+        "key_changes": [
+          "Created ApiError custom error class with status and data properties",
+          "Implemented generic get<T>() function with full retry logic",
+          "Added timeout handling with AbortController",
+          "Configurable retry attempts and delays",
+          "Custom headers support",
+          "POST and DELETE methods implemented (in truncated portion)",
+          "Comprehensive error handling and response validation"
+        ],
+        "complexity_increase": "New - introduces production-grade HTTP client with advanced features"
+      }
+    ],
+    "patterns_discovered": [
+      {
+        "pattern": "API Client Abstraction",
+        "description": "Centralized HTTP client (api-client.ts) used across all hooks to ensure consistent error handling, retry logic, and request management",
+        "benefit": "Single source of truth for API communication, easier to maintain and update",
+        "usage": "useMetrics and useHealthMonitor both delegate to apiClient.get()"
+      },
+      {
+        "pattern": "Custom Hook with Polling",
+        "description": "useMetrics implements useEffect-based polling with configurable intervals and proper cleanup",
+        "benefit": "Reusable pattern for real-time data, decoupled from component logic",
+        "usage": "KPIOverview can enable polling by passing pollingInterval prop"
+      },
+      {
+        "pattern": "Data Transformation Layer",
+        "description": "useMemo in KPIOverview transforms raw API metrics to KPI display format",
+        "benefit": "Separates API schema from UI schema, prevents unnecessary recalculations",
+        "usage": "Maps nested API response structure to flat KPIMetric array"
+      },
+      {
+        "pattern": "Error State Handling",
+        "description": "Components display user-friendly error messages when API calls fail",
+        "benefit": "Better UX and debugging capability",
+        "usage": "KPIOverview renders error UI when metrics fetch fails"
+      },
+      {
+        "pattern": "Icon Mapping Strategy",
+        "description": "SERVICE_ICONS record maps service names to Lucide icons, replacing hardcoded icon assignments",
+        "benefit": "Easier to add new services without code changes, more maintainable",
+        "usage": "useHealthMonitor dynamically resolves icons based on service name"
+      },
+      {
+        "pattern": "Type-Safe Generics",
+        "description": "apiClient.get<T>() uses TypeScript generics for type-safe API responses",
+        "benefit": "Compile-time type checking, better IDE autocomplete",
+        "usage": "get<AggregatedMetrics>('/api/metrics') ensures type safety"
+      }
+    ],
+    "gotchas_discovered": [
+      {
+        "gotcha": "Polling Cleanup Management",
+        "description": "useMetrics hook sets up interval polling that must be cleaned up on unmount. Missing cleanup could cause memory leaks and multiple simultaneous requests",
+        "severity": "High",
+        "evidence": "Line ~100-104 in useMetrics.ts shows clearInterval in return statement",
+        "mitigation": "Hook properly returns cleanup function from useEffect, but developers must be aware of this when using pollingInterval prop"
+      },
+      {
+        "gotcha": "API Response Schema Coupling",
+        "description": "KPIOverview tightly couples to ApiResponse structure with nested paths like metrics.services.find(s => s.service === 'tiktok'). Changes to API schema require UI changes",
+        "severity": "Medium",
+        "evidence": "Lines ~81-92 in KPIOverview.tsx show service lookup by string comparison",
+        "mitigation": "API schema stability is critical; consider API versioning strategy"
+      },
+      {
+        "gotcha": "Default Values on API Null",
+        "description": "KPIOverview uses `|| 0` and `|| false` defaults when API data is missing, which could hide upstream data issues",
+        "severity": "Medium",
+        "evidence": "Lines ~85-100 show multiple fallbacks to 0 (e.g., tiktok?.metrics.views?.value || 0)",
+        "mitigation": "Consider logging missing fields for monitoring, validate API responses on server"
+      },
+      {
+        "gotcha": "Status Mapping Function Missing Case Handling",
+        "description": "mapHealthStatus() in useHealthMonitor.ts has default case returning 'down' which silently converts unknown statuses without warning",
+        "severity": "Low",
+        "evidence": "Lines ~66-75 in useHealthMonitor.ts show default: return 'down'",
+        "mitigation": "Consider throwing error or logging for unexpected status values"
+      },
+      {
+        "gotcha": "Partial API Implementation",
+        "description": "Git diff is truncated at api-client.ts line 257, missing POST/DELETE implementations and potentially other critical methods",
+        "severity": "Medium",
+        "evidence": "Diff shows '(truncated, 19832 chars total)' - file implementation is incomplete in provided data",
+        "mitigation": "Verify full api-client.ts implementation exists with all needed HTTP methods"
+      },
+      {
+        "gotcha": "No Request Deduplication",
+        "description": "Multiple components could trigger concurrent requests to same endpoint if pollingInterval or refetch timing overlaps",
+        "severity": "Low",
+        "evidence": "useMetrics doesn't check for in-flight requests, useHealthMonitor has separate polling logic",
+        "mitigation": "Consider implementing request deduplication cache or using React Query/SWR"
+      }
+    ],
+    "approach_outcome": {
+      "status": "SUCCESS",
+      "summary": "Successfully connected dashboard components to real API endpoints using a well-architected approach",
+      "methodology": [
+        "Created centralized API client library (api-client.ts) with production-grade features (retry logic, timeout handling, error management)",
+        "Implemented reusable custom hooks (useMetrics) for data fetching with polling support, separating concerns from components",
+        "Refactored existing mock-based hooks (useHealthMonitor) to use real API while maintaining interface compatibility",
+        "Added data transformation layer (useMemo) in KPIOverview to map API schema to UI requirements",
+        "Implemented comprehensive error handling and user-friendly error states"
+      ],
+      "achievements": [
+        "Removed all hardcoded mock data and replaced with live API calls",
+        "Decoupled API communication from component logic via hooks",
+        "Added real-time polling capability for metrics",
+        "Maintained type safety throughout with TypeScript generics",
+        "Implemented proper cleanup patterns to prevent memory leaks"
+      ],
+      "completeness": "High - all major components successfully integrated, though api-client.ts appears truncated in diff"
+    },
+    "recommendations": [
+      {
+        "category": "Code Quality",
+        "priority": "High",
+        "recommendation": "Verify complete api-client.ts implementation",
+        "rationale": "The diff is truncated at line 257; ensure POST and DELETE methods are fully implemented as expected by the component",
+        "action": "Review full api-client.ts file to confirm all HTTP methods are present"
+      },
+      {
+        "category": "Performance",
+        "priority": "High",
+        "recommendation": "Implement request caching/deduplication layer",
+        "rationale": "Multiple components may issue concurrent requests; adds unnecessary server load and network traffic",
+        "action": "Consider using React Query, SWR, or implementing local cache in api-client to deduplicate in-flight requests"
+      },
+      {
+        "category": "Error Handling",
+        "priority": "High",
+        "recommendation": "Add monitoring/logging for missing API fields",
+        "rationale": "KPIOverview silently defaults to 0 when API fields are missing, potentially hiding data quality issues",
+        "action": "Log warnings in data transformation when expected fields are null/undefined"
+      },
+      {
+        "category": "API Design",
+        "priority": "Medium",
+        "recommendation": "Establish API versioning strategy",
+        "rationale": "Components are tightly coupled to API response schema (nested property paths); changes will require UI updates",
+        "action": "Document API schema, consider API versioning (v1, v2) to allow backward compatibility"
+      },
+      {
+        "category": "Type Safety",
+        "priority": "Medium",
+        "recommendation": "Add validation/parsing layer for API responses",
+        "rationale": "Current implementation assumes API returns correct schema without validation",
+        "action": "Use runtime validation library (zod, valibot, io-ts) to parse and validate API responses"
+      },
+      {
+        "category": "Testing",
+        "priority": "Medium",
+        "recommendation": "Add unit tests for data transformation logic",
+        "rationale": "KPIOverview's useMemo transformation has complex nested property access that could break silently",
+        "action": "Write tests for formatNumber(), formatCurrency() and KPI metric mapping logic"
+      },
+      {
+        "category": "Documentation",
+        "priority": "Low",
+        "recommendation": "Document API response schemas",
+        "rationale": "No inline documentation of expected /api/metrics and /api/health response structures",
+        "action": "Add TypeScript type definitions or JSDoc comments documenting expected API schemas"
+      },
+      {
+        "category": "Observability",
+        "priority": "Low",
+        "recommendation": "Add request timing metrics",
+        "rationale": "api-client timeout is hardcoded to 10s; no visibility into actual request performance",
+        "action": "Log request duration, implement performance monitoring for slow requests"
+      }
+    ],
+    "subtask_id": "subtask-8-1",
+    "session_num": 30,
+    "success": true,
+    "changed_files": [
+      "dashboard/src/components/KPIOverview.tsx",
+      "dashboard/src/hooks/useHealthMonitor.ts",
+      "dashboard/src/hooks/useMetrics.ts",
+      "dashboard/src/lib/api-client.ts"
+    ]
+  },
+  "what_worked": [
+    "Implemented subtask: subtask-8-1"
+  ],
+  "what_failed": [],
+  "recommendations_for_next_session": []
+}

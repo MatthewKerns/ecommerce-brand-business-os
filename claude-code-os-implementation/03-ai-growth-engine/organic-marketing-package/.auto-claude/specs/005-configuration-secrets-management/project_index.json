@@ -1,0 +1,40 @@
+{
+  "project_type": "monorepo",
+  "services": {
+    "ai-content-agents": {
+      "path": "./ai-content-agents",
+      "tech_stack": ["python", "anthropic"],
+      "port": null,
+      "dev_command": "python generate_content.py",
+      "test_command": "python test_setup.py",
+      "config_pattern": "config/config.py with python-dotenv"
+    },
+    "email-automation": {
+      "path": "./claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/04-email-marketing-automation/implementation",
+      "tech_stack": ["typescript", "node", "googleapis", "openai", "anthropic"],
+      "port": null,
+      "dev_command": "npm run dev",
+      "test_command": "npm test",
+      "config_pattern": "dotenv with config interfaces"
+    }
+  },
+  "infrastructure": {
+    "docker": false,
+    "version_control": "git",
+    "ci_cd": false
+  },
+  "conventions": {
+    "python": {
+      "env_loader": "python-dotenv",
+      "config_file": "config/config.py"
+    },
+    "typescript": {
+      "env_loader": "dotenv",
+      "package_manager": "npm"
+    },
+    "secrets": {
+      "gitignore": [".env", ".env.local"],
+      "example_files": [".env.example"]
+    }
+  }
+}

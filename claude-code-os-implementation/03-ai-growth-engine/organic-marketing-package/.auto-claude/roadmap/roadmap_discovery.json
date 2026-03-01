@@ -1,0 +1,148 @@
+{
+  "project_name": "Organic Marketing Package",
+  "project_type": "api",
+  "tech_stack": {
+    "primary_language": "TypeScript/Python",
+    "frameworks": [
+      "TikTok Shop API",
+      "Amazon SP-API (MCF)",
+      "MCP (Model Context Protocol)",
+      "Klaviyo/Email Platform APIs"
+    ],
+    "key_dependencies": [
+      "TikTok Shop Content API",
+      "TikTok Shop Data API",
+      "Amazon Multi-Channel Fulfillment API",
+      "GA4 Analytics",
+      "Email marketing platform (Klaviyo)",
+      "Website platform integration"
+    ]
+  },
+  "target_audience": {
+    "primary_persona": "E-commerce brand owners spending unsustainably on paid ads who want to build organic marketing channels",
+    "secondary_personas": [
+      "Amazon FBA sellers looking to diversify to TikTok Shop",
+      "New e-commerce brands who cannot afford paid advertising",
+      "Marketing agencies seeking white-label organic marketing solutions",
+      "Toys & Games product sellers (initial niche)"
+    ],
+    "pain_points": [
+      "High and unsustainable ad spend on Facebook, Google, and Amazon PPC",
+      "Rising customer acquisition costs eating into margins",
+      "Dependency on paid channels with no organic traffic moat",
+      "Lack of knowledge about TikTok Shop and social commerce",
+      "No strategy for AI assistant optimization (AEO)",
+      "Fragmented marketing tools with no unified system",
+      "Manual content creation that doesn't scale"
+    ],
+    "goals": [
+      "Reduce ad spend by 50-80% while maintaining or growing revenue",
+      "Build compounding organic traffic channels (TikTok, blog, email)",
+      "Get brand recommended by AI assistants (ChatGPT, Claude, Perplexity)",
+      "Automate content creation and posting across channels",
+      "Convert organic traffic to email subscribers to customers",
+      "Prove ROI with trackable metrics and analytics",
+      "Create a sellable marketing system as a service"
+    ],
+    "usage_context": "E-commerce brand owners use this system to automate their entire organic marketing funnel - from TikTok content creation and posting, through blog/SEO content, to email capture and nurture sequences, with full analytics tracking. The system is first proven on the owner's brand (Infinity Vault), then packaged and sold as a service to other brands."
+  },
+  "product_vision": {
+    "one_liner": "An AI-powered organic marketing engine that drives traffic, builds community, and converts customers with zero ad spend - then sells as a service to other e-commerce brands",
+    "problem_statement": "E-commerce brands are bleeding money on paid advertising with rising CPAs and no sustainable organic traffic moat. Meanwhile, AI assistants are becoming the new search engines, and brands without AEO (Agentic Engine Optimization) will become invisible to the next generation of shoppers.",
+    "value_proposition": "This is the only complete organic marketing system that combines TikTok content automation (4 themed channels), Agentic Engine Optimization (AI assistant recommendations), SEO-optimized blog content, gamified email capture (scratch & win), automated nurture sequences, TikTok Shop to Amazon FBA fulfillment, and full funnel analytics - all integrated and proven on a real brand with trackable results.",
+    "success_metrics": [
+      "Reduce ad spend by 50% within 90 days, 80% within 6 months",
+      "Achieve 3-5% TikTok save rate (vs 1-2% industry average)",
+      "Generate 100K organic TikTok views per month within 6 months",
+      "Build email list to 3,000 subscribers within 6 months",
+      "Achieve 5% email-to-purchase conversion rate",
+      "Get brand cited by 60% of AI assistants on target queries within 6 months",
+      "Generate $15K/month organic revenue within 6 months",
+      "Package and sell system as service generating additional revenue stream"
+    ]
+  },
+  "current_state": {
+    "maturity": "idea",
+    "existing_features": [
+      "Comprehensive package overview and architecture documentation",
+      "TikTok content automation plan with 4 elemental channel strategy (Air, Water, Fire, Earth)",
+      "Agentic Engine Optimization (AEO) strategy document",
+      "Blog content engine plan with SEO+AEO optimization checklist",
+      "Email marketing automation plan with gamified capture and sequence templates",
+      "MCF Connector integration specification (TikTok Shop to Amazon FBA)",
+      "Analytics and tracking plan with full funnel metrics",
+      "Service packaging plan with pricing and sales process",
+      "Related AI content agents exist in separate directory (BlogAgent, SocialAgent)",
+      "Brand strategy and voice guidelines established"
+    ],
+    "known_gaps": [
+      "No actual code implementation yet - all documentation/planning",
+      "[COMPLETED] TikTok Shop seller account already set up",
+      "[IN PROGRESS] TikTok Shop API integration being built in /Users/matthewkerns/workspace/ecommerce-tools/fulfillment-logistics/mcf-amz-tiktok",
+      "[COMPLETED] Amazon MCF API integration built by friend (may need rebuild/adjustment later)",
+      "[IN PROGRESS] MCF Connector app ~70% developed in mcf-amz-tiktok",
+      "[IN PROGRESS] Email platform being built in /Users/matthewkerns/workspace/agency-operations/rishigupta/nurture-leads-automation",
+      "[COMPLETED] Scratch & win / spin-to-win capture mechanism already live on website",
+      "Blog not deployed on infinitycards.com",
+      "Analytics dashboard not built",
+      "TikTok channels not created",
+      "Content production pipeline not automated"
+    ],
+    "technical_debt": [
+      "Planning documents reference external files/repos that need integration",
+      "AI content agents in separate directory need to be connected to this system",
+      "No test infrastructure or CI/CD for when code is written",
+      "Configuration and secrets management approach not defined"
+    ]
+  },
+  "competitive_context": {
+    "alternatives": [
+      "Traditional marketing agencies (manual, expensive, no automation)",
+      "Social media management tools (Hootsuite, Buffer, Later) - posting only, no full funnel",
+      "Email marketing platforms (Klaviyo, Mailchimp) - single channel only",
+      "TikTok management services - content only, no e-commerce integration",
+      "SEO agencies - no AEO, no social, no email integration",
+      "DIY approach with multiple disconnected tools"
+    ],
+    "differentiators": [
+      "Full-stack integrated system (TikTok + Blog + Email + Analytics in one)",
+      "AEO (Agentic Engine Optimization) - optimizing for AI assistants is the new frontier most ignore",
+      "Proven on a real brand first, then sold as service (real results, not theory)",
+      "AI-powered content automation (scalable, not manual 1:1 work)",
+      "TikTok Shop to Amazon MCF fulfillment bridge (unique technical integration)",
+      "Story-based selling: founder spent all money on ads, built this solution, has the receipts",
+      "Saves-focused TikTok strategy (not vanity metrics)",
+      "Compound organic growth vs linear paid growth"
+    ],
+    "market_position": "Premium done-for-you organic marketing system for e-commerce brands, positioned against expensive agencies and fragmented DIY tools. First-mover advantage in AEO space. Targets brands spending $3K-$10K+/month on ads who want sustainable alternatives.",
+    "competitor_pain_points": [],
+    "competitor_analysis_available": false
+  },
+  "constraints": {
+    "technical": [
+      "Requires approved TikTok Shop seller account",
+      "Requires TikTok Shop API app approval (Content + Shop + Data scopes)",
+      "Requires Amazon Seller Central account with FBA inventory",
+      "Requires Amazon SP-API app approval (Fulfillment scope)",
+      "TikTok API rate limits and content policies",
+      "Amazon MCF order processing requirements",
+      "Email platform compliance (CAN-SPAM, GDPR)",
+      "Website platform must support schema markup and blog functionality"
+    ],
+    "resources": [
+      "Solo founder (Matthew Kerns) + AI assistance (Claude)",
+      "Bootstrap budget - must prove ROI on own brand before scaling",
+      "Time constraint: need to show results within 90 days for credibility",
+      "Content creation capacity limited until automation is built"
+    ],
+    "dependencies": [
+      "TikTok Shop platform availability and policies",
+      "Amazon MCF service availability",
+      "[COMPLETED] infinityvaultcards.com website deployed and live with email capture via Clerk & scratch-and-win",
+      "Products listed in both TikTok Shop and Amazon FBA",
+      "Brand strategy and voice guidelines (exists but needs implementation)",
+      "AI content agents from separate repository need integration"
+    ]
+  },
+  "created_at": "2025-02-26T02:00:00Z"
+}

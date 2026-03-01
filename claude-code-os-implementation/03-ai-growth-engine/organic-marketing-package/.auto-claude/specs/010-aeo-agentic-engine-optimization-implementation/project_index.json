@@ -1,0 +1,26 @@
+{
+  "project_type": "single",
+  "services": {
+    "content-agents": {
+      "path": "./claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents",
+      "tech_stack": ["python", "fastapi", "anthropic-claude", "sqlite", "pytest"],
+      "port": 8000,
+      "dev_command": "cd claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents && uvicorn api.main:app --reload --port 8000",
+      "test_command": "cd claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents && pytest",
+      "description": "AI-powered content generation system with multiple specialized agents"
+    }
+  },
+  "infrastructure": {
+    "docker": false,
+    "database": "sqlite",
+    "api_framework": "fastapi"
+  },
+  "conventions": {
+    "linter": "ruff",
+    "formatter": "black",
+    "testing": "pytest",
+    "agent_pattern": "All agents inherit from BaseAgent",
+    "config_pattern": "Centralized configuration in config/config.py",
+    "api_pattern": "FastAPI routers with /api prefix"
+  }
+}

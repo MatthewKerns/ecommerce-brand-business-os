@@ -1,0 +1,189 @@
+{
+  "subtasks": {
+    "subtask-1-1": {
+      "attempts": [
+        {
+          "session": 2,
+          "timestamp": "2026-02-26T09:31:47.744484",
+          "approach": "Implemented: Create ScheduledContent model in database/models.py",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-1-2": {
+      "attempts": [
+        {
+          "session": 3,
+          "timestamp": "2026-02-26T09:34:18.002125",
+          "approach": "Implemented: Create PublishLog model for tracking publish attempts",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-1-3": {
+      "attempts": [
+        {
+          "session": 4,
+          "timestamp": "2026-02-26T09:37:50.750464",
+          "approach": "Implemented: Run database migration to create new tables",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-2-1": {
+      "attempts": [
+        {
+          "session": 5,
+          "timestamp": "2026-02-26T09:41:06.116033",
+          "approach": "Implemented: Create PublishingService class in services/publishing_service.py",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-2-2": {
+      "attempts": [
+        {
+          "session": 6,
+          "timestamp": "2026-02-26T09:43:27.379181",
+          "approach": "Implemented: Create NotificationService class in services/notification_service.py",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-3-1": {
+      "attempts": [
+        {
+          "session": 7,
+          "timestamp": "2026-02-26T09:46:23.053630",
+          "approach": "Implemented: Create Pydantic request/response models in api/models.py",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-3-2": {
+      "attempts": [
+        {
+          "session": 8,
+          "timestamp": "2026-02-26T09:49:55.684154",
+          "approach": "Implemented: Create TikTok scheduling API routes in api/routes/tiktok_scheduling.py",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-3-3": {
+      "attempts": [
+        {
+          "session": 9,
+          "timestamp": "2026-02-26T09:52:25.414792",
+          "approach": "Implemented: Register TikTok scheduling router in api/main.py",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-4-1": {
+      "attempts": [
+        {
+          "session": 10,
+          "timestamp": "2026-02-26T09:55:09.785901",
+          "approach": "Implemented: Create scheduler task functions in scheduler/tasks.py",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-4-2": {
+      "attempts": [
+        {
+          "session": 11,
+          "timestamp": "2026-02-26T09:57:57.548943",
+          "approach": "Implemented: Create scheduler service in scheduler/scheduler_service.py",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-4-3": {
+      "attempts": [
+        {
+          "session": 12,
+          "timestamp": "2026-02-26T09:59:27.913576",
+          "approach": "Implemented: Update requirements.txt with scheduler dependencies",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-5-1": {
+      "attempts": [
+        {
+          "session": 13,
+          "timestamp": "2026-02-26T10:03:02.146420",
+          "approach": "Implemented: Create integration tests for scheduling API",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-5-2": {
+      "attempts": [
+        {
+          "session": 14,
+          "timestamp": "2026-02-26T10:08:57.917882",
+          "approach": "Implemented: Create unit tests for PublishingService",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-5-3": {
+      "attempts": [
+        {
+          "session": 15,
+          "timestamp": "2026-02-26T10:13:01.018785",
+          "approach": "Implemented: Create integration tests for scheduler service",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-5-4": {
+      "attempts": [
+        {
+          "session": 16,
+          "timestamp": "2026-02-26T10:18:00.499521",
+          "approach": "Implemented: End-to-end verification: schedule -> publish -> confirm",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    }
+  },
+  "stuck_subtasks": [],
+  "metadata": {
+    "created_at": "2026-02-26T09:24:26.182560",
+    "last_updated": "2026-02-26T10:18:00.499563"
+  }
+}

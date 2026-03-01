@@ -1,0 +1,29 @@
+{
+  "project_type": "monorepo",
+  "services": {
+    "mcf-connector": {
+      "path": "./claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/05-mcf-connector-integration/implementation",
+      "tech_stack": ["typescript", "node.js", "axios", "googleapis"],
+      "port": 3001,
+      "dev_command": "npm run dev",
+      "test_command": "npm test",
+      "build_command": "npm run build"
+    }
+  },
+  "infrastructure": {
+    "docker": false,
+    "database": "none",
+    "external_apis": ["tiktok-shop", "amazon-mcf"]
+  },
+  "conventions": {
+    "linter": "eslint",
+    "formatter": "prettier",
+    "testing": "jest",
+    "type_checking": "typescript"
+  },
+  "patterns": {
+    "api_clients": "Class-based with OAuth2 authentication and retry logic",
+    "configuration": "Interface-based with environment variables",
+    "error_handling": "Try-catch with exponential backoff for retryable errors"
+  }
+}

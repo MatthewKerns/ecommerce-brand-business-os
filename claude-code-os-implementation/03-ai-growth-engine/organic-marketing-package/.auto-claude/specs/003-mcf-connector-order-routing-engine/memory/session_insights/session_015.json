@@ -1,0 +1,154 @@
+{
+  "session_number": 15,
+  "timestamp": "2026-02-26T07:10:56.663883+00:00",
+  "subtasks_completed": [
+    "subtask-5-2"
+  ],
+  "discoveries": {
+    "file_insights": [
+      {
+        "file_path": "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/05-mcf-connector-integration/implementation/src/core/tracking-sync.ts",
+        "changes_summary": "Added automatic scheduling mechanism for tracking sync operations with rate limiting and scheduler control",
+        "key_additions": [
+          "New config properties: syncIntervalMs (default 30 minutes), schedulerEnabled (default false), rateLimitPerMinute (default 10)",
+          "Scheduler state management: schedulerTimer, isSchedulerActive, lastSyncRun tracking",
+          "Rate limiting implementation: requestsInCurrentMinute counter, currentMinuteStart timestamp",
+          "Public methods: startScheduler(), stopScheduler(), isSchedulerRunning()",
+          "Private methods: resetRateLimitIfNeeded(), enforceRateLimit(), runScheduledSync()",
+          "Enhanced updateConfig() to handle dynamic scheduler state changes",
+          "Extended getStatus() return object with schedulerRunning and lastSyncRun fields"
+        ],
+        "lines_added": 143,
+        "architectural_impact": "Transforms TrackingSync from manual-invocation to background-job capable service with built-in rate protection"
+      }
+    ],
+    "patterns_discovered": [
+      {
+        "pattern_name": "Scheduler Lifecycle Management",
+        "description": "Implements start/stop pattern with idempotent guards to prevent duplicate scheduler instances",
+        "code_evidence": "isSchedulerActive flag checked in startScheduler() and stopScheduler() methods; immediate execution on start followed by interval-based scheduling"
+      },
+      {
+        "pattern_name": "Rate Limiting via Minute Window",
+        "description": "Tracks requests within rolling 1-minute windows with auto-reset mechanism",
+        "code_evidence": "resetRateLimitIfNeeded() calculates elapsed minutes and resets counter; enforceRateLimit() waits for next minute if threshold exceeded"
+      },
+      {
+        "pattern_name": "Dynamic Configuration Patching",
+        "description": "updateConfig() intelligently restarts scheduler when interval changes or enables/disables scheduling",
+        "code_evidence": "Compares previous schedulerEnabled state and restarts scheduler if interval configuration changes while active"
+      },
+      {
+        "pattern_name": "Error Isolation in Background Tasks",
+        "description": "runScheduledSync() silently catches errors to prevent scheduler termination while errors are logged elsewhere",
+        "code_evidence": "try-catch blocks in startScheduler and runScheduledSync with comment explaining error handling strategy"
+      },
+      {
+        "pattern_name": "Constructor Initialization Hook",
+        "description": "Scheduler optionally starts during object construction based on config flag",
+        "code_evidence": "Constructor checks config.schedulerEnabled and calls startScheduler() automatically"
+      }
+    ],
+    "gotchas_discovered": [
+      {
+        "gotcha": "Rate limit window boundary conditions",
+        "description": "When rate limit is hit, the code waits until the next minute boundary. If msUntilNextMinute is 0 or negative (edge case timing), sleep is skipped and could allow immediate retry",
+        "severity": "medium",
+        "code_location": "enforceRateLimit() method, msUntilNextMinute > 0 check"
+      },
+      {
+        "gotcha": "Silent error swallowing in runScheduledSync",
+        "description": "Errors are silently caught with comment 'Errors are already captured in sync results' but there's no visibility into what those errors are or if they should trigger alerts",
+        "severity": "medium",
+        "code_location": "runScheduledSync() catch block"
+      },
+      {
+        "gotcha": "Timer cleanup assumptions",
+        "description": "schedulerTimer is NodeJS.Timeout which may not work in browser environments; no validation that setInterval/clearInterval are available",
+        "severity": "low",
+        "code_location": "schedulerTimer declaration and usage"
+      },
+      {
+        "gotcha": "Race condition between config update and scheduler restart",
+        "description": "updateConfig() stops and immediately restarts scheduler when interval changes, but if a sync is currently running, it might be interrupted mid-operation",
+        "severity": "medium",
+        "code_location": "updateConfig() method interval change handler"
+      },
+      {
+        "gotcha": "No maximum retry/backoff for rate limiting",
+        "description": "If consistently hitting rate limit, enforceRateLimit() will keep waiting indefinitely without exponential backoff or circuit breaker",
+        "severity": "low",
+        "code_location": "enforceRateLimit() infinite wait scenario"
+      }
+    ],
+    "approach_outcome": {
+      "status": "SUCCESS",
+      "strategy_used": "Incremental feature addition with backwards compatibility",
+      "implementation_completeness": "Fully implemented scheduling mechanism with all required components: configuration, lifecycle management, rate limiting, and monitoring",
+      "testing_approach": "No explicit test code shown; implementation appears to follow existing patterns in codebase",
+      "deployment_readiness": "Ready for testing; schedulerEnabled defaults to false preventing unintended production activation on existing code",
+      "key_decisions": [
+        "Rate limiting per-minute rather than per-second to reduce complexity",
+        "Default 30-minute sync interval chosen for batch-friendly operation",
+        "Scheduler disabled by default to maintain backward compatibility",
+        "Immediate first sync on scheduler start to provide fresh data quickly",
+        "Dynamic configuration updates with scheduler restart for interval changes"
+      ]
+    },
+    "recommendations": [
+      {
+        "category": "Robustness",
+        "recommendation": "Add exponential backoff and max-retry logic to rate limit waiting to prevent indefinite hangs",
+        "priority": "medium",
+        "rationale": "Current enforceRateLimit() could wait forever if API is consistently throttled"
+      },
+      {
+        "category": "Observability",
+        "recommendation": "Replace silent error catching with structured logging that tracks error categories and frequencies",
+        "priority": "high",
+        "rationale": "Production operations need visibility into scheduler failures to trigger alerts"
+      },
+      {
+        "category": "Safety",
+        "recommendation": "Add sync-in-progress flag to prevent concurrent syncs when updateConfig() restarts scheduler",
+        "priority": "medium",
+        "rationale": "Current implementation could interrupt mid-sync if interval is changed during execution"
+      },
+      {
+        "category": "Testing",
+        "recommendation": "Add unit tests for rate limiting edge cases: exactly at limit, over limit, minute boundary crossing",
+        "priority": "high",
+        "rationale": "Rate limiting logic has timing-dependent behavior prone to flakiness"
+      },
+      {
+        "category": "Documentation",
+        "recommendation": "Document rate limiting behavior: what happens when limit is hit, how long waits can be, whether requests are dropped or queued",
+        "priority": "medium",
+        "rationale": "Current documentation doesn't clarify blocking vs. queuing behavior"
+      },
+      {
+        "category": "Configuration",
+        "recommendation": "Add configurable rate limit strategy (e.g., exponential backoff, queue-based, circuit breaker)",
+        "priority": "low",
+        "rationale": "Different deployment scenarios may need different rate limiting strategies"
+      },
+      {
+        "category": "Type Safety",
+        "recommendation": "Define explicit Duration type or constants for timing intervals to prevent millisecond conversion errors",
+        "priority": "low",
+        "rationale": "Magic numbers like 60000 and 30 * 60 * 1000 are error-prone"
+      }
+    ],
+    "subtask_id": "subtask-5-2",
+    "session_num": 15,
+    "success": true,
+    "changed_files": [
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/05-mcf-connector-integration/implementation/src/core/tracking-sync.ts"
+    ]
+  },
+  "what_worked": [
+    "Implemented subtask: subtask-5-2"
+  ],
+  "what_failed": [],
+  "recommendations_for_next_session": []
+}

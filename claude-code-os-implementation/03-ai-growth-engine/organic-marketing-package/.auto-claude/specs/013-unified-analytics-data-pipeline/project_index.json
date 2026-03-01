@@ -1,0 +1,39 @@
+{
+  "project_type": "monorepo",
+  "services": {
+    "content-agents": {
+      "path": "./claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents",
+      "tech_stack": ["python", "fastapi", "sqlalchemy"],
+      "port": 8000,
+      "dev_command": "uvicorn main:app --reload --port 8000",
+      "test_command": "pytest",
+      "database": "sqlite/postgresql"
+    },
+    "mcf-connector": {
+      "path": "./claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/mcf-connector",
+      "tech_stack": ["typescript", "nodejs"],
+      "port": 3001,
+      "dev_command": "npm run dev",
+      "test_command": "npm test"
+    },
+    "dashboard": {
+      "path": "./claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/dashboard",
+      "tech_stack": ["nextjs", "react", "typescript"],
+      "port": 3000,
+      "dev_command": "npm run dev",
+      "test_command": "npm test"
+    }
+  },
+  "infrastructure": {
+    "docker": false,
+    "database": "postgresql",
+    "ci_cd": false
+  },
+  "conventions": {
+    "linter": "flake8",
+    "formatter": "black",
+    "testing": "pytest",
+    "python_version": "3.10+",
+    "node_version": "18+"
+  }
+}

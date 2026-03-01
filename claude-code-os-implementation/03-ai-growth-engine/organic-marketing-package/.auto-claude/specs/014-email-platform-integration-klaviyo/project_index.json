@@ -1,0 +1,37 @@
+{
+  "project_type": "single",
+  "services": {
+    "content-agents": {
+      "path": "./claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents",
+      "tech_stack": ["python", "fastapi", "sqlalchemy", "anthropic"],
+      "port": 8000,
+      "dev_command": "uvicorn api.main:app --reload --host 0.0.0.0 --port 8000",
+      "test_command": "pytest tests/",
+      "database": "sqlite",
+      "has_api": true
+    }
+  },
+  "infrastructure": {
+    "docker": false,
+    "database": "sqlite",
+    "ci_cd": false
+  },
+  "conventions": {
+    "linter": "flake8",
+    "formatter": "black",
+    "testing": "pytest",
+    "api_framework": "fastapi",
+    "orm": "sqlalchemy",
+    "config_pattern": "environment_variables"
+  },
+  "existing_integrations": {
+    "tiktok_shop": "integrations/tiktok_shop/",
+    "amazon_sp_api": "integrations/amazon_sp_api/"
+  },
+  "integration_pattern": {
+    "client_class": "Main API client with error handling and rate limiting",
+    "auth_module": "Separate authentication module (oauth.py or auth.py)",
+    "models_module": "Data models for API responses and requests",
+    "exceptions_module": "Custom exception classes for error handling"
+  }
+}

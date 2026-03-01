@@ -1,0 +1,65 @@
+{
+  "files_to_modify": {
+    "dashboard": []
+  },
+  "files_to_create": {
+    "blog-platform": [
+      "blog/README.md",
+      "blog/package.json",
+      "blog/next.config.js",
+      "blog/app/blog/page.tsx",
+      "blog/app/blog/[slug]/page.tsx",
+      "blog/components/BlogPost.tsx",
+      "blog/lib/contentful.ts or similar CMS integration",
+      "blog/public/sitemap.xml",
+      "blog/public/robots.txt"
+    ]
+  },
+  "files_to_reference": [
+    "./claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/dashboard/package.json",
+    "./claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/dashboard/next.config.js",
+    "./claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/dashboard/src/app/layout.tsx"
+  ],
+  "patterns": {
+    "nextjs_structure": "The dashboard uses Next.js 14 App Router with TypeScript, Tailwind CSS, and server components",
+    "styling": "Tailwind CSS with custom configuration at tailwind.config.js",
+    "component_pattern": "React functional components with TypeScript, organized in src/components/",
+    "api_pattern": "Next.js API routes in app/api/ directory"
+  },
+  "existing_implementations": {
+    "description": "BlogAgent generates blog content (markdown) and saves to content-agents/output/blog/. Blog platform needs to either fetch from API or import markdown files.",
+    "relevant_files": [
+      "./claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/agents/blog_agent.py",
+      "./claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/api/routes/blog.py",
+      "./claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/03-blog-content-engine/blog-content-engine-plan.md"
+    ],
+    "blog_requirements": {
+      "url_structure": "infinitycards.com/blog/",
+      "seo_requirements": [
+        "Page load under 3 seconds",
+        "Mobile responsive",
+        "Schema markup (Article, FAQ)",
+        "Sitemap.xml",
+        "Robots.txt",
+        "Meta tags (title, description, OG tags)"
+      ],
+      "cms_requirements": [
+        "Easy content publishing",
+        "Markdown support",
+        "Category/tag management",
+        "Draft/publish workflow"
+      ],
+      "analytics": "Google Analytics 4 or equivalent"
+    }
+  },
+  "deployment_considerations": {
+    "platform_options": [
+      "Next.js static site with Contentful/Sanity CMS",
+      "Next.js with file-based CMS (MDX)",
+      "Ghost CMS with custom theme",
+      "WordPress headless with Next.js frontend"
+    ],
+    "recommended": "Next.js with Contentful or Sanity for easy content management and API integration",
+    "hosting": "Vercel for Next.js (automatic deployments, edge functions, built-in analytics)"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "files_to_modify": {
+    "content-agents": [
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/agents/__init__.py",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/api/main.py",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/config/config.py"
+    ]
+  },
+  "files_to_create": {
+    "content-agents": [
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/agents/aeo_agent.py",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/api/routes/aeo.py",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/aeo_testing_workflow.py",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/aeo_checklist.py",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/tests/test_aeo_agent.py",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/tests/test_api_aeo.py"
+    ]
+  },
+  "files_to_reference": [
+    "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/agents/base_agent.py",
+    "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/agents/blog_agent.py",
+    "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/api/routes/blog.py",
+    "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/02-agentic-engine-optimization/aeo-strategy-plan.md"
+  ],
+  "patterns": {
+    "agent_pattern": "All agents inherit from BaseAgent, load brand context, and use Anthropic Claude API via generate_content()",
+    "route_pattern": "FastAPI routes use APIRouter with /api prefix and include proper error handling",
+    "testing_pattern": "pytest with markers: @pytest.mark.unit, @pytest.mark.integration, @pytest.mark.requires_api",
+    "config_pattern": "All paths and constants defined in config/config.py, loaded via import",
+    "output_pattern": "Generated content saved to output/{category}/ with metadata"
+  },
+  "existing_implementations": {
+    "description": "Found existing content generation system with BlogAgent, SocialAgent, AmazonAgent, CompetitorAgent, and TikTokShopAgent. All inherit from BaseAgent which provides _load_brand_context(), generate_content(), and save_output() methods. FastAPI REST API already exists with routes for each agent.",
+    "relevant_files": [
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/agents/base_agent.py",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/agents/blog_agent.py",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/api/main.py"
+    ],
+    "aeo_strategy": "Comprehensive AEO strategy documented in 02-agentic-engine-optimization/aeo-strategy-plan.md with target queries, tactics, and measurement plan"
+  }
+}

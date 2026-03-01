@@ -1,0 +1,43 @@
+{
+  "files_to_modify": {},
+  "files_to_create": {
+    "documentation": [
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/README.md",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/hooks/README.md",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/hooks/product-demos.md",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/hooks/problem-solution.md",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/hooks/social-proof.md",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/hooks/educational.md",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/scripts/README.md",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/scripts/unboxing-framework.md",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/scripts/comparison-framework.md",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/scripts/tutorial-framework.md",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/scripts/story-driven-framework.md",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/scripts/review-framework.md",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/categories/toys-and-games.md",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/categories/general-ecommerce.md",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/performance-tracking/template-tracker.md",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/performance-tracking/save-rate-analysis.md",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/ab-testing/testing-framework.md",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/ab-testing/variant-templates.md",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-templates/tiktok/customization/how-to-customize.md"
+    ]
+  },
+  "files_to_reference": [
+    "claude-code-os-implementation/09-templates/agent-creation-guide.md",
+    "claude-code-os-implementation/03-ai-growth-engine/tiktok-outreach/02-outreach-message-templates.md",
+    "claude-code-os-implementation/09-templates/design-brief-template.md"
+  ],
+  "patterns": {
+    "documentation_pattern": "All templates follow a consistent structure: Title, Purpose, Template, Customization Guide, Examples, Performance Tips",
+    "directory_pattern": "Organized by content type (hooks/, scripts/, categories/, etc.)",
+    "template_format": "YAML frontmatter for metadata, markdown for content"
+  },
+  "existing_implementations": {
+    "description": "Found existing TikTok outreach message templates with similar structure. Pattern includes purpose statement, template framework, personalization guide, and examples.",
+    "relevant_files": [
+      "claude-code-os-implementation/03-ai-growth-engine/tiktok-outreach/02-outreach-message-templates.md",
+      "claude-code-os-implementation/09-templates/agent-creation-guide.md"
+    ]
+  }
+}

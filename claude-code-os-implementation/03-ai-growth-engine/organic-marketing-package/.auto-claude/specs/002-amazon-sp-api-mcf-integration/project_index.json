@@ -1,0 +1,34 @@
+{
+  "project_type": "single",
+  "services": {
+    "ai-content-agents": {
+      "path": "./ai-content-agents",
+      "tech_stack": ["python", "anthropic-api"],
+      "port": null,
+      "dev_command": "python -m pytest tests/",
+      "test_command": "python -m pytest tests/"
+    }
+  },
+  "infrastructure": {
+    "docker": false,
+    "database": null,
+    "external_apis": [
+      "Amazon SP-API (Seller Partner API)",
+      "Anthropic Claude API"
+    ]
+  },
+  "conventions": {
+    "linter": null,
+    "formatter": null,
+    "testing": "pytest",
+    "env_management": "python-dotenv",
+    "agent_pattern": "All specialized agents inherit from BaseAgent class",
+    "config_pattern": "Centralized configuration in config/config.py"
+  },
+  "directory_structure": {
+    "agents": "ai-content-agents/agents/ - Agent implementations",
+    "config": "ai-content-agents/config/ - Configuration files",
+    "output": "ai-content-agents/output/ - Generated content",
+    "docs": "claude-code-os-implementation/ - Documentation and specs"
+  }
+}

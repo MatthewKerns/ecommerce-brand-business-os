@@ -1,0 +1,64 @@
+{
+  "files_to_modify": {
+    "content-agents": [
+      "agents/blog_agent.py",
+      "api/routes/blog.py",
+      "api/models.py",
+      "database/models.py"
+    ]
+  },
+  "files_to_create": {
+    "content-agents": [
+      "agents/seo_agent.py",
+      "utils/seo_analyzer.py",
+      "utils/keyword_research.py",
+      "utils/internal_linking.py",
+      "api/routes/seo.py"
+    ]
+  },
+  "files_to_reference": [
+    "agents/base_agent.py",
+    "agents/blog_agent.py",
+    "agents/competitor_agent.py",
+    "api/routes/blog.py",
+    "api/models.py",
+    "database/models.py"
+  ],
+  "patterns": {
+    "agent_pattern": "All agents inherit from BaseAgent, implement generate_and_save() pattern, use self.logger for logging, load brand_context from config paths",
+    "api_pattern": "FastAPI routers in api/routes/, Pydantic models for request/response validation in api/models.py, use APIRouter with prefix and tags",
+    "database_pattern": "SQLAlchemy ORM models in database/models.py, use Base from connection.py, include relationships and constraints",
+    "output_pattern": "Save content to output/{type}/ directories with metadata JSON files",
+    "error_handling": "Custom exceptions in exceptions.py, use try/except with logger.error()"
+  },
+  "existing_implementations": {
+    "description": "Existing content generation agents (blog, social, amazon, competitor) with API endpoints. Blog agent supports SEO keywords but lacks comprehensive SEO pipeline features.",
+    "relevant_files": [
+      "agents/blog_agent.py - Has basic SEO keyword support in generate_blog_post()",
+      "api/models.py - BlogRequest has seo_keywords field",
+      "agents/competitor_agent.py - Has keyword extraction capabilities",
+      "database/models.py - ContentHistory stores content metadata"
+    ],
+    "seo_features_found": {
+      "existing": [
+        "seo_keywords parameter in BlogRequest",
+        "target_keywords in blog_agent.generate_blog_post()",
+        "Keyword extraction in competitor_agent"
+      ],
+      "missing": [
+        "Keyword research workflow",
+        "On-page SEO checklist validation",
+        "Internal linking suggestions",
+        "SEO scoring/grading",
+        "Meta description optimization",
+        "Heading structure analysis"
+      ]
+    }
+  },
+  "integration_points": {
+    "blog_agent": "Extend with SEO checklist and scoring",
+    "competitor_agent": "Use for keyword research insights",
+    "database": "Add SEO metadata fields to ContentHistory",
+    "api": "New /seo endpoints for analysis and recommendations"
+  }
+}

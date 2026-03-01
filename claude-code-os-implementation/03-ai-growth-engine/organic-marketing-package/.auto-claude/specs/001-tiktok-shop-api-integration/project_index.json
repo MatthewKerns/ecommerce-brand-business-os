@@ -1,0 +1,24 @@
+{
+  "project_type": "single",
+  "services": {
+    "ai-content-agents": {
+      "path": "./ai-content-agents",
+      "tech_stack": ["python", "anthropic-api"],
+      "port": null,
+      "dev_command": "python quick_start.py",
+      "test_command": "python test_setup.py"
+    }
+  },
+  "infrastructure": {
+    "docker": false,
+    "database": null,
+    "external_apis": ["anthropic", "tiktok-shop"]
+  },
+  "conventions": {
+    "linter": null,
+    "formatter": null,
+    "testing": "manual",
+    "agent_pattern": "BaseAgent inheritance",
+    "config_pattern": "Centralized in config/config.py"
+  }
+}

@@ -1,0 +1,208 @@
+{
+  "session_number": 9,
+  "timestamp": "2026-02-26T06:35:10.959698+00:00",
+  "subtasks_completed": [
+    "subtask-3-2"
+  ],
+  "discoveries": {
+    "file_insights": [
+      {
+        "file_path": "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/05-mcf-connector-integration/implementation/src/clients/amazon-mcf-client.ts",
+        "type": "NEW_FILE",
+        "lines_added": 542,
+        "lines_removed": 0,
+        "primary_purpose": "Amazon MCF API client implementation with LWA OAuth2 authentication and AWS Signature Version 4 signing",
+        "key_components": [
+          "AmazonMCFClient class - main client for API operations",
+          "LWA token management - OAuth2 refresh token handling",
+          "AWS Signature v4 implementation - request signing",
+          "Exponential backoff retry logic - resilience handling",
+          "MCF order operations - fulfillment order creation and retrieval",
+          "Error handling with retryable status codes",
+          "Axios interceptor for request signing and authentication"
+        ],
+        "complexity_level": "HIGH",
+        "test_coverage_needed": [
+          "LWA token refresh flow",
+          "AWS signature generation",
+          "Retry logic with backoff",
+          "API error handling",
+          "Request/response transformation"
+        ]
+      }
+    ],
+    "patterns_discovered": [
+      {
+        "pattern_name": "Authentication Wrapper Pattern",
+        "description": "Uses Axios interceptor to automatically inject LWA access token and AWS signature headers on every request",
+        "files_involved": [
+          "amazon-mcf-client.ts"
+        ],
+        "benefit": "Centralizes auth logic, reduces boilerplate across API calls"
+      },
+      {
+        "pattern_name": "Exponential Backoff Retry",
+        "description": "Implements configurable exponential backoff retry strategy with max retry limits and delay caps",
+        "files_involved": [
+          "amazon-mcf-client.ts"
+        ],
+        "benefit": "Handles transient failures gracefully, respects rate limits via backoff multiplier"
+      },
+      {
+        "pattern_name": "Token Lifecycle Management",
+        "description": "Proactively refreshes tokens before expiration (5-minute buffer), tracked via tokenExpiresAt timestamp",
+        "files_involved": [
+          "amazon-mcf-client.ts"
+        ],
+        "benefit": "Prevents 401 errors by ensuring valid token before requests"
+      },
+      {
+        "pattern_name": "AWS Signature v4 Implementation",
+        "description": "Multi-step cryptographic signing: canonical request \u2192 string to sign \u2192 signing key \u2192 signature",
+        "files_involved": [
+          "amazon-mcf-client.ts"
+        ],
+        "benefit": "Enables secure AWS API access without SDK dependency"
+      },
+      {
+        "pattern_name": "Region-Based Endpoint Selection",
+        "description": "Maps region codes (na/eu/fe) to regional SP-API endpoints",
+        "files_involved": [
+          "amazon-mcf-client.ts"
+        ],
+        "benefit": "Supports multi-region deployments"
+      },
+      {
+        "pattern_name": "Parameter Transformation Layer",
+        "description": "Converts internal CreateMCFOrderParams to Amazon MCFFulfillmentOrderRequest format",
+        "files_involved": [
+          "amazon-mcf-client.ts"
+        ],
+        "benefit": "Isolates domain model from third-party API schema"
+      }
+    ],
+    "gotchas_discovered": [
+      {
+        "gotcha": "AWS Signature v4 timestamp format sensitivity",
+        "description": "Timestamp must be ISO format with seconds precision (Z suffix), converted with .replace(/\\.\\d{3}Z$/, 'Z')",
+        "impact": "Invalid signature if timestamp format mismatches",
+        "mitigation": "Use consistent timestamp formatting in canonical request and signature header"
+      },
+      {
+        "gotcha": "Token expiration buffer required",
+        "description": "Token refresh checks for expiration minus 5 minutes, not at exact expiration time",
+        "impact": "Without buffer, could attempt API call with just-expired token causing 401",
+        "mitigation": "5-minute buffer implemented in ensureValidToken() method"
+      },
+      {
+        "gotcha": "Canonical headers must be sorted and trimmed",
+        "description": "AWS v4 signature requires headers sorted by lowercase key name with trimmed values",
+        "impact": "Signature mismatch if header order or whitespace varies",
+        "mitigation": "Explicit sorting and trim() calls in generateAWSSignature()"
+      },
+      {
+        "gotcha": "Query string encoding for signature",
+        "description": "Query parameters must be URL encoded and sorted alphabetically for canonical request",
+        "impact": "Signature invalid if query string encoding inconsistent",
+        "mitigation": "Explicit encodeURIComponent() and sort() in request interceptor"
+      },
+      {
+        "gotcha": "Retryable error distinction",
+        "description": "Network errors (no response) vs HTTP 429/5xx must be differentiated from auth errors (401/403)",
+        "impact": "Retrying auth failures wastes time; not retrying network failures loses resilience",
+        "mitigation": "isRetryableError() function checks both error type and status codes"
+      },
+      {
+        "gotcha": "Host header required for signature",
+        "description": "AWS v4 requires exact host header in canonical request matching URL host",
+        "impact": "Signature mismatch if host header missing or incorrect",
+        "mitigation": "Explicitly extracted from endpoint URL in request interceptor"
+      }
+    ],
+    "approach_outcome": {
+      "status": "SUCCESS",
+      "completion_percentage": 100,
+      "key_achievements": [
+        "Implemented complete Amazon MCF API client with dual authentication mechanisms",
+        "LWA OAuth2 token refresh integrated with automatic token lifecycle management",
+        "AWS Signature v4 cryptographic signing fully implemented with correct canonical request format",
+        "Exponential backoff retry strategy with configurable parameters and jitter handling",
+        "Type-safe parameter transformation between domain model and Amazon API schema",
+        "Error classification and retryable error detection",
+        "Regional endpoint routing for NA/EU/FE regions",
+        "Fulfillment order creation and tracking support"
+      ],
+      "challenges_overcome": [
+        "Correctly implemented multi-step AWS Signature v4 process without native AWS SDK",
+        "Managed token lifecycle to prevent 401 errors during long-running operations",
+        "Balanced retry strategy to handle rate limits without aggressive hammering"
+      ],
+      "dependencies_satisfied": [
+        "Axios HTTP client",
+        "Node.js crypto module",
+        "Type definitions from mcf-order and config types"
+      ]
+    },
+    "recommendations": [
+      {
+        "category": "TESTING",
+        "priority": "HIGH",
+        "recommendation": "Add comprehensive unit tests for AWS Signature v4 generation with known test vectors from AWS documentation",
+        "rationale": "Signature generation is cryptographically critical; any error breaks all API calls"
+      },
+      {
+        "category": "TESTING",
+        "priority": "HIGH",
+        "recommendation": "Mock LWA token endpoint and test token refresh edge cases (expiration, network failure, invalid token)",
+        "rationale": "Token management is critical path; failures cascade to all API calls"
+      },
+      {
+        "category": "ERROR_HANDLING",
+        "priority": "HIGH",
+        "recommendation": "Add specific error codes/types for Amazon-specific errors (e.g., InvalidAddress, InvalidSKU) beyond generic AMAZON_API_ERROR",
+        "rationale": "Currently generic error handling doesn't allow client code to react to specific failure modes"
+      },
+      {
+        "category": "LOGGING",
+        "priority": "MEDIUM",
+        "recommendation": "Add structured logging for retry attempts, token refreshes, and signature generation (without exposing secrets)",
+        "rationale": "Debugging authentication/signing issues is difficult without visibility into these operations"
+      },
+      {
+        "category": "PERFORMANCE",
+        "priority": "MEDIUM",
+        "recommendation": "Consider caching canonical request format components to avoid re-sorting headers/params on every request",
+        "rationale": "Current implementation re-sorts headers and query params on every intercepted request"
+      },
+      {
+        "category": "SECURITY",
+        "priority": "MEDIUM",
+        "recommendation": "Validate and sanitize config parameters (e.g., region must be in valid set) at constructor time",
+        "rationale": "Invalid region could silently fall back to 'na' endpoint, masking configuration errors"
+      },
+      {
+        "category": "DOCUMENTATION",
+        "priority": "MEDIUM",
+        "recommendation": "Document AWS Signature v4 implementation with reference to AWS signing process to aid maintenance",
+        "rationale": "Complex cryptographic implementation benefits from detailed inline documentation"
+      },
+      {
+        "category": "CONFIGURATION",
+        "priority": "LOW",
+        "recommendation": "Make HTTP timeout configurable rather than hardcoded 30000ms",
+        "rationale": "Different operations may require different timeout durations"
+      }
+    ],
+    "subtask_id": "subtask-3-2",
+    "session_num": 9,
+    "success": true,
+    "changed_files": [
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/05-mcf-connector-integration/implementation/src/clients/amazon-mcf-client.ts"
+    ]
+  },
+  "what_worked": [
+    "Implemented subtask: subtask-3-2"
+  ],
+  "what_failed": [],
+  "recommendations_for_next_session": []
+}

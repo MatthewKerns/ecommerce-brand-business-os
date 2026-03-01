@@ -1,0 +1,64 @@
+{
+  "files_to_modify": {
+    "backend": [
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/database/models.py",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/api/main.py",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/api/routes/__init__.py"
+    ]
+  },
+  "files_to_create": {
+    "backend": [
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/api/routes/tiktok_scheduling.py",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/api/models.py",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/services/publishing_service.py",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/services/notification_service.py",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/services/__init__.py"
+    ],
+    "scheduler": [
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/scheduler/__init__.py",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/scheduler/scheduler_service.py",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/scheduler/tasks.py"
+    ],
+    "tests": [
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/tests/test_scheduling_api.py",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/tests/test_publishing_service.py",
+      "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/tests/test_scheduler.py"
+    ]
+  },
+  "files_to_reference": [
+    "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/agents/base_agent.py",
+    "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/agents/tiktok_shop_agent.py",
+    "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/integrations/tiktok_shop/client.py",
+    "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/database/models.py",
+    "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/api/routes/blog.py",
+    "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/api/routes/social.py",
+    "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/api/main.py",
+    "claude-code-os-implementation/03-ai-growth-engine/organic-marketing-package/content-agents/exceptions.py"
+  ],
+  "patterns": {
+    "agent_pattern": "All agents inherit from BaseAgent class with generate_content() and save_output() methods",
+    "api_route_pattern": "FastAPI APIRouter with prefix='/api', tags for grouping, dependency injection via dependencies.py",
+    "database_model_pattern": "SQLAlchemy declarative models with Base, relationships, constraints, indexes",
+    "error_handling_pattern": "Custom exception hierarchy inheriting from base exceptions in exceptions.py",
+    "logging_pattern": "Use get_logger(name) from logging_config.py for consistent logging",
+    "tiktok_integration_pattern": "TikTokShopClient handles OAuth, rate limiting, retries automatically",
+    "service_pattern": "Services are separate modules that encapsulate business logic, called by routes"
+  },
+  "existing_implementations": {
+    "description": "TikTok Shop integration already exists with OAuth, API client, and content agent",
+    "relevant_files": [
+      "integrations/tiktok_shop/client.py - Full API client with create_post(), upload_video(), rate limiting, retries",
+      "integrations/tiktok_shop/oauth.py - OAuth flow handling",
+      "integrations/tiktok_shop/rate_limiter.py - Token bucket rate limiting",
+      "integrations/tiktok_shop/exceptions.py - TikTok-specific exception hierarchy",
+      "agents/tiktok_shop_agent.py - Content generation for TikTok",
+      "database/models.py - ContentHistory, APIUsage, PerformanceMetrics models"
+    ],
+    "notes": [
+      "TikTokShopClient.create_post() supports scheduled_time parameter (Unix timestamp)",
+      "Client has built-in retry logic for rate limits, server errors, network errors",
+      "Rate limiter prevents hitting API limits proactively",
+      "All API methods return Dict[str, Any] with standardized error handling"
+    ]
+  }
+}
