@@ -329,7 +329,7 @@
         "feature-1",
         "feature-2"
       ],
-      "status": "planned",
+      "status": "done",
       "acceptance_criteria": [
         "New TikTok Shop orders automatically detected within 5 minutes",
         "Order data validated and transformed for MCF requirements",
@@ -360,7 +360,7 @@
       "impact": "medium",
       "phase_id": "phase-1",
       "dependencies": [],
-      "status": "planned",
+      "status": "done",
       "acceptance_criteria": [
         "Secrets stored securely (not in code repository)",
         "Environment-specific configuration files working",
@@ -385,7 +385,7 @@
       "impact": "high",
       "phase_id": "phase-1",
       "dependencies": [],
-      "status": "planned",
+      "status": "done",
       "acceptance_criteria": [
         "Monorepo or service structure defined and documented",
         "Database schema designed for multi-channel data",
@@ -448,7 +448,7 @@
         "feature-1",
         "feature-6"
       ],
-      "status": "planned",
+      "status": "done",
       "acceptance_criteria": [
         "Content queued and published at scheduled times with 99%+ reliability",
         "Failed posts trigger immediate notification with clear error reason",
@@ -479,7 +479,7 @@
       "dependencies": [
         "feature-5"
       ],
-      "status": "planned",
+      "status": "done",
       "acceptance_criteria": [
         "Human review workflow: ContentReview model, approval state machine (draft \u2192 in_review \u2192 approved/rejected), and review endpoints implemented",
         "Content generation queue: blog and social generation jobs routed through Celery with priority levels (high/medium/low) wired to task routing",
@@ -564,7 +564,7 @@
       "dependencies": [
         "feature-5"
       ],
-      "status": "planned",
+      "status": "in_progress",
       "acceptance_criteria": [
         "Blog live on infinitycards.com/blog or blog.infinitycards.com",
         "Page load speed under 3 seconds on mobile",
@@ -620,7 +620,7 @@
       "dependencies": [
         "feature-11"
       ],
-      "status": "planned",
+      "status": "done",
       "acceptance_criteria": [
         "FAQ schema markup implemented on all product and content pages",
         "Product schema with complete attributes for AI parsing",
@@ -648,7 +648,7 @@
       "dependencies": [
         "feature-13"
       ],
-      "status": "planned",
+      "status": "done",
       "acceptance_criteria": [
         "Weekly automated testing of target queries across ChatGPT, Claude, Perplexity",
         "Citation database tracking mentions over time",
@@ -1050,7 +1050,7 @@
       "impact": "critical",
       "phase_id": "phase-1",
       "dependencies": [],
-      "status": "planned",
+      "status": "done",
       "acceptance_criteria": [
         "Authentication system with Clerk integration working",
         "Workspace-based multi-tenancy implemented",
@@ -1157,7 +1157,7 @@
         "feature-30",
         "feature-31"
       ],
-      "status": "planned",
+      "status": "in_progress",
       "acceptance_criteria": [
         "Blog creation form with topic, keywords, style inputs",
         "Connection to BlogAgent API endpoint functional",
@@ -1378,7 +1378,7 @@
       "dependencies": [
         "feature-30"
       ],
-      "status": "planned",
+      "status": "in_progress",
       "acceptance_criteria": [
         "File upload interface for brand documents",
         "Conversational brand building flow implemented",
