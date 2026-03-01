@@ -24,7 +24,10 @@ from api.routes import (
     citation_monitoring_router,
     # seo_router,  # Temporarily disabled - missing KeywordResearchRequest
     klaviyo_router,
-    cart_router
+    cart_router,
+    review_router,
+    versions_router,
+    tasks_router
 )
 from api.routes.clerk_webhooks import router as clerk_webhooks_router
 
@@ -67,6 +70,9 @@ app.include_router(citation_monitoring_router, prefix="/api")
 app.include_router(klaviyo_router, prefix="/api")
 app.include_router(clerk_webhooks_router, prefix="/api")
 app.include_router(cart_router, prefix="/api")
+app.include_router(review_router, prefix="/api")
+app.include_router(versions_router, prefix="/api")
+app.include_router(tasks_router, prefix="/api")
 
 
 @app.exception_handler(Exception)
