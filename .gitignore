@@ -25,3 +25,6 @@ Thumbs.db
 .worktrees/
 .security-key
 logs/security/
+
+# Auto Claude data directory
+.auto-claude/
