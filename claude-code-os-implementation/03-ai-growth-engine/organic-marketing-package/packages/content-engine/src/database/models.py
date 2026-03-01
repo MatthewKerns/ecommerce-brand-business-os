@@ -4,12 +4,21 @@ Defines SQLAlchemy ORM models for content history, API usage, and performance me
 """
 from datetime import datetime
 from typing import Optional
+from enum import Enum as PyEnum
 from sqlalchemy import (
     Boolean, CheckConstraint, Column, DateTime, Enum, ForeignKey,
     Integer, JSON, Numeric, String, Text, Index
 )
 from sqlalchemy.orm import relationship
 from .connection import Base
+
+
+class ApprovalStatus(str, PyEnum):
+    """Content review approval status values"""
+    DRAFT = "draft"
+    IN_REVIEW = "in_review"
+    APPROVED = "approved"
+    REJECTED = "rejected"
 
 
 class ContentHistory(Base):
@@ -112,6 +121,62 @@ class ContentHistory(Base):
 
     def __repr__(self):
         return f"<ContentHistory(id={self.id}, request_id='{self.request_id}', type='{self.content_type}')>"
+
+
+class ContentReview(Base):
+    """
+    Tracks content review workflow with approval state machine.
+
+    This model implements a human review workflow for AI-generated content
+    before publication. Content progresses through states: draft → in_review → approved/rejected.
+
+    Attributes:
+        id: Primary key
+        content_id: Foreign key to content_history
+        approval_status: Current approval state (draft, in_review, approved, rejected)
+        reviewer_id: Identifier of the user reviewing the content
+        review_notes: Optional notes from the reviewer
+        submitted_at: Timestamp when content was submitted for review
+        reviewed_at: Timestamp when review decision was made
+        created_at: Timestamp when record was created
+        updated_at: Timestamp when record was last updated
+    """
+    __tablename__ = "content_reviews"
+
+    # Primary Key
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
+    # Content Reference
+    content_id = Column(Integer, ForeignKey("content_history.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    # Review Status
+    approval_status = Column(String(20), nullable=False, default="draft", index=True)
+
+    # Reviewer Information
+    reviewer_id = Column(String(50), index=True)
+    review_notes = Column(Text)
+
+    # Timestamps
+    submitted_at = Column(DateTime, index=True)
+    reviewed_at = Column(DateTime)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    content = relationship("ContentHistory")
+
+    # Table constraints
+    __table_args__ = (
+        CheckConstraint(
+            "approval_status IN ('draft', 'in_review', 'approved', 'rejected')",
+            name="check_approval_status"
+        ),
+        Index("idx_content_reviews_status_submitted", "approval_status", "submitted_at"),
+        Index("idx_content_reviews_content_id", "content_id"),
+    )
+
+    def __repr__(self):
+        return f"<ContentReview(id={self.id}, content_id={self.content_id}, status='{self.approval_status}')>"
 
 
 class APIUsage(Base):
