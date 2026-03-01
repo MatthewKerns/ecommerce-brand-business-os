@@ -638,6 +638,191 @@ When user clicks on a channel card or the performance table:
 
 ---
 
+## Automation Management
+
+### Channel Automation Controls
+
+Each channel has its own automation toggle and settings, accessible from the channel card or the gear icon:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  🔥 FIRE CHANNEL — Automation Settings                       │
+│                                                               │
+│  AUTOMATION STATUS                                            │
+│  ┌────────────────────────────────────────────────────┐     │
+│  │  Content Generation:  [ON ●───] Active              │     │
+│  │  Auto-Scheduling:     [ON ●───] Active              │     │
+│  │  Auto-Publishing:     [───○ OFF] Manual approval    │     │
+│  │  Trend Monitoring:    [ON ●───] Active              │     │
+│  │  Brand Check:         [ON ●───] Always on           │     │
+│  └────────────────────────────────────────────────────┘     │
+│                                                               │
+│  PUBLISHING MODE                                              │
+│  ┌────────────────────────────────────────────────────┐     │
+│  │  Current: Manual Review Required                     │     │
+│  │                                                      │     │
+│  │  Your approval stats (last 30 days):                │     │
+│  │  • 42 drafts reviewed                               │     │
+│  │  • 38 approved without edits (90.5%)                │     │
+│  │  • 4 edited before approval                         │     │
+│  │  • 0 rejected                                       │     │
+│  │                                                      │     │
+│  │  ⚡ You're eligible for Smart Autopilot on this      │     │
+│  │  channel. Based on your 90.5% no-edit approval      │     │
+│  │  rate, I can auto-publish content that passes       │     │
+│  │  brand check + scores above your quality threshold. │     │
+│  │                                                      │     │
+│  │  ○ Manual Review (current)                          │     │
+│  │    Every draft requires your approval.              │     │
+│  │                                                      │     │
+│  │  ○ Smart Autopilot                                  │     │
+│  │    Auto-publish if ALL conditions met:              │     │
+│  │    ✅ Brand check passes                            │     │
+│  │    ✅ Content quality score > [85 ▼]               │     │
+│  │    ✅ No avoided words detected                     │     │
+│  │    ✅ Content pillar matches schedule slot          │     │
+│  │    Flag for manual review otherwise.                │     │
+│  │                                                      │     │
+│  │  ○ Full Autopilot (unlocked at 95%+ approval rate) │     │
+│  │    All generated content publishes on schedule.     │     │
+│  │    You review performance after the fact.           │     │
+│  │    Emergency pause always available.                │     │
+│  └────────────────────────────────────────────────────┘     │
+│                                                               │
+│  POSTING SCHEDULE                                             │
+│  ┌────────────────────────────────────────────────────┐     │
+│  │  Cadence: 5 posts/week                              │     │
+│  │  Tue 10am | Thu 11am | Fri 1pm | Sat 3pm | Sun 6pm│     │
+│  │                                                      │     │
+│  │  [Edit Schedule]  [Use AI-Optimized Times]          │     │
+│  └────────────────────────────────────────────────────┘     │
+│                                                               │
+│  RATE LIMITS                                                  │
+│  ┌────────────────────────────────────────────────────┐     │
+│  │  Max posts per day: [2 ▼]                           │     │
+│  │  Min hours between posts: [4 ▼]                     │     │
+│  │  Max posts per week: [5 ▼]                          │     │
+│  │  Cool-down after underperformance: [ON ●───]        │     │
+│  │  (Pauses auto-publish for 24h if last 2 posts      │     │
+│  │   score below target metrics)                       │     │
+│  └────────────────────────────────────────────────────┘     │
+│                                                               │
+│  QUICK ACTIONS                                                │
+│  [Pause This Channel]  [Pause All Channels]                  │
+│  [View Automation Logs]  [Go to Command Center]              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Progressive Trust System
+
+The system tracks approval patterns and progressively offers more automation:
+
+```
+TRUST LEVELS:
+
+Level 1 — Manual Review (Default)
+  Requirement: New channel, no history
+  Behavior: Every draft queued for review
+  Notification: "3 drafts ready for review"
+
+Level 2 — Smart Autopilot (Unlocked)
+  Requirement: 30+ approvals with <15% edit rate
+  Behavior: Auto-publish if brand check + quality threshold passes
+  Notification: "2 posts auto-published today. 1 flagged for review."
+  System prompt: "Your Fire channel has a 90% approval rate over
+  42 reviews. Want to enable Smart Autopilot? Content that passes
+  brand check and scores above 85 will publish automatically.
+  Anything below goes to your review queue."
+
+Level 3 — Full Autopilot (Unlocked)
+  Requirement: 50+ auto-published with <5% manual override rate
+  Behavior: All generated content publishes on schedule
+  Notification: Daily summary of what was published + performance
+  System prompt: "Your Fire channel has auto-published 52 posts
+  with only 2 manual overrides. You can enable Full Autopilot —
+  all content publishes on schedule, you review performance daily."
+
+Trust is earned PER CHANNEL. Fire can be on Full Autopilot
+while Earth stays on Manual Review.
+
+Trust can be REVOKED automatically:
+  • If 3 consecutive posts underperform targets → drops one level
+  • If brand check failure rate increases → drops to Manual
+  • If user manually overrides 3+ posts in a week → drops one level
+  • User can always manually downgrade at any time
+```
+
+### Error Recovery & Self-Healing
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  AUTOMATION HEALTH — 🔥 Fire Channel                         │
+│                                                               │
+│  Status: ● Healthy                                            │
+│                                                               │
+│  Recent Events:                                               │
+│  ┌────────────────────────────────────────────────────┐     │
+│  │  ✅ 10:02 AM — Post published successfully         │     │
+│  │  🔄 9:58 AM — TikTok API timeout, auto-retrying   │     │
+│  │  ✅ 9:58 AM — Retry successful (attempt 2 of 4)   │     │
+│  │  ✅ 9:45 AM — Content generated, brand check pass  │     │
+│  │  ✅ 8:00 AM — Trend scan completed, 2 opportunities│     │
+│  └────────────────────────────────────────────────────┘     │
+│                                                               │
+│  Error Recovery Policy:                                       │
+│  ┌────────────────────────────────────────────────────┐     │
+│  │  API Disconnection:                                 │     │
+│  │  → Auto-retry: 4 attempts (2s, 4s, 8s, 16s)       │     │
+│  │  → If all fail: Pause posting, notify user         │     │
+│  │  → Auto-retry resumes every 30 min for 24h         │     │
+│  │  → After 24h: Marked as disconnected, user alert   │     │
+│  │                                                      │     │
+│  │  Failed Post:                                       │     │
+│  │  → Auto-retry at next available slot               │     │
+│  │  → If fails again: Queue for manual review         │     │
+│  │  → If content-related: Auto-regenerate and retry   │     │
+│  │                                                      │     │
+│  │  Rate Limit Hit:                                    │     │
+│  │  → Auto-throttle: Reduce posting frequency 50%     │     │
+│  │  → Resume normal schedule when limit resets         │     │
+│  │  → Notify user if throttled for >24h               │     │
+│  └────────────────────────────────────────────────────┘     │
+│                                                               │
+│  [View Full Logs]  [Configure Recovery Policy]               │
+│  [Test Connection Now]                                        │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Bulk Operations
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  TIKTOK STUDIO — Bulk Actions                                │
+│                                                               │
+│  Select channels:                                             │
+│  ☑️ 🔥 Fire  ☑️ 🌍 Earth  ☑️ 💧 Water  ☑️ 🌬️ Air            │
+│                                                               │
+│  Action:                                                      │
+│  ┌────────────────────────────────────────────────────┐     │
+│  │  [Pause All Selected]                               │     │
+│  │  [Resume All Selected]                              │     │
+│  │  [Generate Full Week for All]                       │     │
+│  │  [Set All to Manual Review]                         │     │
+│  │  [Set All to Smart Autopilot] (if eligible)        │     │
+│  │  [Reschedule All Pending Posts +24h]               │     │
+│  │  [Clear All Pending Drafts]                         │     │
+│  └────────────────────────────────────────────────────┘     │
+│                                                               │
+│  ⚠️ Bulk pause will hold all scheduled posts across           │
+│  selected channels. Content stays in queue and resumes        │
+│  when you unpause. Nothing is deleted.                        │
+│                                                               │
+│  [Confirm Action]  [Cancel]                                   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
 ## Edge Cases
 
 ### Channel Disconnected

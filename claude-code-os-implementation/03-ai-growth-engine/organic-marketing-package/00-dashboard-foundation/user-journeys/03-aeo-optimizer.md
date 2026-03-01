@@ -651,6 +651,211 @@ Display: Diff view showing what changed
 
 ---
 
+## Automation Management
+
+### AEO Automation Controls
+
+Accessible from the AEO dashboard gear icon or the central Automation Command Center:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  AEO OPTIMIZER — Automation Settings                         │
+│                                                               │
+│  AUTOMATION STATUS                                            │
+│  ┌────────────────────────────────────────────────────┐     │
+│  │  Blog Generation:      [ON ●───] Active             │     │
+│  │  AI Visibility Scans:  [ON ●───] Weekly             │     │
+│  │  Citation Tracking:    [ON ●───] Bi-weekly          │     │
+│  │  Competitor Monitoring: [ON ●───] Active            │     │
+│  │  Full Audit:           [ON ●───] Monthly            │     │
+│  │  Auto-SEO Optimization:[ON ●───] On generation      │     │
+│  └────────────────────────────────────────────────────┘     │
+│                                                               │
+│  PUBLISHING MODE                                              │
+│  ┌────────────────────────────────────────────────────┐     │
+│  │  Current: Manual Review Required                     │     │
+│  │                                                      │     │
+│  │  Your approval stats (last 90 days):                │     │
+│  │  • 14 blog posts reviewed                           │     │
+│  │  • 11 approved without edits (78.6%)                │     │
+│  │  • 3 edited before approval                         │     │
+│  │  • 0 rejected                                       │     │
+│  │                                                      │     │
+│  │  ○ Manual Review (current)                          │     │
+│  │    Every blog post draft requires your approval.    │     │
+│  │                                                      │     │
+│  │  ○ Smart Autopilot (not yet eligible)               │     │
+│  │    Requires: 20+ approvals with <10% edit rate.     │     │
+│  │    You're at 14 approvals, 21.4% edit rate.         │     │
+│  │    Progress: ██████████████░░░░░░ 70%               │     │
+│  │                                                      │     │
+│  │    When unlocked: Auto-publish if ALL pass:         │     │
+│  │    ✅ SEO score > [85 ▼]                            │     │
+│  │    ✅ AEO score > [80 ▼]                            │     │
+│  │    ✅ Brand voice match > [90% ▼]                   │     │
+│  │    ✅ No brand language violations                   │     │
+│  │                                                      │     │
+│  │  ○ Full Autopilot (locked — requires 40+            │     │
+│  │    auto-published posts with <3% override rate)     │     │
+│  └────────────────────────────────────────────────────┘     │
+│                                                               │
+│  GENERATION CADENCE                                           │
+│  ┌────────────────────────────────────────────────────┐     │
+│  │  Posts per month: [4 ▼] (range: 1-8)               │     │
+│  │  Generation day: [Monday ▼]                         │     │
+│  │  Publish stagger: [1 post per week max ▼]          │     │
+│  │                                                      │     │
+│  │  Content mix (auto-balanced):                       │     │
+│  │  • Comparison posts: 40%                            │     │
+│  │  • Definitive guides: 30%                           │     │
+│  │  • How-to / educational: 20%                        │     │
+│  │  • Myth buster / contrarian: 10%                    │     │
+│  │                                                      │     │
+│  │  [Adjust Mix]  [Let AI Optimize Based on Citations] │     │
+│  └────────────────────────────────────────────────────┘     │
+│                                                               │
+│  MONITORING FREQUENCY                                         │
+│  ┌────────────────────────────────────────────────────┐     │
+│  │  AI Visibility Scan: [Weekly ▼]                     │     │
+│  │  Citation Check: [Bi-weekly ▼]                      │     │
+│  │  Full Audit: [Monthly ▼]                            │     │
+│  │  Competitor Watch: [Continuous ▼]                   │     │
+│  └────────────────────────────────────────────────────┘     │
+│                                                               │
+│  ALERT THRESHOLDS                                             │
+│  ┌────────────────────────────────────────────────────┐     │
+│  │  Notify me when:                                    │     │
+│  │  ☑️ Visibility score drops > [5 ▼] points          │     │
+│  │  ☑️ New citation earned (any tier)                  │     │
+│  │  ☑️ Competitor publishes content on my target query │     │
+│  │  ☑️ Blog post indexed by search engines            │     │
+│  │  ☑️ First AI mention detected                      │     │
+│  └────────────────────────────────────────────────────┘     │
+│                                                               │
+│  QUICK ACTIONS                                                │
+│  [Pause All Generation]  [Pause Only Publishing]             │
+│  [View Automation Logs]  [Go to Command Center]              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Progressive Trust for Blog Publishing
+
+AEO blog content requires higher trust thresholds than TikTok because:
+- Blog posts are longer and more complex
+- They represent the brand's authority in search
+- Errors are harder to retract once indexed
+- Citations depend on content quality
+
+```
+TRUST LEVELS — AEO:
+
+Level 1 — Manual Review (Default)
+  Requirement: New strategy, no history
+  Behavior: Every blog post queued for review
+  Threshold to advance: 20+ approvals, <10% edit rate
+  (Higher bar than TikTok because blog content is
+   permanent and represents brand authority)
+
+Level 2 — Smart Autopilot (Unlocked)
+  Requirement: 20+ approvals with <10% edit rate
+  Behavior: Auto-publish if SEO >85, AEO >80, voice >90%
+  Threshold to advance: 40+ auto-published, <3% override
+  System prompt: "Your AEO content has been approved 22
+  times with only 1 edit. Want to enable Smart Autopilot?
+  Posts scoring above your thresholds will publish
+  automatically. Lower-scoring posts go to your queue."
+
+Level 3 — Full Autopilot (Unlocked)
+  Requirement: 40+ auto-published with <3% override rate
+  Behavior: All generated content publishes on schedule
+  Notification: Weekly digest of what was published +
+  citation/visibility impact
+
+Trust revocation triggers:
+  • SEO/AEO scores trend downward for 3 consecutive posts
+  • Citation rate drops significantly
+  • User manually overrides 3+ posts → drops one level
+  • Visibility score drops >10 points after auto-publish
+```
+
+### Error Recovery & Self-Healing
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  AUTOMATION HEALTH — AEO                                     │
+│                                                               │
+│  Status: ● Healthy                                            │
+│                                                               │
+│  Recent Events:                                               │
+│  ┌────────────────────────────────────────────────────┐     │
+│  │  ✅ 6:00 AM — Weekly visibility scan completed     │     │
+│  │  ✅ 6:02 AM — Score: 34 (no change from last week)│     │
+│  │  ✅ Yesterday — Blog post published, indexing...   │     │
+│  │  🔄 2 days ago — Citation check: API timeout,      │     │
+│  │     auto-retried → completed on retry 2            │     │
+│  │  ✅ 3 days ago — New blog draft generated          │     │
+│  └────────────────────────────────────────────────────┘     │
+│                                                               │
+│  Error Recovery Policy:                                       │
+│  ┌────────────────────────────────────────────────────┐     │
+│  │  Blog Publishing Failure:                           │     │
+│  │  → Auto-retry: 3 attempts with 5-min intervals    │     │
+│  │  → If CMS connection lost: queue post, notify user │     │
+│  │  → Auto-reconnect attempts every hour for 24h     │     │
+│  │                                                      │     │
+│  │  AI Scan Failure:                                   │     │
+│  │  → Auto-retry: 4 attempts (exponential backoff)   │     │
+│  │  → If platform API down: skip, retry next cycle   │     │
+│  │  → Log partial results if some platforms succeed   │     │
+│  │                                                      │     │
+│  │  Content Generation Failure:                        │     │
+│  │  → Auto-retry with different content parameters   │     │
+│  │  → If AI provider down: queue for next available  │     │
+│  │  → Notify user if generation delayed >24h         │     │
+│  │                                                      │     │
+│  │  Visibility Score Drop (automated response):       │     │
+│  │  → If drop >5 points: Alert user immediately      │     │
+│  │  → If drop >10 points: Auto-generate response     │     │
+│  │    content targeting lost queries (queued for      │     │
+│  │    review, not auto-published)                     │     │
+│  │  → If drop >20 points: Pause auto-publishing,     │     │
+│  │    escalate to manual review for all content       │     │
+│  └────────────────────────────────────────────────────┘     │
+│                                                               │
+│  [View Full Logs]  [Configure Recovery Policy]               │
+│  [Run Manual Scan Now]  [Test Blog Connection]               │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Automation Pause & Resume
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  AEO — Pause Automation                                      │
+│                                                               │
+│  What would you like to pause?                                │
+│                                                               │
+│  ☐ Blog Generation (stop creating new drafts)                │
+│  ☐ Blog Publishing (drafts still generate, won't publish)   │
+│  ☐ AI Visibility Scans (stop monitoring AI mentions)         │
+│  ☐ Citation Tracking (stop checking for new citations)       │
+│  ☐ Competitor Monitoring (stop watching competitor content)   │
+│  ☐ Everything (full AEO pause)                               │
+│                                                               │
+│  Duration:                                                    │
+│  ○ Until I resume manually                                    │
+│  ○ Pause for [7 ▼] days, then auto-resume                   │
+│  ○ Pause until [date picker]                                 │
+│                                                               │
+│  ⚠️ Pausing monitoring means you won't be alerted to         │
+│  visibility drops or competitor activity during this period.  │
+│                                                               │
+│  [Confirm Pause]  [Cancel]                                    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
 ## Edge Cases
 
 ### No Blog/Website Connected

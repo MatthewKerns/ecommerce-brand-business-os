@@ -794,6 +794,249 @@ For one-time campaigns (promotions, announcements, seasonal):
 
 ---
 
+## Automation Management
+
+### Sequence Automation Controls
+
+Each email sequence has its own automation panel, plus a global control view:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  EMAIL MARKETING — Automation Settings                       │
+│                                                               │
+│  SEQUENCE STATUS                                              │
+│  ┌────────────────────────────────────────────────────┐     │
+│  │  Welcome Sequence:     [ON ●───] Active             │     │
+│  │  Nurture Sequence:     [ON ●───] Active             │     │
+│  │  Post-Purchase:        [ON ●───] Active             │     │
+│  │  Win-Back:             [───○ OFF] Paused            │     │
+│  │  ──────────────────────────────────                 │     │
+│  │  Platform Sync:        [ON ●───] Real-time          │     │
+│  │  A/B Testing:          [ON ●───] Active on 2 tests  │     │
+│  │  List Hygiene:         [ON ●───] Weekly auto-clean  │     │
+│  └────────────────────────────────────────────────────┘     │
+│                                                               │
+│  SENDING MODE                                                 │
+│  ┌────────────────────────────────────────────────────┐     │
+│  │  Current: Manual Review for New Emails              │     │
+│  │                                                      │     │
+│  │  Your approval stats (last 60 days):                │     │
+│  │  • 18 emails reviewed (new and revised)             │     │
+│  │  • 15 approved without edits (83.3%)                │     │
+│  │  • 3 edited before approval                         │     │
+│  │  • 0 rejected                                       │     │
+│  │                                                      │     │
+│  │  ⚡ Smart Autopilot eligible for:                    │     │
+│  │  ✅ Welcome Sequence (91% no-edit rate)             │     │
+│  │  ✅ Post-Purchase (88% no-edit rate)                │     │
+│  │  ⚠️ Nurture (72% — needs improvement)              │     │
+│  │  ⚠️ Win-Back (too few data points)                 │     │
+│  │                                                      │     │
+│  │  ○ Manual Review (current)                          │     │
+│  │    All new and revised emails require approval.     │     │
+│  │                                                      │     │
+│  │  ○ Smart Autopilot (per sequence)                   │     │
+│  │    Auto-send sequence emails that pass:             │     │
+│  │    ✅ Brand voice match > [90% ▼]                   │     │
+│  │    ✅ Spam score < [2.0 ▼]                          │     │
+│  │    ✅ No brand language violations                   │     │
+│  │    ✅ Subject line quality > [80 ▼]                 │     │
+│  │    Campaigns always require manual approval.        │     │
+│  │                                                      │     │
+│  │  ○ Full Autopilot (earned per sequence)             │     │
+│  │    Sequence emails auto-send. Campaigns still       │     │
+│  │    require approval. Daily digest of sends.         │     │
+│  └────────────────────────────────────────────────────┘     │
+│                                                               │
+│  FREQUENCY CAPS                                               │
+│  ┌────────────────────────────────────────────────────┐     │
+│  │  Max emails per subscriber per day: [1 ▼]          │     │
+│  │  Max emails per subscriber per week: [3 ▼]         │     │
+│  │  Priority order (when capped):                      │     │
+│  │  1. Transactional (order confirmations) — always   │     │
+│  │  2. Active sequence step — high priority            │     │
+│  │  3. Campaign — medium priority                      │     │
+│  │  4. Win-back — low priority (can wait)             │     │
+│  │                                                      │     │
+│  │  ⚠️ If a subscriber would receive 2 emails in one  │     │
+│  │  day, the lower-priority email is delayed 24h.     │     │
+│  └────────────────────────────────────────────────────┘     │
+│                                                               │
+│  SAFETY THRESHOLDS                                            │
+│  ┌────────────────────────────────────────────────────┐     │
+│  │  Auto-pause a sequence if:                          │     │
+│  │  ☑️ Unsubscribe rate exceeds [0.5% ▼] in a day    │     │
+│  │  ☑️ Bounce rate exceeds [3% ▼]                     │     │
+│  │  ☑️ Spam complaints exceed [0.1% ▼]                │     │
+│  │  ☑️ Open rate drops below [15% ▼] for 3 sends     │     │
+│  │                                                      │     │
+│  │  When auto-paused:                                  │     │
+│  │  → Sequence stops sending new emails               │     │
+│  │  → AI analyzes the problem and suggests fixes      │     │
+│  │  → User receives alert with diagnosis + fix options│     │
+│  │  → Subscribers in the sequence are held, not lost  │     │
+│  └────────────────────────────────────────────────────┘     │
+│                                                               │
+│  QUICK ACTIONS                                                │
+│  [Pause All Sequences]  [Pause Only Campaigns]               │
+│  [View Automation Logs]  [Go to Command Center]              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Progressive Trust for Email Sending
+
+Email has the most nuanced trust model because sends are irreversible and directly impact subscriber relationships:
+
+```
+TRUST LEVELS — EMAIL:
+
+Level 1 — Manual Review (Default)
+  Requirement: New setup, no history
+  Behavior: All new emails and revisions require approval
+  Existing approved sequences run automatically (they were
+  reviewed during setup). Only NEW or CHANGED emails need review.
+  Threshold to advance: 15+ email approvals, <15% edit rate
+
+Level 2 — Smart Autopilot (Per Sequence)
+  Requirement: 15+ approvals per sequence, <15% edit rate
+  Earned independently per sequence — your Welcome Sequence
+  can reach Smart Autopilot while Win-Back stays Manual.
+  Behavior: Auto-send if brand check + spam check + quality pass
+  One-time campaigns ALWAYS require manual approval at this level.
+  System prompt: "Your Welcome Sequence emails have been
+  approved 16 times with only 1 edit. Enable Smart Autopilot?
+  New emails meeting quality thresholds will auto-activate.
+  Below-threshold emails go to your review queue."
+
+Level 3 — Full Autopilot (Per Sequence)
+  Requirement: 30+ auto-sent without manual override
+  Behavior: All sequence emails auto-activate
+  Campaigns still require manual send confirmation
+  (Campaigns are one-shot — too risky for full autopilot)
+  Notification: Weekly digest of sends, performance, and
+  any safety threshold triggers
+
+Trust revocation triggers (EMAIL-SPECIFIC):
+  • Unsubscribe rate spikes above threshold → immediate pause
+  • Bounce rate exceeds threshold → drops to Manual
+  • User manually edits 3+ auto-sent emails → drops one level
+  • Spam complaint filed → drops to Manual immediately
+  • Open rate decline for 3 consecutive sends → warning + review
+
+IMPORTANT: One-time campaigns never reach Full Autopilot.
+They always require human confirmation before sending.
+This is a safety design choice, not a trust limitation.
+```
+
+### Error Recovery & Self-Healing
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  AUTOMATION HEALTH — Email Marketing                         │
+│                                                               │
+│  Platform: Klaviyo • Status: ● Connected                     │
+│  Last sync: 2 minutes ago                                     │
+│                                                               │
+│  Recent Events:                                               │
+│  ┌────────────────────────────────────────────────────┐     │
+│  │  ✅ 10:15 AM — Welcome email sent to new subscriber│     │
+│  │  ✅ 10:00 AM — Platform sync completed (12 new)   │     │
+│  │  🔄 9:45 AM — Klaviyo API rate limit hit,          │     │
+│  │     auto-throttled, resuming in 60s                │     │
+│  │  ✅ 9:46 AM — Throttle released, sends resumed    │     │
+│  │  ✅ 9:30 AM — A/B test concluded: Variant B wins  │     │
+│  │  ⚠️ 8:00 AM — 2 bounces detected, contacts cleaned│     │
+│  └────────────────────────────────────────────────────┘     │
+│                                                               │
+│  Error Recovery Policy:                                       │
+│  ┌────────────────────────────────────────────────────┐     │
+│  │  Platform Disconnection:                            │     │
+│  │  → Auto-retry: 4 attempts (exponential backoff)   │     │
+│  │  → During disconnect: Queue unsent emails          │     │
+│  │  → Auto-reconnect attempts every 30 min for 24h   │     │
+│  │  → After 24h: Alert user, pause all sends         │     │
+│  │  → Queued emails send in order once reconnected   │     │
+│  │                                                      │     │
+│  │  Failed Send:                                       │     │
+│  │  → Auto-retry: 3 attempts over 30 minutes         │     │
+│  │  → If content rejected by platform: flag for       │     │
+│  │    review (may contain spam-trigger words)         │     │
+│  │  → If rate limited: auto-throttle and resume       │     │
+│  │                                                      │     │
+│  │  Bounce Handling:                                   │     │
+│  │  → Hard bounce: Auto-remove from active lists     │     │
+│  │  → Soft bounce: Retry 3x, then suppress for 30d  │     │
+│  │  → Bounce rate alert if >3% in any batch          │     │
+│  │                                                      │     │
+│  │  Safety Threshold Breach:                           │     │
+│  │  → Auto-pause the affected sequence immediately   │     │
+│  │  → AI diagnoses the problem (which email, why)    │     │
+│  │  → Generates fix suggestion (new subject line,     │     │
+│  │    revised copy, changed timing)                   │     │
+│  │  → User reviews diagnosis + approves fix           │     │
+│  │  → Sequence resumes with fix applied               │     │
+│  └────────────────────────────────────────────────────┘     │
+│                                                               │
+│  [View Full Logs]  [Configure Recovery Policy]               │
+│  [Test Platform Connection]  [Send Test Email]               │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Sequence Pause & Resume
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  EMAIL — Pause Sequence                                      │
+│                                                               │
+│  Pausing: Welcome Sequence                                    │
+│  Currently enrolled: 45 subscribers mid-sequence              │
+│                                                               │
+│  What happens to enrolled subscribers?                         │
+│  ○ Hold in place — resume from where they stopped            │
+│  ○ Complete current step, then hold                          │
+│  ○ Remove from sequence (they won't receive remaining        │
+│    emails even after resume)                                  │
+│                                                               │
+│  Duration:                                                    │
+│  ○ Until I resume manually                                    │
+│  ○ Pause for [7 ▼] days, then auto-resume                   │
+│  ○ Pause until [date picker]                                 │
+│                                                               │
+│  ⚠️ New signups during pause will be queued and enrolled     │
+│  when the sequence resumes. No subscribers are lost.          │
+│                                                               │
+│  [Confirm Pause]  [Cancel]                                    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Bulk Operations
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  EMAIL — Bulk Actions                                        │
+│                                                               │
+│  Select sequences:                                            │
+│  ☑️ Welcome  ☑️ Nurture  ☑️ Post-Purchase  ☐ Win-Back       │
+│                                                               │
+│  Action:                                                      │
+│  ┌────────────────────────────────────────────────────┐     │
+│  │  [Pause All Selected]                               │     │
+│  │  [Resume All Selected]                              │     │
+│  │  [Set All to Manual Review]                         │     │
+│  │  [Rewrite All in Brand Voice] (re-generates copy   │     │
+│  │   for all emails using current brand guide)         │     │
+│  │  [A/B Test Subject Lines] (generates variant       │     │
+│  │   subject lines for all emails in selected seqs)   │     │
+│  │  [Export All Templates]                             │     │
+│  │  [Sync All to Platform Now]                         │     │
+│  └────────────────────────────────────────────────────┘     │
+│                                                               │
+│  [Confirm Action]  [Cancel]                                   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
 ## Edge Cases
 
 ### Platform Disconnected
