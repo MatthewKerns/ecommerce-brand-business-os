@@ -75,7 +75,8 @@
         "feature-31",
         "feature-32",
         "feature-33",
-        "feature-34"
+        "feature-34",
+        "feature-42"
       ],
       "milestones": [
         {
@@ -1415,6 +1416,36 @@
         "As a new user, I want guided setup so I can start generating content quickly",
         "As a non-technical user, I want help connecting integrations so everything works seamlessly"
       ],
+      "competitor_insight_ids": []
+    },
+    {
+      "id": "feature-42",
+      "title": "Content Review & Versioning UI",
+      "description": "Dashboard UI for the human review workflow and content versioning system built in feature-8. Provides a review queue for AI-generated drafts, approve/reject actions, and version history with diff comparison.",
+      "phase_id": "phase-2",
+      "status": "planned",
+      "priority": "must",
+      "complexity": "medium",
+      "impact": "high",
+      "dependencies": [
+        "feature-8",
+        "feature-29"
+      ],
+      "acceptance_criteria": [
+        "Review queue listing all drafts pending approval with content preview",
+        "Approve and reject actions wired to /api/review/approve and /api/review/reject endpoints",
+        "Version history timeline showing all revisions for a piece of content",
+        "Side-by-side diff view between any two versions using /api/versions/compare",
+        "One-click revert to a previous version via /api/versions/revert",
+        "Async generation status indicator showing queue position and progress",
+        "Integrates with Blog Content Creation UI (feature-32) for in-context review"
+      ],
+      "user_stories": [
+        "As a brand owner, I want to see all AI-generated drafts awaiting my review so I can approve or reject before anything publishes",
+        "As a content editor, I want to compare the current draft against previous versions so I can track what changed",
+        "As a brand owner, I want to revert a published piece to an earlier version if the latest edit introduced errors"
+      ],
+      "rationale": "The review and versioning API (feature-8) is fully built but has no UI surface. Without this, brand owners must hit raw API endpoints to approve content \u2014 blocking the human-in-the-loop safety guarantee the system was designed to provide.",
       "competitor_insight_ids": []
     }
   ],
