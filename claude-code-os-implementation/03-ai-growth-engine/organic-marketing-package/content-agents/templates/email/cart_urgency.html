@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Your cart is waiting - Don't miss out! - Infinity Vault{% endblock %}
+
+{% block content %}
+<div class="greeting">
+    Hi{% if customer_name %} {{ customer_name }}{% endif %},
+</div>
+
+<div class="message">
+    <p style="font-weight: bold; color: #d9534f; font-size: 18px;">⏰ Your cart items are selling fast!</p>
+    <p>The items in your cart are popular and inventory is limited. We can't guarantee they'll still be available if you wait much longer.</p>
+    <p><strong>Don't miss out</strong> - complete your order now to secure these items before they're gone.</p>
+</div>
+
+<!-- Cart Items Section -->
+<div class="cart-section">
+    <div class="cart-header">
+        Your Reserved Items
+    </div>
+
+    {% if cart_items %}
+        {% for item in cart_items %}
+        <div class="cart-item">
+            {% if item.product_image_url %}
+            <div class="item-image">
+                <img src="{{ item.product_image_url }}" alt="{{ item.product_name }}">
+            </div>
+            {% endif %}
+            <div class="item-details">
+                <div class="item-name">{{ item.product_name }}</div>
+                <div class="item-quantity">Quantity: {{ item.quantity }}</div>
+                <div class="item-price">{{ item.currency | default('$') }}{{ "%.2f" | format(item.price) }}</div>
+                {% if loop.index <= 2 %}
+                <div style="color: #d9534f; font-size: 13px; font-weight: bold; margin-top: 5px;">
+                    🔥 Limited Stock Available
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- Cart Total -->
+        <div class="cart-total">
+            <span class="total-label">Total:</span>
+            <span class="total-amount">{{ currency | default('$') }}{{ "%.2f" | format(total_value) }}</span>
+        </div>
+    {% else %}
+        <p style="color: #777777; text-align: center; padding: 20px 0;">
+            Your cart items are waiting for you
+        </p>
+    {% endif %}
+</div>
+
+<!-- Call to Action Button -->
+<div class="button-container">
+    <a href="{{ recovery_link }}" class="button" style="background-color: #d9534f;">
+        Secure My Order Now
+    </a>
+</div>
+
+<div class="message" style="text-align: center; margin-top: 30px; background-color: #fff3cd; padding: 20px; border-radius: 4px; border-left: 4px solid #ffc107;">
+    <p style="font-size: 15px; color: #856404; margin: 0;">
+        <strong>⚠️ Important:</strong> Items in your cart are not reserved indefinitely. Stock levels change quickly, and we want to make sure you get what you want.
+    </p>
+</div>
+
+<div class="message" style="text-align: center; margin-top: 20px;">
+    <p style="font-size: 14px; color: #777777;">
+        Questions? We're here to help!<br>
+        Contact us at <a href="mailto:support@infinityvault.com" style="color: #000000;">support@infinityvault.com</a>
+    </p>
+</div>
+{% endblock %}

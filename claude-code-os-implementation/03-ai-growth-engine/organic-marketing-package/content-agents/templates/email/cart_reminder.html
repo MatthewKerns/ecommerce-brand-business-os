@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}You left items in your cart - Infinity Vault{% endblock %}
+
+{% block content %}
+<div class="greeting">
+    Hi{% if customer_name %} {{ customer_name }}{% endif %},
+</div>
+
+<div class="message">
+    <p>We noticed you left some amazing items in your cart. We've saved them for you!</p>
+    <p>Your cart is waiting, and these items are ready to ship. Complete your order now to secure your items.</p>
+</div>
+
+<!-- Cart Items Section -->
+<div class="cart-section">
+    <div class="cart-header">
+        Your Cart
+    </div>
+
+    {% if cart_items %}
+        {% for item in cart_items %}
+        <div class="cart-item">
+            {% if item.product_image_url %}
+            <div class="item-image">
+                <img src="{{ item.product_image_url }}" alt="{{ item.product_name }}">
+            </div>
+            {% endif %}
+            <div class="item-details">
+                <div class="item-name">{{ item.product_name }}</div>
+                <div class="item-quantity">Quantity: {{ item.quantity }}</div>
+                <div class="item-price">{{ item.currency | default('$') }}{{ "%.2f" | format(item.price) }}</div>
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- Cart Total -->
+        <div class="cart-total">
+            <span class="total-label">Total:</span>
+            <span class="total-amount">{{ currency | default('$') }}{{ "%.2f" | format(total_value) }}</span>
+        </div>
+    {% else %}
+        <p style="color: #777777; text-align: center; padding: 20px 0;">
+            Your cart items are waiting for you
+        </p>
+    {% endif %}
+</div>
+
+<!-- Call to Action Button -->
+<div class="button-container">
+    <a href="{{ recovery_link }}" class="button">
+        Complete Your Order
+    </a>
+</div>
+
+<div class="message" style="text-align: center; margin-top: 30px;">
+    <p style="font-size: 14px; color: #777777;">
+        Need help? Our customer support team is ready to assist you.<br>
+        Simply reply to this email or visit our <a href="{{ base_url | default('https://infinityvault.com') }}/help" style="color: #000000;">Help Center</a>.
+    </p>
+</div>
+{% endblock %}

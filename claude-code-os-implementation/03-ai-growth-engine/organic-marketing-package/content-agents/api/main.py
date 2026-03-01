@@ -23,7 +23,8 @@ from api.routes import (
     aeo_router,
     citation_monitoring_router,
     seo_router,
-    klaviyo_router
+    klaviyo_router,
+    cart_router
 )
 from api.routes.clerk_webhooks import router as clerk_webhooks_router
 
@@ -65,6 +66,7 @@ app.include_router(citation_monitoring_router, prefix="/api")
 app.include_router(seo_router, prefix="/api")
 app.include_router(klaviyo_router, prefix="/api")
 app.include_router(clerk_webhooks_router, prefix="/api")
+app.include_router(cart_router, prefix="/api")
 
 
 @app.exception_handler(Exception)

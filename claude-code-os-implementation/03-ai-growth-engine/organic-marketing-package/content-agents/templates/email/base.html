@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>{% block title %}Infinity Vault{% endblock %}</title>
+    <!--[if mso]>
+    <style type="text/css">
+        body, table, td {font-family: Arial, Helvetica, sans-serif !important;}
+    </style>
+    <![endif]-->
+    <style>
+        /* Reset styles */
+        body {
+            margin: 0;
+            padding: 0;
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
+
+        table {
+            border-collapse: collapse;
+            mso-table-lspace: 0pt;
+            mso-table-rspace: 0pt;
+        }
+
+        img {
+            border: 0;
+            height: auto;
+            line-height: 100%;
+            outline: none;
+            text-decoration: none;
+            -ms-interpolation-mode: bicubic;
+        }
+
+        /* Base styles */
+        body {
+            background-color: #f4f4f4;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333333;
+        }
+
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+        }
+
+        /* Header */
+        .header {
+            background-color: #000000;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .logo {
+            color: #ffffff;
+            font-size: 28px;
+            font-weight: bold;
+            text-decoration: none;
+            letter-spacing: 1px;
+        }
+
+        /* Content */
+        .content {
+            padding: 40px 30px;
+        }
+
+        .greeting {
+            font-size: 18px;
+            color: #333333;
+            margin-bottom: 20px;
+        }
+
+        .message {
+            font-size: 16px;
+            color: #555555;
+            line-height: 1.8;
+            margin-bottom: 30px;
+        }
+
+        /* Cart items */
+        .cart-section {
+            background-color: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 30px 0;
+        }
+
+        .cart-header {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333333;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #000000;
+            padding-bottom: 10px;
+        }
+
+        .cart-item {
+            display: table;
+            width: 100%;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .cart-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .item-image {
+            display: table-cell;
+            width: 100px;
+            vertical-align: top;
+            padding-right: 15px;
+        }
+
+        .item-image img {
+            width: 100%;
+            max-width: 100px;
+            height: auto;
+            border-radius: 4px;
+        }
+
+        .item-details {
+            display: table-cell;
+            vertical-align: top;
+        }
+
+        .item-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333333;
+            margin-bottom: 5px;
+        }
+
+        .item-quantity {
+            font-size: 14px;
+            color: #777777;
+            margin-bottom: 5px;
+        }
+
+        .item-price {
+            font-size: 16px;
+            font-weight: bold;
+            color: #000000;
+        }
+
+        /* Cart total */
+        .cart-total {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #000000;
+            text-align: right;
+        }
+
+        .total-label {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333333;
+        }
+
+        .total-amount {
+            font-size: 24px;
+            font-weight: bold;
+            color: #000000;
+            margin-left: 10px;
+        }
+
+        /* Buttons */
+        .button-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 16px 40px;
+            background-color: #000000;
+            color: #ffffff !important;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .button:hover {
+            background-color: #333333;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #f4f4f4;
+            padding: 30px 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #777777;
+        }
+
+        .footer a {
+            color: #000000;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media only screen and (max-width: 600px) {
+            .content {
+                padding: 30px 20px !important;
+            }
+
+            .cart-section {
+                padding: 15px !important;
+            }
+
+            .item-image {
+                width: 80px !important;
+            }
+
+            .item-image img {
+                max-width: 80px !important;
+            }
+
+            .item-name {
+                font-size: 14px !important;
+            }
+
+            .item-price {
+                font-size: 14px !important;
+            }
+
+            .total-amount {
+                font-size: 20px !important;
+            }
+
+            .button {
+                display: block !important;
+                padding: 14px 30px !important;
+                font-size: 14px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+        <tr>
+            <td style="padding: 20px 0;">
+                <table class="email-container" cellspacing="0" cellpadding="0" border="0" width="600" align="center">
+                    <!-- Header -->
+                    <tr>
+                        <td class="header">
+                            <a href="{{ base_url | default('https://infinityvault.com') }}" class="logo">
+                                INFINITY VAULT
+                            </a>
+                        </td>
+                    </tr>
+
+                    <!-- Content -->
+                    <tr>
+                        <td class="content">
+                            {% block content %}
+                            <!-- Content will be inserted here by child templates -->
+                            {% endblock %}
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td class="footer">
+                            <p style="margin-bottom: 10px;">
+                                &copy; {{ current_year | default('2024') }} Infinity Vault. All rights reserved.
+                            </p>
+                            <p style="margin-bottom: 10px;">
+                                <a href="{{ base_url | default('https://infinityvault.com') }}/help">Help Center</a> |
+                                <a href="{{ base_url | default('https://infinityvault.com') }}/contact">Contact Us</a> |
+                                <a href="{{ unsubscribe_url | default('#') }}">Unsubscribe</a>
+                            </p>
+                            <p style="margin-top: 20px; font-size: 12px; color: #999999;">
+                                This email was sent to {{ email | default('customer@example.com') }}.
+                                If you have any questions, please contact us at support@infinityvault.com
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
