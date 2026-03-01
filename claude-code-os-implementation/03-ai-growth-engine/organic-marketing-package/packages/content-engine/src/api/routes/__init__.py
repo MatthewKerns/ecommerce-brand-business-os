@@ -15,6 +15,8 @@ from api.routes.citation_monitoring import router as citation_monitoring_router
 # from api.routes.seo import router as seo_router  # Temporarily disabled - missing KeywordResearchRequest
 from api.routes.klaviyo import router as klaviyo_router
 from api.routes.cart import router as cart_router
+from api.routes.review import router as review_router
+from api.routes.versions import router as versions_router
 
 __all__ = [
     "blog_router",
@@ -27,5 +29,7 @@ __all__ = [
     "citation_monitoring_router",
     # "seo_router",  # Temporarily disabled
     "klaviyo_router",
-    "cart_router"
+    "cart_router",
+    "review_router",
+    "versions_router"
 ]
