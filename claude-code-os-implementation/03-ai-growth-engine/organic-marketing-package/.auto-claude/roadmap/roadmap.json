@@ -1138,7 +1138,6 @@
         "As a marketer, I want AI avatar videos with Synthesia so I can create professional spokesperson content",
         "As a developer, I want local video processing with FFmpeg so I can handle simple edits without external APIs"
       ],
-      "linked_spec_id": "031-video-provider-implementations",
       "competitor_insight_ids": [
         "pain-1-2",
         "pain-5-3"
