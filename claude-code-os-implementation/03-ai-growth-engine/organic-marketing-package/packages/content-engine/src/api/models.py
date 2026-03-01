@@ -423,6 +423,65 @@ class ComparisonContentRequest(BaseModel):
 SchemaGenerationRequest = FAQSchemaRequest
 
 
+class ReviewSubmitRequest(BaseModel):
+    """
+    Review submission request.
+
+    This model handles submitting content for human review.
+    """
+    content_id: int = Field(
+        ...,
+        ge=1,
+        description="ID of the content to submit for review"
+    )
+    reviewer_id: str = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        description="Identifier of the reviewer"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "content_id": 123,
+                "reviewer_id": "reviewer@example.com"
+            }
+        }
+
+
+class ReviewActionRequest(BaseModel):
+    """
+    Review action request.
+
+    This model handles approval or rejection of content under review.
+    """
+    review_id: int = Field(
+        ...,
+        ge=1,
+        description="ID of the review to action"
+    )
+    action: str = Field(
+        ...,
+        pattern="^(approve|reject)$",
+        description="Action to take: approve or reject"
+    )
+    notes: Optional[str] = Field(
+        None,
+        max_length=2000,
+        description="Review notes or feedback"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "review_id": 456,
+                "action": "approve",
+                "notes": "Content looks great, approved for publishing"
+            }
+        }
+
+
 # ============================================================================
 # Response Models
 # ============================================================================
@@ -639,6 +698,56 @@ class ErrorResponse(BaseModel):
                 },
                 "request_id": "req_abc123def456",
                 "timestamp": "2024-02-26T10:30:45Z"
+            }
+        }
+
+
+class ReviewStatusResponse(BaseModel):
+    """
+    Review status response.
+
+    This model provides the current status of a content review.
+    """
+    review_id: int = Field(
+        ...,
+        description="Unique identifier for the review"
+    )
+    content_id: int = Field(
+        ...,
+        description="ID of the content being reviewed"
+    )
+    status: str = Field(
+        ...,
+        pattern="^(draft|in_review|approved|rejected)$",
+        description="Current approval status"
+    )
+    reviewer_id: str = Field(
+        ...,
+        description="Identifier of the reviewer"
+    )
+    submitted_at: datetime = Field(
+        ...,
+        description="When the content was submitted for review"
+    )
+    reviewed_at: Optional[datetime] = Field(
+        None,
+        description="When the review was completed (if applicable)"
+    )
+    notes: Optional[str] = Field(
+        None,
+        description="Review notes or feedback"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "review_id": 456,
+                "content_id": 123,
+                "status": "approved",
+                "reviewer_id": "reviewer@example.com",
+                "submitted_at": "2024-02-26T10:30:45Z",
+                "reviewed_at": "2024-02-26T11:15:30Z",
+                "notes": "Content looks great, approved for publishing"
             }
         }
 
