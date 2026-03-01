@@ -25,7 +25,9 @@
         "feature-3",
         "feature-4",
         "feature-5",
-        "feature-29"
+        "feature-29",
+        "feature-40",
+        "feature-41"
       ],
       "milestones": [
         {
@@ -70,7 +72,10 @@
         "feature-9",
         "feature-10",
         "feature-30",
-        "feature-31"
+        "feature-31",
+        "feature-32",
+        "feature-33",
+        "feature-34"
       ],
       "milestones": [
         {
@@ -141,7 +146,10 @@
         "feature-16",
         "feature-17",
         "feature-18",
-        "feature-19"
+        "feature-19",
+        "feature-37",
+        "feature-38",
+        "feature-39"
       ],
       "milestones": [
         {
@@ -185,7 +193,9 @@
         "feature-20",
         "feature-21",
         "feature-22",
-        "feature-23"
+        "feature-23",
+        "feature-35",
+        "feature-36"
       ],
       "milestones": [
         {
@@ -461,9 +471,9 @@
     },
     {
       "id": "feature-8",
-      "title": "AI Content Agent Integration",
-      "description": "Connect existing AI content agents (BlogAgent, SocialAgent from separate repository) to the organic marketing system. Enable AI-powered content generation for TikTok scripts, blog articles, and email copy.",
-      "rationale": "AI-powered content automation addresses pain point of manual content creation that doesn't scale. Reduces labor costs making affordable done-for-you service possible (market gap-7). Connects existing assets from sibling directory.",
+      "title": "AI Content Agent Integration — Remaining Gaps",
+      "description": "Core AI content agents (BlogAgent, SocialAgent, TikTokChannelAgent) and brand voice enforcement are fully implemented. This feature now targets the three remaining gaps: human review workflow, content queue prioritization for generation jobs, and content versioning/revision system.",
+      "rationale": "Agent integration and brand voice are done. The missing pieces are what turn a working prototype into a production-safe system: humans need a way to review before content goes live, generation jobs need to be queued and prioritized rather than blocking, and content needs versioning so edits and revisions are tracked.",
       "priority": "must",
       "complexity": "medium",
       "impact": "high",
@@ -471,18 +481,22 @@
       "dependencies": [
         "feature-5"
       ],
-      "status": "under_review",
+      "status": "in_progress",
+      "completed_criteria": [
+        "BlogAgent integrated for article generation (blog_agent.py, /api/routes/blog.py)",
+        "SocialAgent integrated for TikTok script generation (social_agent.py, tiktok_channel_agent.py)",
+        "Brand voice guidelines enforced in generation prompts (BaseAgent._build_system_prompt loads brand files)",
+        "Content history tracked in ContentHistory table (all generations logged with tokens, timing, status)"
+      ],
       "acceptance_criteria": [
-        "BlogAgent integrated for article generation",
-        "SocialAgent integrated for TikTok script generation",
-        "Content generation queue with prioritization",
-        "Human review workflow for AI-generated content",
-        "Brand voice guidelines enforced in generation prompts",
-        "Content versioning and edit history maintained"
+        "Human review workflow: ContentReview model, approval state machine (draft → in_review → approved/rejected), and review endpoints implemented",
+        "Content generation queue: blog and social generation jobs routed through Celery with priority levels (high/medium/low) wired to task routing",
+        "Content versioning: version numbers on ContentHistory records, draft/revision system, ability to compare or revert to a previous version"
       ],
       "user_stories": [
-        "As a brand owner, I want AI to generate content so that I can maintain high posting frequency without hiring writers",
-        "As a content creator, I want AI-generated drafts so that I can focus on editing rather than writing from scratch"
+        "As a brand owner, I want to review AI-generated drafts before they publish so that off-brand content never goes live",
+        "As a content creator, I want AI-generated drafts so that I can focus on editing rather than writing from scratch",
+        "As a brand owner, I want content generation to run in the background so that I don't wait for API calls to complete"
       ],
       "competitor_insight_ids": [
         "pain-7-5"
@@ -1153,15 +1167,291 @@
         "pain-1-2",
         "pain-5-3"
       ]
+    },
+    {
+      "id": "feature-32",
+      "title": "Blog Content Creation UI",
+      "description": "Complete UI flow for blog content generation, editing, and publishing through the dashboard",
+      "rationale": "Without this UI, the powerful BlogAgent backend capabilities are inaccessible to users. This creates the complete flow from topic selection to publishing, making blog content generation a seamless experience.",
+      "priority": "high",
+      "complexity": "low",
+      "impact": "high",
+      "phase_id": "phase-2",
+      "dependencies": [
+        "feature-30",
+        "feature-31"
+      ],
+      "status": "planned",
+      "acceptance_criteria": [
+        "Blog creation form with topic, keywords, style inputs",
+        "Connection to BlogAgent API endpoint functional",
+        "Generated content displayed with editing capabilities",
+        "Save/publish/schedule functions implemented",
+        "Content history and version tracking available"
+      ],
+      "user_stories": [
+        "As a brand owner, I want to generate blog content through a simple UI so I can publish without technical knowledge",
+        "As a content manager, I want to edit AI-generated content before publishing so it matches my brand voice perfectly"
+      ],
+      "competitor_insight_ids": []
+    },
+    {
+      "id": "feature-33",
+      "title": "Social Media Content Pipeline",
+      "description": "UI for generating and scheduling multi-platform social media content with preview and batch capabilities",
+      "rationale": "Social media content generation exists in the backend but lacks a user interface. This feature creates the complete pipeline from ideation to scheduling across all platforms.",
+      "priority": "high",
+      "complexity": "low",
+      "impact": "high",
+      "phase_id": "phase-2",
+      "dependencies": [
+        "feature-30",
+        "feature-31"
+      ],
+      "status": "planned",
+      "acceptance_criteria": [
+        "Multi-platform content generator UI implemented",
+        "SocialAgent API integration functional",
+        "Platform-specific previews available",
+        "Batch generation capabilities working",
+        "Content calendar view integrated"
+      ],
+      "user_stories": [
+        "As a social media manager, I want to generate content for multiple platforms at once so I save hours of work",
+        "As a brand owner, I want to preview how content looks on each platform before publishing"
+      ],
+      "competitor_insight_ids": []
+    },
+    {
+      "id": "feature-34",
+      "title": "TikTok Video Generation & Publishing",
+      "description": "Complete video creation and publishing workflow with script generation, preview, and scheduling",
+      "rationale": "TikTok is the primary growth channel but the video generation capabilities aren't accessible through the UI. This creates the end-to-end workflow from script to published video.",
+      "priority": "high",
+      "complexity": "high",
+      "impact": "high",
+      "phase_id": "phase-2",
+      "dependencies": [
+        "feature-30",
+        "feature-31",
+        "feature-6"
+      ],
+      "status": "planned",
+      "acceptance_criteria": [
+        "Video generation UI with script/hook inputs",
+        "Video preview and editing capabilities",
+        "TikTok publishing service integration",
+        "Scheduling interface functional",
+        "4-channel management dashboard implemented"
+      ],
+      "user_stories": [
+        "As a TikTok creator, I want to generate and schedule videos in bulk so I maintain consistent posting",
+        "As a brand owner, I want to manage all 4 TikTok channels from one dashboard"
+      ],
+      "competitor_insight_ids": [
+        "pain-5-1",
+        "pain-5-2"
+      ]
+    },
+    {
+      "id": "feature-35",
+      "title": "Real-Time Analytics Dashboard",
+      "description": "Connect analytics ETL pipelines to dashboard visualization with real-time data streaming",
+      "rationale": "Analytics ETL exists but data isn't visible to users. This creates the real-time dashboard that makes performance metrics actionable.",
+      "priority": "medium",
+      "complexity": "high",
+      "impact": "high",
+      "phase_id": "phase-5",
+      "dependencies": [
+        "feature-30",
+        "feature-20"
+      ],
+      "status": "planned",
+      "acceptance_criteria": [
+        "ETL pipeline to database wiring complete",
+        "WebSocket real-time streaming functional",
+        "Interactive charts and metrics displayed",
+        "Filtering and date range selection working",
+        "Export capabilities implemented"
+      ],
+      "user_stories": [
+        "As a data-driven marketer, I want real-time analytics so I can make quick optimization decisions",
+        "As a brand owner, I want to export performance data for investor reports"
+      ],
+      "competitor_insight_ids": []
+    },
+    {
+      "id": "feature-36",
+      "title": "Content Performance Tracking",
+      "description": "Track and display performance metrics for published content with optimization recommendations",
+      "rationale": "Content is being published but performance isn't tracked in a unified way. This creates the feedback loop for continuous improvement.",
+      "priority": "medium",
+      "complexity": "medium",
+      "impact": "high",
+      "phase_id": "phase-5",
+      "dependencies": [
+        "feature-35"
+      ],
+      "status": "planned",
+      "acceptance_criteria": [
+        "Content performance API endpoints created",
+        "Performance dashboard with KPIs implemented",
+        "A/B testing tracking functional",
+        "Optimization recommendations generated",
+        "Performance reports available"
+      ],
+      "user_stories": [
+        "As a content strategist, I want to see which content performs best so I can create more of what works",
+        "As a brand owner, I want AI recommendations for content optimization based on performance data"
+      ],
+      "competitor_insight_ids": []
+    },
+    {
+      "id": "feature-37",
+      "title": "Email Sequence Builder",
+      "description": "Visual drag-and-drop builder for email automation sequences with template library",
+      "rationale": "Klaviyo integration exists but users can't build sequences through the platform. This creates the visual builder for complex email automations.",
+      "priority": "high",
+      "complexity": "high",
+      "impact": "high",
+      "phase_id": "phase-4",
+      "dependencies": [
+        "feature-30",
+        "feature-15"
+      ],
+      "status": "planned",
+      "acceptance_criteria": [
+        "Drag-and-drop sequence designer implemented",
+        "Klaviyo API sequence deployment functional",
+        "Template library available",
+        "Trigger configuration working",
+        "Testing and preview capabilities functional"
+      ],
+      "user_stories": [
+        "As an email marketer, I want a visual sequence builder so I can create complex automations without code",
+        "As a brand owner, I want pre-built email templates so I can launch campaigns quickly"
+      ],
+      "competitor_insight_ids": [
+        "pain-4-1",
+        "pain-4-2"
+      ]
+    },
+    {
+      "id": "feature-38",
+      "title": "Cart Recovery Automation UI",
+      "description": "Configure and monitor abandoned cart recovery sequences with templates and A/B testing",
+      "rationale": "Cart recovery backend exists but lacks user configuration. This creates the UI for managing this critical revenue recovery feature.",
+      "priority": "high",
+      "complexity": "low",
+      "impact": "high",
+      "phase_id": "phase-4",
+      "dependencies": [
+        "feature-37",
+        "feature-18"
+      ],
+      "status": "planned",
+      "acceptance_criteria": [
+        "Recovery sequence configuration UI implemented",
+        "Monitoring dashboard functional",
+        "Recovery email templates available",
+        "Performance metrics displayed",
+        "A/B testing for recovery emails working"
+      ],
+      "user_stories": [
+        "As an e-commerce owner, I want to configure cart recovery emails so I recover lost revenue automatically",
+        "As a marketer, I want to A/B test recovery messages to maximize conversion"
+      ],
+      "competitor_insight_ids": []
+    },
+    {
+      "id": "feature-39",
+      "title": "Workflow Automation Builder",
+      "description": "Visual workflow builder for creating multi-step marketing automations with conditional logic",
+      "rationale": "Complex marketing workflows require coordination between multiple systems. This creates the visual builder for sophisticated automation flows.",
+      "priority": "medium",
+      "complexity": "high",
+      "impact": "high",
+      "phase_id": "phase-4",
+      "dependencies": [
+        "feature-37"
+      ],
+      "status": "planned",
+      "acceptance_criteria": [
+        "Workflow builder interface implemented",
+        "Trigger and action library available",
+        "Conditional logic implementation working",
+        "Scheduling capabilities functional",
+        "Workflow monitoring dashboard created"
+      ],
+      "user_stories": [
+        "As a marketing automation specialist, I want visual workflow building so I can create complex automations",
+        "As a brand owner, I want conditional logic in workflows so I can personalize customer journeys"
+      ],
+      "competitor_insight_ids": []
+    },
+    {
+      "id": "feature-40",
+      "title": "Brand Guide Upload & Processing",
+      "description": "Complete brand guide ingestion flow with document upload and conversational brand building",
+      "rationale": "Brand context is critical for content generation but there's no way to input brand guidelines. This creates the complete brand onboarding experience.",
+      "priority": "critical",
+      "complexity": "medium",
+      "impact": "high",
+      "phase_id": "phase-1",
+      "dependencies": [
+        "feature-30"
+      ],
+      "status": "planned",
+      "acceptance_criteria": [
+        "File upload interface for brand documents",
+        "Conversational brand building flow implemented",
+        "Brand context extraction pipeline functional",
+        "Brand preview and editing UI available",
+        "Brand context integrated into all content generation"
+      ],
+      "user_stories": [
+        "As a new user, I want to upload my brand guide so all content matches my brand voice",
+        "As a brand owner without formal guidelines, I want to build my brand profile through conversation"
+      ],
+      "competitor_insight_ids": []
+    },
+    {
+      "id": "feature-41",
+      "title": "Onboarding Wizard",
+      "description": "Guided setup flow for new users with integration guides and default configurations",
+      "rationale": "New users need guidance to get value quickly. This creates the step-by-step onboarding that ensures successful platform adoption.",
+      "priority": "high",
+      "complexity": "low",
+      "impact": "high",
+      "phase_id": "phase-1",
+      "dependencies": [
+        "feature-40"
+      ],
+      "status": "planned",
+      "acceptance_criteria": [
+        "Step-by-step onboarding flow created",
+        "Integration setup guides implemented",
+        "Progress tracking functional",
+        "Help and documentation links integrated",
+        "Default configurations applied automatically"
+      ],
+      "user_stories": [
+        "As a new user, I want guided setup so I can start generating content quickly",
+        "As a non-technical user, I want help connecting integrations so everything works seamlessly"
+      ],
+      "competitor_insight_ids": []
     }
   ],
   "metadata": {
     "created_at": "2025-02-26T02:30:00Z",
-    "updated_at": "2026-03-01T07:15:24.930Z",
+    "updated_at": "2026-03-01T09:00:53.816Z",
     "generated_by": "roadmap_features agent",
     "prioritization_framework": "MoSCoW",
     "competitor_analysis_used": true,
-    "total_competitor_pain_points_addressed": 37,
-    "market_gaps_addressed": 8
+    "total_features": 41,
+    "total_competitor_pain_points_addressed": 39,
+    "market_gaps_addressed": 8,
+    "frontend_backend_integration_features_added": 10,
+    "notes": "Added features 32-41 to bridge critical frontend-backend integration gaps and complete user journeys"
   }
 }
