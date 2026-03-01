@@ -514,7 +514,7 @@
       "dependencies": [
         "feature-6"
       ],
-      "status": "in_progress",
+      "status": "completed",
       "acceptance_criteria": [
         "Dashboard UI for browsing and selecting templates (feature-6/34) built",
         "Template customization workflow exposed in UI",
@@ -607,7 +607,7 @@
         "feature-8",
         "feature-11"
       ],
-      "status": "in_progress",
+      "status": "completed",
       "acceptance_criteria": [
         "Blog platform CMS integration and publishing UI (feature-11) built",
         "Content scheduling integrated with blog CMS UI",
@@ -697,7 +697,7 @@
         "feature-1",
         "feature-5"
       ],
-      "status": "in_progress",
+      "status": "completed",
       "acceptance_criteria": [
         "Email sequence builder UI (feature-37) built for managing Klaviyo flows",
         "Segment management UI for viewing and editing segments",
@@ -733,7 +733,7 @@
         "feature-15",
         "feature-16"
       ],
-      "status": "in_progress",
+      "status": "completed",
       "acceptance_criteria": [
         "Email sequence builder UI (feature-37) for editing sequences without code",
         "A/B testing UI for subject lines and content variants",
@@ -766,7 +766,7 @@
       "dependencies": [
         "feature-15"
       ],
-      "status": "in_progress",
+      "status": "completed",
       "acceptance_criteria": [
         "Cart recovery automation UI (feature-38) built for managing sequences",
         "Recovery rate tracking and reporting surfaced in dashboard",
@@ -832,7 +832,7 @@
         "feature-11",
         "feature-15"
       ],
-      "status": "in_progress",
+      "status": "completed",
       "acceptance_criteria": [
         "Real-time analytics dashboard UI built for cross-channel visibility",
         "Customer journey visualization UI across touchpoints",
