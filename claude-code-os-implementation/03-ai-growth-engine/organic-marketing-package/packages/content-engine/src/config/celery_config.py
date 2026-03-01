@@ -26,6 +26,13 @@ CELERY_RESULT_PERSISTENT = True
 # Task Routing
 CELERY_TASK_ROUTES = {
     "tasks.cart_recovery.*": {"queue": "cart_recovery"},
+    # Content Generation Tasks with Priority Queues
+    "tasks.content_generation.generate_blog_post_task": {"queue": "content_generation_high"},
+    "tasks.content_generation.generate_social_post_task": {"queue": "content_generation_normal"},
+    "tasks.content_generation.generate_email_task": {"queue": "content_generation_normal"},
+    "tasks.content_generation.generate_product_description_task": {"queue": "content_generation_normal"},
+    "tasks.content_generation.bulk_generate_task": {"queue": "content_generation_low"},
+    "tasks.content_generation.*": {"queue": "content_generation_normal"},
 }
 
 # Worker Configuration
