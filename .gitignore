@@ -16,7 +16,7 @@ Thumbs.db
 .claude/
 
 # Auto Claude data directory
-.auto-claude/
+# .auto-claude/  # Now tracked in git
 
 # Auto Claude generated files
 .auto-claude-security.json

@@ -1,0 +1,705 @@
+{
+  "id": "roadmap-20250128-2345",
+  "project_name": "E-commerce Brand Business OS",
+  "version": "1.0",
+  "vision": "An AI-powered Business Operating System that transforms productivity through intelligent automation, strategic alignment, and frictionless execution",
+  "target_audience": {
+    "primary": "Solo e-commerce brand owners and small business operators seeking AI-powered productivity systems",
+    "secondary": [
+      "Content creators managing multiple output channels",
+      "Entrepreneurs overwhelmed by project management tools",
+      "Business owners wanting to leverage AI without coding"
+    ]
+  },
+  "phases": [
+    {
+      "id": "phase-1",
+      "name": "Foundation",
+      "description": "Core infrastructure improvements and quick wins that address critical competitor pain points while enhancing the existing MVP with automation capabilities",
+      "order": 1,
+      "status": "planned",
+      "features": [
+        "feature-1",
+        "feature-2",
+        "feature-3",
+        "feature-4",
+        "feature-5",
+        "feature-6"
+      ],
+      "milestones": [
+        {
+          "id": "milestone-1-1",
+          "title": "CLI Automation Enabled",
+          "description": "Users can trigger daily planning, assessments, and agent actions via simple CLI commands instead of manual prompts",
+          "features": [
+            "feature-1",
+            "feature-2"
+          ],
+          "status": "planned"
+        },
+        {
+          "id": "milestone-1-2",
+          "title": "Context System Operational",
+          "description": "AI sessions automatically load and preserve context, eliminating the #1 competitor pain point",
+          "features": [
+            "feature-3",
+            "feature-4"
+          ],
+          "status": "planned"
+        },
+        {
+          "id": "milestone-1-3",
+          "title": "Daily Flow Streamlined",
+          "description": "Morning planning completes in under 60 seconds with enhanced productivity scoring",
+          "features": [
+            "feature-5",
+            "feature-6"
+          ],
+          "status": "planned"
+        }
+      ]
+    },
+    {
+      "id": "phase-2",
+      "name": "Enhancement",
+      "description": "User experience improvements and productivity features that deepen strategic alignment and provide objective measurement capabilities",
+      "order": 2,
+      "status": "planned",
+      "features": [
+        "feature-7",
+        "feature-8",
+        "feature-9",
+        "feature-10",
+        "feature-11"
+      ],
+      "milestones": [
+        {
+          "id": "milestone-2-1",
+          "title": "Strategic Alignment Dashboard",
+          "description": "Users can visualize how daily work connects to OBG and track strategic progress over time",
+          "features": [
+            "feature-7",
+            "feature-8"
+          ],
+          "status": "planned"
+        },
+        {
+          "id": "milestone-2-2",
+          "title": "Intelligent Agent Coordination",
+          "description": "AI agents can communicate and hand off work automatically without manual file coordination",
+          "features": [
+            "feature-9",
+            "feature-10"
+          ],
+          "status": "planned"
+        },
+        {
+          "id": "milestone-2-3",
+          "title": "Pattern Recognition System",
+          "description": "System identifies productivity patterns and proactively suggests optimizations",
+          "features": [
+            "feature-11"
+          ],
+          "status": "planned"
+        }
+      ]
+    },
+    {
+      "id": "phase-3",
+      "name": "Scale",
+      "description": "External integrations, advanced automation, and performance optimizations that extend the system's reach",
+      "order": 3,
+      "status": "planned",
+      "features": [
+        "feature-12",
+        "feature-13",
+        "feature-14",
+        "feature-15"
+      ],
+      "milestones": [
+        {
+          "id": "milestone-3-1",
+          "title": "Calendar and Time Integration",
+          "description": "System syncs with external calendar and optionally tracks time spent on tasks",
+          "features": [
+            "feature-12",
+            "feature-13"
+          ],
+          "status": "planned"
+        },
+        {
+          "id": "milestone-3-2",
+          "title": "Cross-Device Sync",
+          "description": "Work context available across multiple devices via Git-based sync",
+          "features": [
+            "feature-14",
+            "feature-15"
+          ],
+          "status": "planned"
+        }
+      ]
+    },
+    {
+      "id": "phase-4",
+      "name": "Future Vision",
+      "description": "Long-term capabilities that expand accessibility and market reach while maintaining the core conversational interface",
+      "order": 4,
+      "status": "planned",
+      "features": [
+        "feature-16",
+        "feature-17",
+        "feature-18"
+      ],
+      "milestones": [
+        {
+          "id": "milestone-4-1",
+          "title": "Web Accessibility",
+          "description": "Users can access the system via web interface in addition to terminal",
+          "features": [
+            "feature-16"
+          ],
+          "status": "planned"
+        },
+        {
+          "id": "milestone-4-2",
+          "title": "Agent Ecosystem",
+          "description": "Marketplace for sharing and discovering specialized AI agents",
+          "features": [
+            "feature-17",
+            "feature-18"
+          ],
+          "status": "planned"
+        }
+      ]
+    }
+  ],
+  "features": [
+    {
+      "id": "feature-1",
+      "title": "CLI Command System",
+      "description": "Implement shortcut CLI commands (e.g., /morning, /evening, /focus) that trigger common workflows without requiring users to type full prompts. Each command maps to predefined agent interactions.",
+      "rationale": "Users currently must manually type or paste prompts to trigger workflows. CLI commands reduce friction and make the system feel more like a native tool. Addresses the complexity complaints from Obsidian (pain-2-1, pain-2-2) where users want things to 'just work' without extensive setup.",
+      "priority": "must",
+      "complexity": "medium",
+      "impact": "high",
+      "phase_id": "phase-1",
+      "dependencies": [],
+      "status": "under_review",
+      "acceptance_criteria": [
+        "/morning command generates daily roadmap in under 60 seconds",
+        "/evening command triggers productivity assessment",
+        "/focus command identifies THE ONE THING for the day",
+        "Commands can accept optional parameters (e.g., /morning --brief)",
+        "Help text available via /help command"
+      ],
+      "user_stories": [
+        "As a busy entrepreneur, I want to type '/morning' to instantly get my daily plan so that I don't waste time on prompt engineering",
+        "As a user, I want shortcuts for common actions so that the system feels as fast as native CLI tools"
+      ],
+      "competitor_insight_ids": [
+        "pain-2-1",
+        "pain-2-2",
+        "pain-1-3"
+      ]
+    },
+    {
+      "id": "feature-2",
+      "title": "Centralized Agent Registry",
+      "description": "Create a unified registry that catalogs all AI agents with their capabilities, prompts, input/output specifications, and invocation methods. Enables discoverability and consistent agent management.",
+      "rationale": "Currently agent prompts are scattered across multiple markdown files making it hard to understand what agents exist and how to use them. A centralized registry addresses the technical debt and mirrors how Obsidian users struggle with plugin management (pain-2-2, pain-2-6).",
+      "priority": "must",
+      "complexity": "medium",
+      "impact": "high",
+      "phase_id": "phase-1",
+      "dependencies": [],
+      "status": "planned",
+      "acceptance_criteria": [
+        "Single JSON/YAML file contains all agent definitions",
+        "Each agent has documented inputs, outputs, and trigger methods",
+        "Agents can be listed via /agents command",
+        "Agent prompts are validated for required fields",
+        "Documentation auto-generated from registry"
+      ],
+      "user_stories": [
+        "As a user, I want to see all available agents in one place so that I know what capabilities the system has",
+        "As a developer, I want agent definitions standardized so that I can easily add or modify agents"
+      ],
+      "competitor_insight_ids": [
+        "pain-2-2",
+        "pain-2-6"
+      ],
+      "linked_spec_id": "001-centralized-agent-registry"
+    },
+    {
+      "id": "feature-3",
+      "title": "Automatic Session Context Loading",
+      "description": "Implement automatic loading of relevant context at the start of each session including recent work, active projects, current OBG, and pending tasks. No manual context restoration required.",
+      "rationale": "This is THE #1 differentiator vs ChatGPT/Claude workflows (pain-6-1, gap-1). Every competitor AI tool requires users to re-explain their situation each session. Automatic context loading transforms the user experience from 'starting over' to 'continuing where you left off'.",
+      "priority": "must",
+      "complexity": "high",
+      "impact": "high",
+      "phase_id": "phase-1",
+      "dependencies": [],
+      "status": "planned",
+      "acceptance_criteria": [
+        "Session starts with summary of last session's work within 5 seconds",
+        "Active projects and their status automatically available to AI",
+        "OBG and current tier priorities loaded without user action",
+        "Context includes last 7 days of productivity scores",
+        "Users can override with '/fresh' to start clean session"
+      ],
+      "user_stories": [
+        "As a user, I want the AI to remember what I worked on yesterday so that I don't waste time re-explaining context",
+        "As an entrepreneur, I want my strategic goals always present so that every conversation stays aligned with my OBG"
+      ],
+      "competitor_insight_ids": [
+        "pain-6-1",
+        "pain-6-5",
+        "gap-1"
+      ],
+      "linked_spec_id": "002-automatic-session-context-loading"
+    },
+    {
+      "id": "feature-4",
+      "title": "Smart Work Tracking",
+      "description": "Automatically track and log work completed during each session including tasks done, files modified, decisions made, and time spent. Creates an objective record without manual entry.",
+      "rationale": "Addresses the 'no objective measurement' gap (gap-4) and eliminates manual tracking that plagues tools like Notion (pain-1-3). Users get accurate records of their work without maintenance burden.",
+      "priority": "must",
+      "complexity": "medium",
+      "impact": "high",
+      "phase_id": "phase-1",
+      "dependencies": [
+        "feature-3"
+      ],
+      "status": "under_review",
+      "acceptance_criteria": [
+        "Tasks completed during session automatically logged",
+        "Work log accessible via /history command",
+        "Daily summary generated at end of each session",
+        "Integration with productivity scoring system",
+        "No manual data entry required from user"
+      ],
+      "user_stories": [
+        "As a user, I want my work automatically tracked so that I have an accurate record without manual logging",
+        "As a business owner, I want to see exactly what was accomplished each day for accountability"
+      ],
+      "competitor_insight_ids": [
+        "pain-1-3",
+        "gap-4"
+      ]
+    },
+    {
+      "id": "feature-5",
+      "title": "Enhanced Productivity Scoring",
+      "description": "Upgrade the productivity scoring system to provide more detailed, actionable feedback including category breakdowns, trend analysis, and specific improvement recommendations based on patterns.",
+      "rationale": "Current 1-10 scoring is good but could be more insightful. Addresses gap-4 (objective measurement) and differentiates from all competitors who lack any productivity measurement. Leverages pattern recognition from 20 years of productivity principles.",
+      "priority": "should",
+      "complexity": "medium",
+      "impact": "high",
+      "phase_id": "phase-1",
+      "dependencies": [
+        "feature-4"
+      ],
+      "status": "under_review",
+      "acceptance_criteria": [
+        "Score breakdown by category (focus, completion, alignment)",
+        "Week-over-week trend comparison",
+        "Specific improvement suggestions based on patterns",
+        "Celebration of achievements and streaks",
+        "Score history accessible via /scores command"
+      ],
+      "user_stories": [
+        "As a user, I want to understand WHY I got a certain productivity score so that I can improve",
+        "As an entrepreneur, I want to see my productivity trends so that I can identify patterns"
+      ],
+      "competitor_insight_ids": [
+        "gap-4"
+      ]
+    },
+    {
+      "id": "feature-6",
+      "title": "Intelligent Kill List Management",
+      "description": "Automated management of things NOT to do, including smart reminders when users attempt forbidden activities, pattern detection for recurring temptations, and integration with daily planning.",
+      "rationale": "Unique differentiator (gap-8) - no competitor actively tracks what NOT to do. Kill lists are a powerful productivity principle that prevents wasted time on low-value activities. Makes the system proactively protective of user focus.",
+      "priority": "should",
+      "complexity": "low",
+      "impact": "medium",
+      "phase_id": "phase-1",
+      "dependencies": [],
+      "status": "under_review",
+      "acceptance_criteria": [
+        "Kill list items visible during morning planning",
+        "AI warns when user mentions kill list activities",
+        "Weekly summary of kill list violations vs adherence",
+        "Easy add/remove items via /kill command",
+        "Categories for different types of kills (distractions, projects, habits)"
+      ],
+      "user_stories": [
+        "As a user prone to distractions, I want the AI to remind me of things I said NOT to do so that I stay focused",
+        "As an entrepreneur, I want to track projects I've killed so I don't accidentally resurrect them"
+      ],
+      "competitor_insight_ids": [
+        "gap-8"
+      ]
+    },
+    {
+      "id": "feature-7",
+      "title": "OBG Alignment Dashboard",
+      "description": "Visual representation showing how current work connects to the One Big Obsessional Goal. Includes alignment scores for each project, strategic drift warnings, and progress tracking toward OBG milestones.",
+      "rationale": "Addresses gap-3 (connecting daily to strategic) which affects almost every competitor. Makes strategic alignment visible and measurable rather than assumed. Prevents the strategic drift that is a major user pain point.",
+      "priority": "should",
+      "complexity": "medium",
+      "impact": "high",
+      "phase_id": "phase-2",
+      "dependencies": [
+        "feature-3",
+        "feature-4"
+      ],
+      "status": "under_review",
+      "acceptance_criteria": [
+        "Visual display of OBG with current progress percentage",
+        "Each active project shows alignment score to OBG",
+        "Warning when daily tasks don't connect to OBG",
+        "Weekly OBG progress report with trend line",
+        "Accessible via /obg or /alignment command"
+      ],
+      "user_stories": [
+        "As an entrepreneur, I want to see how my daily work connects to my big goal so that I don't lose sight of what matters",
+        "As a user, I want warnings when I'm drifting from my strategy so that I can course correct"
+      ],
+      "competitor_insight_ids": [
+        "gap-3",
+        "pain-6-5"
+      ]
+    },
+    {
+      "id": "feature-8",
+      "title": "Productivity Analytics Dashboard",
+      "description": "Comprehensive analytics view showing productivity trends, time allocation, task completion rates, and pattern insights over configurable time periods (week, month, quarter).",
+      "rationale": "Addresses the known gap for limited analytics while providing the objective measurement that competitors lack (gap-4). Helps users understand their productivity patterns for continuous improvement.",
+      "priority": "should",
+      "complexity": "medium",
+      "impact": "medium",
+      "phase_id": "phase-2",
+      "dependencies": [
+        "feature-4",
+        "feature-5"
+      ],
+      "status": "under_review",
+      "acceptance_criteria": [
+        "Weekly productivity summary auto-generated",
+        "Monthly pattern analysis with recommendations",
+        "Tier 1/2/3 task completion ratios tracked",
+        "Focus time vs context-switching metrics",
+        "Accessible via /analytics command"
+      ],
+      "user_stories": [
+        "As a user, I want to see my productivity trends over time so that I can understand what affects my performance",
+        "As a business owner, I want monthly analytics so that I can make informed decisions about my work habits"
+      ],
+      "competitor_insight_ids": [
+        "gap-4"
+      ]
+    },
+    {
+      "id": "feature-9",
+      "title": "Agent Communication Protocol",
+      "description": "Standardized protocol for AI agents to communicate and coordinate without manual file-based coordination. Agents can pass context, request assistance, and share results through defined interfaces.",
+      "rationale": "Addresses technical debt of manual agent coordination. As the system grows with more specialized agents, inter-agent communication becomes critical. Prevents the disjointed experience users complain about with Obsidian plugins (pain-2-6).",
+      "priority": "should",
+      "complexity": "high",
+      "impact": "medium",
+      "phase_id": "phase-2",
+      "dependencies": [
+        "feature-2"
+      ],
+      "status": "under_review",
+      "acceptance_criteria": [
+        "Agents can invoke other agents with defined inputs",
+        "Context passes automatically between agent handoffs",
+        "Agent chains can be defined for complex workflows",
+        "Errors in agent chains handled gracefully",
+        "Communication logs available for debugging"
+      ],
+      "user_stories": [
+        "As a user, I want agents to work together seamlessly so that complex tasks feel like one interaction",
+        "As a developer, I want standardized agent communication so that adding new agents is straightforward"
+      ],
+      "competitor_insight_ids": [
+        "pain-2-6"
+      ]
+    },
+    {
+      "id": "feature-10",
+      "title": "Smart Delegation to Agent Teams",
+      "description": "Enable fire-and-forget delegation where users describe a task and the system automatically routes it to the appropriate agent(s), manages the workflow, and reports back results.",
+      "rationale": "This is the 'leverage' promise of AI - delegation without micromanagement. Addresses the desire for 3-5x execution speed improvement. Makes the department-based agent organization actually feel like having a business team.",
+      "priority": "should",
+      "complexity": "high",
+      "impact": "high",
+      "phase_id": "phase-2",
+      "dependencies": [
+        "feature-2",
+        "feature-9"
+      ],
+      "status": "under_review",
+      "acceptance_criteria": [
+        "Users can describe task in natural language",
+        "System identifies appropriate agent(s) for task",
+        "Progress updates provided during execution",
+        "Results summarized and presented to user",
+        "User can intervene or redirect if needed"
+      ],
+      "user_stories": [
+        "As a busy entrepreneur, I want to describe what I need and have the right AI agent handle it so that I can focus on high-level decisions",
+        "As a content creator, I want to delegate content tasks and receive finished work so that I save hours per week"
+      ],
+      "competitor_insight_ids": []
+    },
+    {
+      "id": "feature-11",
+      "title": "Proactive Pattern Recognition",
+      "description": "AI proactively identifies patterns in user behavior, productivity, and work habits. Provides unsolicited but helpful suggestions for optimization based on detected patterns.",
+      "rationale": "Differentiates from reactive tools by being proactively helpful. Uses the 20 years of productivity principles to provide contextually relevant advice. Addresses pain-6-2 where AI quality feels inconsistent - structured pattern recognition provides consistent value.",
+      "priority": "could",
+      "complexity": "medium",
+      "impact": "medium",
+      "phase_id": "phase-2",
+      "dependencies": [
+        "feature-4",
+        "feature-5"
+      ],
+      "status": "under_review",
+      "acceptance_criteria": [
+        "System identifies recurring productivity patterns",
+        "Suggestions based on patterns appear in morning planning",
+        "Users can accept, dismiss, or snooze suggestions",
+        "Pattern library grows based on user feedback",
+        "Privacy-respecting local pattern analysis"
+      ],
+      "user_stories": [
+        "As a user, I want the AI to notice things I don't see about my work patterns so that I can improve",
+        "As an entrepreneur, I want proactive optimization suggestions so that I'm always getting better"
+      ],
+      "competitor_insight_ids": [
+        "pain-6-2"
+      ]
+    },
+    {
+      "id": "feature-12",
+      "title": "Calendar Integration",
+      "description": "Two-way integration with external calendar systems (Google Calendar, Apple Calendar) to incorporate scheduled events into daily planning and optionally block time for focused work.",
+      "rationale": "Addresses the known gap of no external integrations. Calendar awareness makes daily planning more realistic and prevents conflicts. Addresses pain-5-3 where Todoist users want calendar + tasks together.",
+      "priority": "should",
+      "complexity": "high",
+      "impact": "high",
+      "phase_id": "phase-3",
+      "dependencies": [
+        "feature-1"
+      ],
+      "status": "under_review",
+      "acceptance_criteria": [
+        "Today's calendar events visible in morning planning",
+        "Time blocks suggested around fixed appointments",
+        "Focus time can be added to calendar from system",
+        "Supports Google Calendar and Apple Calendar",
+        "Read-only mode available for security-conscious users"
+      ],
+      "user_stories": [
+        "As a user with meetings, I want my calendar events in my daily plan so that I can schedule work around them",
+        "As an entrepreneur, I want to block focus time on my calendar so that others respect my work time"
+      ],
+      "competitor_insight_ids": [
+        "pain-5-3"
+      ]
+    },
+    {
+      "id": "feature-13",
+      "title": "Optional Time Tracking",
+      "description": "Lightweight time tracking that records how long tasks take without requiring manual start/stop. Uses session timestamps and work logs to estimate time allocation.",
+      "rationale": "Addresses the known gap for automated time tracking while being non-intrusive. Competitors like Monday.com lock time tracking behind expensive tiers (pain-4-4). Makes time visible without adding friction.",
+      "priority": "could",
+      "complexity": "medium",
+      "impact": "medium",
+      "phase_id": "phase-3",
+      "dependencies": [
+        "feature-4"
+      ],
+      "status": "under_review",
+      "acceptance_criteria": [
+        "Session duration automatically tracked",
+        "Time estimates for tasks based on historical data",
+        "Weekly time allocation report by project/category",
+        "No manual timers or tracking required",
+        "Data exportable for invoicing if needed"
+      ],
+      "user_stories": [
+        "As a freelancer, I want to know how long tasks actually take so that I can estimate better",
+        "As a user, I want to see where my time goes without manually tracking it"
+      ],
+      "competitor_insight_ids": [
+        "pain-4-4"
+      ]
+    },
+    {
+      "id": "feature-14",
+      "title": "Git-Based Sync System",
+      "description": "Robust cross-device synchronization using Git as the transport layer. Handles conflicts gracefully and ensures work context available on any device with the system installed.",
+      "rationale": "Addresses the known gap of local filesystem limiting cross-device sync. Uses familiar Git infrastructure for reliability. Avoids Obsidian sync issues (pain-2-4) by using battle-tested version control.",
+      "priority": "could",
+      "complexity": "high",
+      "impact": "medium",
+      "phase_id": "phase-3",
+      "dependencies": [],
+      "status": "under_review",
+      "acceptance_criteria": [
+        "One-command sync to remote repository",
+        "Automatic conflict detection with resolution helpers",
+        "Sync status visible in system status",
+        "Works with GitHub, GitLab, or any Git remote",
+        "Offline changes queued until connectivity restored"
+      ],
+      "user_stories": [
+        "As a user with multiple computers, I want my work context synced so that I can continue from any device",
+        "As a user, I want version history of my work so that I can recover from mistakes"
+      ],
+      "competitor_insight_ids": [
+        "pain-2-4"
+      ]
+    },
+    {
+      "id": "feature-15",
+      "title": "Template Library",
+      "description": "Collection of pre-built templates for common business scenarios including product launches, content campaigns, project kickoffs, and strategic reviews. Reduces setup time and ensures best practices.",
+      "rationale": "Addresses gap-2 where tools require significant setup before delivering value. Templates provide instant value and encode the productivity methodology. Differentiates from generic AI that has no domain knowledge.",
+      "priority": "could",
+      "complexity": "low",
+      "impact": "medium",
+      "phase_id": "phase-3",
+      "dependencies": [
+        "feature-2"
+      ],
+      "status": "under_review",
+      "acceptance_criteria": [
+        "At least 10 templates for common scenarios",
+        "Templates accessible via /template command",
+        "Users can customize and save their own templates",
+        "Templates include relevant agent configurations",
+        "Templates versioned and updatable"
+      ],
+      "user_stories": [
+        "As a new user, I want templates that work immediately so that I don't have to figure out setup",
+        "As an e-commerce owner, I want product launch templates so that I follow proven processes"
+      ],
+      "competitor_insight_ids": [
+        "gap-2"
+      ]
+    },
+    {
+      "id": "feature-16",
+      "title": "Web Interface",
+      "description": "Optional web-based interface for users who prefer GUI over terminal. Maintains the conversational paradigm while providing visual elements for dashboards and status views.",
+      "rationale": "Addresses the constraint of terminal-only access limiting accessibility. Opens the system to users uncomfortable with command line. However, this is a significant architectural change so it's future phase.",
+      "priority": "could",
+      "complexity": "high",
+      "impact": "high",
+      "phase_id": "phase-4",
+      "dependencies": [
+        "feature-1",
+        "feature-7",
+        "feature-8"
+      ],
+      "status": "under_review",
+      "acceptance_criteria": [
+        "Core functionality accessible via web browser",
+        "Conversational interface maintained in web UI",
+        "Dashboard visualizations for productivity data",
+        "Mobile-responsive design",
+        "Secure authentication for web access"
+      ],
+      "user_stories": [
+        "As a user who prefers GUI, I want a web interface so that I can use the system without terminal",
+        "As a mobile user, I want web access so that I can check my status on the go"
+      ],
+      "competitor_insight_ids": []
+    },
+    {
+      "id": "feature-17",
+      "title": "Custom Agent Creator",
+      "description": "User-friendly interface for creating custom AI agents without coding. Guides users through defining agent purpose, prompts, inputs/outputs, and integration with the system.",
+      "rationale": "Extends the HR Department's GPT Express framework to be more accessible. Enables users to create specialized agents for their unique business needs. Similar to how Obsidian relies on plugins but with guided creation.",
+      "priority": "wont",
+      "complexity": "high",
+      "impact": "medium",
+      "phase_id": "phase-4",
+      "dependencies": [
+        "feature-2",
+        "feature-9"
+      ],
+      "status": "under_review",
+      "acceptance_criteria": [
+        "Wizard-style interface for agent creation",
+        "Prompt templates for common agent types",
+        "Testing interface before publishing agent",
+        "Version control for custom agents",
+        "Agents registered automatically in system registry"
+      ],
+      "user_stories": [
+        "As a power user, I want to create my own agents so that I can automate unique aspects of my business",
+        "As a user with specific needs, I want custom agents without coding so that I can extend the system"
+      ],
+      "competitor_insight_ids": []
+    },
+    {
+      "id": "feature-18",
+      "title": "Agent Marketplace",
+      "description": "Platform for sharing and discovering AI agents created by the community. Includes ratings, reviews, and one-click installation of vetted agents.",
+      "rationale": "Long-term vision for community growth and ecosystem building. Addresses the need for specialized functionality without requiring every user to build from scratch. Creates network effects for platform adoption.",
+      "priority": "wont",
+      "complexity": "high",
+      "impact": "medium",
+      "phase_id": "phase-4",
+      "dependencies": [
+        "feature-17"
+      ],
+      "status": "under_review",
+      "acceptance_criteria": [
+        "Searchable catalog of community agents",
+        "Rating and review system",
+        "One-click installation of agents",
+        "Verification/vetting process for security",
+        "Revenue sharing for agent creators"
+      ],
+      "user_stories": [
+        "As a user, I want to discover agents others have built so that I can benefit from community knowledge",
+        "As an agent creator, I want to share my agents so that others can benefit from my work"
+      ],
+      "competitor_insight_ids": []
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-01-28T23:45:00Z",
+    "updated_at": "2026-01-29T04:39:11.106Z",
+    "generated_by": "roadmap_features agent",
+    "prioritization_framework": "MoSCoW",
+    "competitor_analysis_used": true,
+    "total_features": 18,
+    "features_addressing_competitor_pain_points": 15,
+    "priority_breakdown": {
+      "must": 4,
+      "should": 7,
+      "could": 5,
+      "wont": 2
+    },
+    "complexity_breakdown": {
+      "low": 2,
+      "medium": 9,
+      "high": 7
+    },
+    "impact_breakdown": {
+      "low": 0,
+      "medium": 7,
+      "high": 11
+    }
+  }
+}

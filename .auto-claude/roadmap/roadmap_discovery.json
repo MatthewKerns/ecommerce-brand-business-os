@@ -1,0 +1,128 @@
+{
+  "project_name": "E-commerce Brand Business OS",
+  "project_type": "other",
+  "tech_stack": {
+    "primary_language": "Markdown",
+    "frameworks": ["Claude Code", "AI Agent Framework"],
+    "key_dependencies": ["Claude AI", "Git", "Local Filesystem"]
+  },
+  "target_audience": {
+    "primary_persona": "Solo e-commerce brand owners and small business operators seeking AI-powered productivity systems",
+    "secondary_personas": [
+      "Content creators managing multiple output channels",
+      "Entrepreneurs overwhelmed by project management tools",
+      "Business owners wanting to leverage AI without coding"
+    ],
+    "pain_points": [
+      "Scattered AI sessions with no continuity between conversations",
+      "Manual planning consuming 30+ minutes daily",
+      "Strategic drift and forgotten projects",
+      "Inconsistent productivity and difficulty maintaining focus",
+      "Overwhelmed by complex tools like Notion requiring manual maintenance",
+      "No objective measurement of daily productivity",
+      "High friction in maintaining discipline and routines"
+    ],
+    "goals": [
+      "Achieve consistent daily focus on high-impact work",
+      "Automate planning to under 2 minutes per day",
+      "Maintain strategic alignment across weeks and months",
+      "Leverage AI agents for content creation and business operations",
+      "Create sustainable productivity without burnout",
+      "Achieve 'mind peace' through complete work traceability"
+    ],
+    "usage_context": "Daily morning planning sessions, throughout-day task execution, evening productivity assessments, weekly and monthly strategic reviews - all managed through conversational AI interface with Claude Code"
+  },
+  "product_vision": {
+    "one_liner": "An AI-powered Business Operating System that transforms productivity through intelligent automation, strategic alignment, and frictionless execution",
+    "problem_statement": "Business owners and entrepreneurs waste hours on manual planning, lose context between scattered AI sessions, experience strategic drift from forgotten projects, and struggle to maintain consistent productivity routines using complex tools that require constant manual maintenance",
+    "value_proposition": "Claude Code OS replaces fragmented tools with a unified AI-powered system that automatically tracks work, generates prioritized daily roadmaps in under 1 minute, maintains strategic alignment with your OBG (One Big Obsessional Goal), and provides objective productivity assessments - all through natural conversation with AI agents organized as business departments",
+    "success_metrics": [
+      "Daily planning time reduced from 30+ minutes to under 2 minutes",
+      "Consistent productivity scores of 7+/10 daily",
+      "100% strategic alignment of daily work with OBG",
+      "Zero lost projects or forgotten contexts",
+      "3-5x execution speed improvement with AI agent teams",
+      "Sustainable high performance without burnout"
+    ]
+  },
+  "current_state": {
+    "maturity": "mvp",
+    "existing_features": [
+      "Executive Office with daily/weekly/monthly planning automation",
+      "Operations Department with productivity tracking and scoring (1-10 scale)",
+      "AI Growth Engine for strategic advisory and OBG alignment",
+      "Content Team with 14+ specialized AI agents (YouTube, Blog, Email, Social)",
+      "HR Department with GPT Express agent creation framework",
+      "Knowledge Base with 13 core productivity principles",
+      "Complete daily workflow with morning planning and evening assessment",
+      "Weekly strategic analysis with brutal prioritization framework",
+      "Monthly reviews with pattern recognition",
+      "Tier 1/2/3 task prioritization system",
+      "Kill Lists for things NOT to do",
+      "THE ONE THING daily focus methodology",
+      "Pattern recognition for productivity optimization",
+      "Project continuity tracking across sessions"
+    ],
+    "known_gaps": [
+      "No automated CLI commands (manual prompt triggers)",
+      "No external integrations (calendar, email, project tools)",
+      "Limited analytics dashboards",
+      "No mobile/web interface - terminal/Claude Code only",
+      "Agent communication relies on manual file-based coordination",
+      "No real-time notifications or reminders",
+      "Limited team collaboration features",
+      "No automated time tracking integration"
+    ],
+    "technical_debt": [
+      "Documentation-heavy system requiring regular manual updates",
+      "Agent prompts scattered across multiple markdown files",
+      "No centralized agent registry or management system",
+      "File-based data storage without database backing",
+      "No validation or error handling for corrupted state",
+      "Manual sync required between planning documents"
+    ]
+  },
+  "competitive_context": {
+    "alternatives": [
+      "Notion with AI features",
+      "Obsidian with plugins",
+      "Todoist/Things with traditional task management",
+      "ClickUp/Monday.com project management",
+      "Custom ChatGPT/Claude workflows",
+      "Traditional paper-based productivity systems (GTD, Bullet Journal)"
+    ],
+    "differentiators": [
+      "True conversational AI interface vs clicking through UIs",
+      "Automatic context preservation across sessions",
+      "AI-powered prioritization based on strategic goals",
+      "Zero friction - no manual data entry or maintenance",
+      "Objective productivity scoring vs subjective self-assessment",
+      "Department-based AI agent organization mimicking real business",
+      "Built on 20 years of validated productivity principles",
+      "Fire-and-forget delegation to AI agents"
+    ],
+    "market_position": "Premium AI-native productivity system for serious entrepreneurs who want the leverage of AI automation without technical complexity - positioned against both traditional productivity tools (too manual) and raw AI chat (no structure/continuity)",
+    "competitor_pain_points": [],
+    "competitor_analysis_available": false
+  },
+  "constraints": {
+    "technical": [
+      "Requires Claude Code access (not free)",
+      "Terminal-based interface limits accessibility",
+      "Dependent on Claude AI model capabilities and availability",
+      "Local filesystem architecture limits cross-device sync",
+      "No offline capability - requires internet for AI features"
+    ],
+    "resources": [
+      "Appears to be solo developer/maintainer project",
+      "Documentation-driven approach limits rapid iteration",
+      "Community building required for adoption"
+    ],
+    "dependencies": [
+      "Anthropic Claude Code product stability",
+      "Claude AI model quality and response time",
+      "User's terminal/development environment setup"
+    ]
+  },
+  "created_at": "2025-01-28T23:15:00Z"
+}
