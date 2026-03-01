@@ -201,7 +201,7 @@
         {
           "id": "milestone-5-1",
           "title": "Full Funnel Tracking",
-          "description": "Complete attribution from TikTok → Website → Email → Purchase tracked",
+          "description": "Complete attribution from TikTok \u2192 Website \u2192 Email \u2192 Purchase tracked",
           "features": [
             "feature-20",
             "feature-21"
@@ -299,13 +299,11 @@
       "impact": "high",
       "phase_id": "phase-1",
       "dependencies": [],
-      "status": "planned",
+      "status": "in_progress",
       "acceptance_criteria": [
-        "Amazon Seller Central account configured with FBA inventory",
-        "SP-API app approved with Fulfillment scope",
-        "MCF order creation working with proper address formatting",
-        "Shipment tracking numbers retrievable and sync-able",
-        "Inventory levels queryable for stock management"
+        "Order routing UI (feature-3) built for MCF order dispatch",
+        "Full end-to-end order flow tested with live Amazon sandbox",
+        "Inventory sync scheduled job running in production"
       ],
       "user_stories": [
         "As a brand owner, I want to use Amazon's fulfillment for TikTok orders so that my customers get reliable 2-3 day shipping",
@@ -316,6 +314,13 @@
         "pain-6-1",
         "pain-6-2",
         "pain-6-3"
+      ],
+      "completed_criteria": [
+        "Amazon SP-API OAuth flow and credential management implemented",
+        "MCF client with order creation, address formatting, and retry logic built",
+        "Shipment tracking number retrieval and sync endpoints working",
+        "Inventory level query API integrated",
+        "SP-API app credential storage and rotation implemented"
       ]
     },
     {
@@ -471,7 +476,7 @@
     },
     {
       "id": "feature-8",
-      "title": "AI Content Agent Integration — Remaining Gaps",
+      "title": "AI Content Agent Integration \u2014 Remaining Gaps",
       "description": "Core AI content agents (BlogAgent, SocialAgent, TikTokChannelAgent) and brand voice enforcement are fully implemented. This feature now targets the three remaining gaps: human review workflow, content queue prioritization for generation jobs, and content versioning/revision system.",
       "rationale": "Agent integration and brand voice are done. The missing pieces are what turn a working prototype into a production-safe system: humans need a way to review before content goes live, generation jobs need to be queued and prioritized rather than blocking, and content needs versioning so edits and revisions are tracked.",
       "priority": "must",
@@ -481,15 +486,9 @@
       "dependencies": [
         "feature-5"
       ],
-      "status": "in_progress",
-      "completed_criteria": [
-        "BlogAgent integrated for article generation (blog_agent.py, /api/routes/blog.py)",
-        "SocialAgent integrated for TikTok script generation (social_agent.py, tiktok_channel_agent.py)",
-        "Brand voice guidelines enforced in generation prompts (BaseAgent._build_system_prompt loads brand files)",
-        "Content history tracked in ContentHistory table (all generations logged with tokens, timing, status)"
-      ],
+      "status": "planned",
       "acceptance_criteria": [
-        "Human review workflow: ContentReview model, approval state machine (draft → in_review → approved/rejected), and review endpoints implemented",
+        "Human review workflow: ContentReview model, approval state machine (draft \u2192 in_review \u2192 approved/rejected), and review endpoints implemented",
         "Content generation queue: blog and social generation jobs routed through Celery with priority levels (high/medium/low) wired to task routing",
         "Content versioning: version numbers on ContentHistory records, draft/revision system, ability to compare or revert to a previous version"
       ],
@@ -500,7 +499,8 @@
       ],
       "competitor_insight_ids": [
         "pain-7-5"
-      ]
+      ],
+      "linked_spec_id": "018-ai-content-agent-integration-remaining-gaps"
     },
     {
       "id": "feature-9",
@@ -514,14 +514,11 @@
       "dependencies": [
         "feature-6"
       ],
-      "status": "planned",
+      "status": "in_progress",
       "acceptance_criteria": [
-        "10+ TikTok hook templates categorized by content type",
-        "5+ video script frameworks for product content",
-        "Template performance tracking with save rate correlation",
-        "Category filtering (toys & games, general e-commerce)",
-        "Easy template customization workflow",
-        "A/B test setup for template variants"
+        "Dashboard UI for browsing and selecting templates (feature-6/34) built",
+        "Template customization workflow exposed in UI",
+        "A/B test results visible in analytics dashboard"
       ],
       "user_stories": [
         "As a brand owner, I want proven content templates so that I don't have to figure out what works from scratch",
@@ -531,6 +528,13 @@
       "competitor_insight_ids": [
         "pain-4-5",
         "pain-3-4"
+      ],
+      "completed_criteria": [
+        "10+ TikTok hook templates categorized by content type implemented",
+        "5+ video script frameworks for product content built",
+        "A/B test framework for template variants implemented",
+        "Category filtering (toys & games, general e-commerce) working",
+        "Template performance tracking schema with save rate correlation built"
       ]
     },
     {
@@ -603,14 +607,11 @@
         "feature-8",
         "feature-11"
       ],
-      "status": "planned",
+      "status": "in_progress",
       "acceptance_criteria": [
-        "Keyword research workflow with target keyword assignment per article",
-        "On-page SEO checklist (title, meta, headings, image alt, internal links)",
-        "Automated internal linking suggestions based on content relevance",
-        "Content scheduling integrated with blog CMS",
-        "SEO score/grade for each article before publishing",
-        "Integration with AI content agent for draft generation"
+        "Blog platform CMS integration and publishing UI (feature-11) built",
+        "Content scheduling integrated with blog CMS UI",
+        "SEO score surfaced in content editor UI before publishing"
       ],
       "user_stories": [
         "As a brand owner, I want SEO-optimized content automatically so that articles rank without manual optimization expertise",
@@ -619,6 +620,13 @@
       "linked_spec_id": "012-seo-optimized-content-pipeline",
       "competitor_insight_ids": [
         "pain-2-6"
+      ],
+      "completed_criteria": [
+        "Keyword research workflow with target keyword assignment per article implemented",
+        "On-page SEO checklist validation (title, meta, headings, image alt, internal links) built",
+        "Automated internal linking suggestion engine implemented",
+        "SEO scoring/grading algorithm for articles implemented",
+        "Integration with AI content agent for draft generation working"
       ]
     },
     {
@@ -689,13 +697,11 @@
         "feature-1",
         "feature-5"
       ],
-      "status": "planned",
+      "status": "in_progress",
       "acceptance_criteria": [
-        "Klaviyo account connected via API",
-        "Customer profiles syncing from all channels (TikTok, website)",
-        "Order data flowing for purchase-based segmentation",
-        "List management with compliance (unsubscribe handling)",
-        "Basic segments created (new subscribers, customers, VIPs)"
+        "Email sequence builder UI (feature-37) built for managing Klaviyo flows",
+        "Segment management UI for viewing and editing segments",
+        "Sync status dashboard showing profile/order data health"
       ],
       "user_stories": [
         "As a brand owner, I want all my customer data in one email platform so that I can send targeted campaigns",
@@ -705,6 +711,13 @@
       "competitor_insight_ids": [
         "pain-3-1",
         "pain-3-2"
+      ],
+      "completed_criteria": [
+        "Klaviyo API client with authentication and rate limiting implemented",
+        "Customer profile sync from TikTok Shop and website channels working",
+        "Order event tracking flowing into Klaviyo for purchase-based segmentation",
+        "List management with unsubscribe/compliance handling implemented",
+        "Basic segments (new subscribers, customers, VIPs) created via API"
       ]
     },
     {
@@ -720,14 +733,11 @@
         "feature-15",
         "feature-16"
       ],
-      "status": "planned",
+      "status": "in_progress",
       "acceptance_criteria": [
-        "5-7 email welcome series deployed and automated",
-        "Nurture sequence for non-buyers (education, social proof, offers)",
-        "Personalization based on signup source and interests",
-        "Performance tracking (open rate, click rate, conversion)",
-        "Easy editing interface for sequence customization",
-        "A/B testing for subject lines and content"
+        "Email sequence builder UI (feature-37) for editing sequences without code",
+        "A/B testing UI for subject lines and content variants",
+        "Performance metrics surfaced in analytics dashboard UI"
       ],
       "user_stories": [
         "As a new subscriber, I want valuable emails that help me understand the brand so that I feel confident buying",
@@ -736,6 +746,12 @@
       "linked_spec_id": "015-welcome-nurture-email-sequences",
       "competitor_insight_ids": [
         "pain-3-4"
+      ],
+      "completed_criteria": [
+        "5-7 email welcome series templates built and deployable to Klaviyo",
+        "Nurture sequence for non-buyers (education, social proof, offers) implemented",
+        "Personalization tokens for signup source and interests wired",
+        "Performance tracking (open rate, click rate, conversion) schema built"
       ]
     },
     {
@@ -750,21 +766,27 @@
       "dependencies": [
         "feature-15"
       ],
-      "status": "planned",
+      "status": "in_progress",
       "acceptance_criteria": [
-        "Cart abandonment detection within 30 minutes",
-        "3-email recovery sequence (reminder, urgency, offer)",
-        "Product images and cart contents in emails",
-        "Direct cart recovery links",
-        "Recovery rate tracking and reporting",
-        "Integration with both TikTok Shop and website carts"
+        "Cart recovery automation UI (feature-38) built for managing sequences",
+        "Recovery rate tracking and reporting surfaced in dashboard",
+        "Integration with website cart abandonment tested end-to-end"
       ],
       "user_stories": [
         "As a shopper, I want a reminder about items I left in cart so that I don't forget to complete my purchase",
         "As a brand owner, I want to recover lost sales automatically so that I maximize revenue from existing traffic"
       ],
       "linked_spec_id": "016-abandoned-cart-recovery",
-      "competitor_insight_ids": []
+      "competitor_insight_ids": [],
+      "completed_criteria": [
+        "Cart abandonment detection logic within 30-minute window implemented",
+        "3-email recovery sequence (reminder, urgency, offer) built in Klaviyo",
+        "Product images and cart contents included in email templates",
+        "Direct cart recovery deep-links generated and tracked",
+        "Celery task queue for recovery sequence scheduling implemented",
+        "SendGrid fallback transactional email delivery integrated",
+        "Webhook listener for TikTok Shop and website cart events built"
+      ]
     },
     {
       "id": "feature-19",
@@ -810,14 +832,11 @@
         "feature-11",
         "feature-15"
       ],
-      "status": "planned",
+      "status": "in_progress",
       "acceptance_criteria": [
-        "TikTok data flowing (views, saves, shares, shop clicks)",
-        "Website analytics connected (GA4 or equivalent)",
-        "Email metrics syncing (opens, clicks, conversions)",
-        "Sales data from TikTok Shop and website",
-        "Customer journey tracking across touchpoints",
-        "Data refresh at least daily"
+        "Real-time analytics dashboard UI built for cross-channel visibility",
+        "Customer journey visualization UI across touchpoints",
+        "Alerting and anomaly detection UI for key metric changes"
       ],
       "user_stories": [
         "As a brand owner, I want all my marketing data in one place so that I can see the full picture",
@@ -826,6 +845,14 @@
       "linked_spec_id": "013-unified-analytics-data-pipeline",
       "competitor_insight_ids": [
         "pain-5-3"
+      ],
+      "completed_criteria": [
+        "TikTok analytics ETL pipeline (views, saves, shares, shop clicks) implemented",
+        "Website analytics connector (GA4) built and data flowing",
+        "Email metrics sync (opens, clicks, conversions) from Klaviyo implemented",
+        "Sales data aggregation from TikTok Shop and website built",
+        "Customer journey event tracking schema across touchpoints implemented",
+        "Daily data refresh scheduled job working"
       ]
     },
     {
@@ -843,7 +870,7 @@
       "status": "under_review",
       "acceptance_criteria": [
         "First-touch and multi-touch attribution models available",
-        "TikTok → Website → Email → Purchase journey trackable",
+        "TikTok \u2192 Website \u2192 Email \u2192 Purchase journey trackable",
         "Revenue attributed to organic channels with confidence",
         "Comparison against paid channel performance",
         "Time-to-conversion metrics by channel",
@@ -1444,7 +1471,7 @@
   ],
   "metadata": {
     "created_at": "2025-02-26T02:30:00Z",
-    "updated_at": "2026-03-01T09:00:53.816Z",
+    "updated_at": "2026-03-01T09:08:21.471Z",
     "generated_by": "roadmap_features agent",
     "prioritization_framework": "MoSCoW",
     "competitor_analysis_used": true,
