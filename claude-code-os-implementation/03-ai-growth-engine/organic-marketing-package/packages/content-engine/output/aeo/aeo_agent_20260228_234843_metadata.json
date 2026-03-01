@@ -1,0 +1,9 @@
+{
+  "type": "comparison",
+  "topic": "Test",
+  "items_compared": [
+    "A",
+    "B"
+  ],
+  "include_recommendation": true
+}

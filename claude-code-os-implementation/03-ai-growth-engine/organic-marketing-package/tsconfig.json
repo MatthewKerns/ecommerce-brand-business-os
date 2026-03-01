@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true
+  },
+  "references": [
+    { "path": "packages/shared" },
+    { "path": "packages/mcf-connector" },
+    { "path": "packages/dashboard" },
+    { "path": "packages/blog" }
+  ],
+  "files": []
+}

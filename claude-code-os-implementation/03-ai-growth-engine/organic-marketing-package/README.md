@@ -43,4 +43,14 @@ Next.js management interface:
 2. Add your API keys
 3. Start services
 
-See `docs/SETUP.md` for detailed instructions.
+See [docs/guides/SETUP_GUIDE.md](docs/guides/SETUP_GUIDE.md) for detailed instructions.
+
+## Documentation
+
+All documentation is organized under [`docs/`](docs/README.md):
+
+- **[Architecture](docs/architecture/)** - System design, database schema, component architecture
+- **[API](docs/api/)** - REST API design, error handling, validation
+- **[Guides](docs/guides/)** - Setup, configuration, and usage guides
+- **[Planning](docs/planning/)** - Phase-based planning documents for each component
+- **[Verification](docs/verification/)** - Test results and QA reports

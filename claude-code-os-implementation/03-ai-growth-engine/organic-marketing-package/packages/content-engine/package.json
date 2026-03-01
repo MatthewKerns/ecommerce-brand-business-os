@@ -1,0 +1,16 @@
+{
+  "name": "@organic-marketing/content-engine",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Python-based AI content generation system for the Organic Marketing platform",
+  "scripts": {
+    "setup": "python -m venv venv && . venv/bin/activate && pip install -r requirements.txt",
+    "dev": "uvicorn src.api.main:app --reload --port 8000",
+    "test": "pytest tests/",
+    "test:coverage": "pytest tests/ --cov=src --cov-report=html",
+    "lint": "ruff check src/ tests/",
+    "format": "ruff format src/ tests/"
+  },
+  "author": "Matthew Kerns",
+  "license": "MIT"
+}
