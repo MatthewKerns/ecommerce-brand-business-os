@@ -22,7 +22,7 @@ from api.routes import (
     tiktok_scheduling_router,
     aeo_router,
     citation_monitoring_router,
-    seo_router,
+    # seo_router,  # Temporarily disabled - missing KeywordResearchRequest
     klaviyo_router,
     cart_router
 )
@@ -63,7 +63,7 @@ app.include_router(tiktok_channels_router, prefix="/api")
 app.include_router(tiktok_scheduling_router, prefix="/api")
 app.include_router(aeo_router, prefix="/api")
 app.include_router(citation_monitoring_router, prefix="/api")
-app.include_router(seo_router, prefix="/api")
+# app.include_router(seo_router, prefix="/api")  # Temporarily disabled
 app.include_router(klaviyo_router, prefix="/api")
 app.include_router(clerk_webhooks_router, prefix="/api")
 app.include_router(cart_router, prefix="/api")
