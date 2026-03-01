@@ -314,13 +314,6 @@
         "pain-6-1",
         "pain-6-2",
         "pain-6-3"
-      ],
-      "completed_criteria": [
-        "Amazon SP-API OAuth flow and credential management implemented",
-        "MCF client with order creation, address formatting, and retry logic built",
-        "Shipment tracking number retrieval and sync endpoints working",
-        "Inventory level query API integrated",
-        "SP-API app credential storage and rotation implemented"
       ]
     },
     {
@@ -497,10 +490,10 @@
         "As a content creator, I want AI-generated drafts so that I can focus on editing rather than writing from scratch",
         "As a brand owner, I want content generation to run in the background so that I don't wait for API calls to complete"
       ],
+      "linked_spec_id": "018-ai-content-agent-integration-remaining-gaps",
       "competitor_insight_ids": [
         "pain-7-5"
-      ],
-      "linked_spec_id": "018-ai-content-agent-integration-remaining-gaps"
+      ]
     },
     {
       "id": "feature-9",
@@ -514,7 +507,7 @@
       "dependencies": [
         "feature-6"
       ],
-      "status": "completed",
+      "status": "done",
       "acceptance_criteria": [
         "Dashboard UI for browsing and selecting templates (feature-6/34) built",
         "Template customization workflow exposed in UI",
@@ -528,13 +521,6 @@
       "competitor_insight_ids": [
         "pain-4-5",
         "pain-3-4"
-      ],
-      "completed_criteria": [
-        "10+ TikTok hook templates categorized by content type implemented",
-        "5+ video script frameworks for product content built",
-        "A/B test framework for template variants implemented",
-        "Category filtering (toys & games, general e-commerce) working",
-        "Template performance tracking schema with save rate correlation built"
       ]
     },
     {
@@ -607,7 +593,7 @@
         "feature-8",
         "feature-11"
       ],
-      "status": "completed",
+      "status": "done",
       "acceptance_criteria": [
         "Blog platform CMS integration and publishing UI (feature-11) built",
         "Content scheduling integrated with blog CMS UI",
@@ -620,13 +606,6 @@
       "linked_spec_id": "012-seo-optimized-content-pipeline",
       "competitor_insight_ids": [
         "pain-2-6"
-      ],
-      "completed_criteria": [
-        "Keyword research workflow with target keyword assignment per article implemented",
-        "On-page SEO checklist validation (title, meta, headings, image alt, internal links) built",
-        "Automated internal linking suggestion engine implemented",
-        "SEO scoring/grading algorithm for articles implemented",
-        "Integration with AI content agent for draft generation working"
       ]
     },
     {
@@ -697,7 +676,7 @@
         "feature-1",
         "feature-5"
       ],
-      "status": "completed",
+      "status": "done",
       "acceptance_criteria": [
         "Email sequence builder UI (feature-37) built for managing Klaviyo flows",
         "Segment management UI for viewing and editing segments",
@@ -711,13 +690,6 @@
       "competitor_insight_ids": [
         "pain-3-1",
         "pain-3-2"
-      ],
-      "completed_criteria": [
-        "Klaviyo API client with authentication and rate limiting implemented",
-        "Customer profile sync from TikTok Shop and website channels working",
-        "Order event tracking flowing into Klaviyo for purchase-based segmentation",
-        "List management with unsubscribe/compliance handling implemented",
-        "Basic segments (new subscribers, customers, VIPs) created via API"
       ]
     },
     {
@@ -733,7 +705,7 @@
         "feature-15",
         "feature-16"
       ],
-      "status": "completed",
+      "status": "done",
       "acceptance_criteria": [
         "Email sequence builder UI (feature-37) for editing sequences without code",
         "A/B testing UI for subject lines and content variants",
@@ -746,12 +718,6 @@
       "linked_spec_id": "015-welcome-nurture-email-sequences",
       "competitor_insight_ids": [
         "pain-3-4"
-      ],
-      "completed_criteria": [
-        "5-7 email welcome series templates built and deployable to Klaviyo",
-        "Nurture sequence for non-buyers (education, social proof, offers) implemented",
-        "Personalization tokens for signup source and interests wired",
-        "Performance tracking (open rate, click rate, conversion) schema built"
       ]
     },
     {
@@ -766,7 +732,7 @@
       "dependencies": [
         "feature-15"
       ],
-      "status": "completed",
+      "status": "done",
       "acceptance_criteria": [
         "Cart recovery automation UI (feature-38) built for managing sequences",
         "Recovery rate tracking and reporting surfaced in dashboard",
@@ -777,16 +743,7 @@
         "As a brand owner, I want to recover lost sales automatically so that I maximize revenue from existing traffic"
       ],
       "linked_spec_id": "016-abandoned-cart-recovery",
-      "competitor_insight_ids": [],
-      "completed_criteria": [
-        "Cart abandonment detection logic within 30-minute window implemented",
-        "3-email recovery sequence (reminder, urgency, offer) built in Klaviyo",
-        "Product images and cart contents included in email templates",
-        "Direct cart recovery deep-links generated and tracked",
-        "Celery task queue for recovery sequence scheduling implemented",
-        "SendGrid fallback transactional email delivery integrated",
-        "Webhook listener for TikTok Shop and website cart events built"
-      ]
+      "competitor_insight_ids": []
     },
     {
       "id": "feature-19",
@@ -832,7 +789,7 @@
         "feature-11",
         "feature-15"
       ],
-      "status": "completed",
+      "status": "done",
       "acceptance_criteria": [
         "Real-time analytics dashboard UI built for cross-channel visibility",
         "Customer journey visualization UI across touchpoints",
@@ -845,14 +802,6 @@
       "linked_spec_id": "013-unified-analytics-data-pipeline",
       "competitor_insight_ids": [
         "pain-5-3"
-      ],
-      "completed_criteria": [
-        "TikTok analytics ETL pipeline (views, saves, shares, shop clicks) implemented",
-        "Website analytics connector (GA4) built and data flowing",
-        "Email metrics sync (opens, clicks, conversions) from Klaviyo implemented",
-        "Sales data aggregation from TikTok Shop and website built",
-        "Customer journey event tracking schema across touchpoints implemented",
-        "Daily data refresh scheduled job working"
       ]
     },
     {
@@ -1142,7 +1091,7 @@
         "feature-6",
         "feature-8"
       ],
-      "status": "completed",
+      "status": "done",
       "acceptance_criteria": [
         "Domain interfaces defined for video generation contracts",
         "VideoGenerationService with dependency injection implemented",
@@ -1220,7 +1169,8 @@
         "As a brand owner, I want to generate blog content through a simple UI so I can publish without technical knowledge",
         "As a content manager, I want to edit AI-generated content before publishing so it matches my brand voice perfectly"
       ],
-      "competitor_insight_ids": []
+      "competitor_insight_ids": [],
+      "linked_spec_id": "019-blog-content-creation-ui"
     },
     {
       "id": "feature-33",
@@ -1471,7 +1421,7 @@
   ],
   "metadata": {
     "created_at": "2025-02-26T02:30:00Z",
-    "updated_at": "2026-03-01T09:08:21.471Z",
+    "updated_at": "2026-03-01T15:31:57.254Z",
     "generated_by": "roadmap_features agent",
     "prioritization_framework": "MoSCoW",
     "competitor_analysis_used": true,
