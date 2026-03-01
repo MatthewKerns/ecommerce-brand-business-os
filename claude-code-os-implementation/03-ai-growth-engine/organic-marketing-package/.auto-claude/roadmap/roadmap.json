@@ -1106,7 +1106,6 @@
         "As a system architect, I want to swap video providers without changing business logic so the system remains flexible",
         "As a brand owner, I want reliable video generation that can use different providers based on my needs"
       ],
-      "linked_spec_id": "030-video-generation-architecture",
       "competitor_insight_ids": []
     },
     {
