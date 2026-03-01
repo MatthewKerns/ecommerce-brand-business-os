@@ -17,6 +17,7 @@ from api.routes.klaviyo import router as klaviyo_router
 from api.routes.cart import router as cart_router
 from api.routes.review import router as review_router
 from api.routes.versions import router as versions_router
+from api.routes.tasks import router as tasks_router
 
 __all__ = [
     "blog_router",
@@ -31,5 +32,6 @@ __all__ = [
     "klaviyo_router",
     "cart_router",
     "review_router",
-    "versions_router"
+    "versions_router",
+    "tasks_router"
 ]
