@@ -1,11 +1,45 @@
 # Current Strategy Status
 
-**Last Updated**: November 24, 2025
-**Phase**: BFCM No-Ads Breakeven Execution
+**Last Updated**: March 02, 2026
+**Phase**: TikTok Affiliate Scaling + Inventory Sell-Through
 
 ---
 
 ## Active Strategic Initiatives
+
+### 0. TikTok Shop Affiliate Scaling (NEW - March 2026)
+**Status**: 🟢 In Execution
+**Pillar**: Revenue Growth
+**Source**: MADA Agency meeting (March 01, 2026) - [Full Notes](../meeting-notes/2026-03-01-mada-tiktok-agency.md)
+
+Scale TikTok revenue by building an automated affiliate outreach funnel. Replicate the $2K/mo agency playbook (MADA) in-house using our organic marketing automation system.
+
+**Strategy**: Optimize listings → Seed reviews → Mass affiliate outreach → Provide scripts → Scale
+
+**Affiliate Outreach Tier System** (Critical Path):
+| Tier | Requirement | Weekly Outreach | Target Audience |
+|------|------------|----------------|-----------------|
+| Tier 1 | New shop | 1,000 (one-time) | Limited pool |
+| Tier 2 | 1st affiliate sale | 2,000/week | Micro (<20K followers) |
+| Tier 3 | $2K affiliate GMV/30d | 7,000/week | ANY affiliate |
+
+**Immediate Actions**:
+- [ ] **URGENT**: Make self-purchase through affiliate link → Unlock Tier 2
+- [ ] Optimize TikTok Shop listings (treat as landing pages)
+- [ ] Seed 10-20 reviews with prepared keyword bank
+- [ ] Deploy affiliate outreach automation via TikTok Shop API
+- [ ] Prepare branded scripts + flyer for free sample packages
+- [ ] Hit $2K affiliate GMV → Unlock Tier 3 (7K outreach/week, unlimited)
+
+**Technical Implementation**:
+- [ ] TikTok Shop Affiliate API integration (search, filter, invite creators)
+- [ ] Automated outreach campaign manager (daily batches + follow-ups)
+- [ ] Script generation from competitor video analysis
+- [ ] Affiliate performance tracking dashboard
+
+**Why This Matters**: MADA charges $2K/mo for this exact service. True CMOS case study: $0 → $600K/mo in 1 year. 70% of sellers never unlock Tier 3, creating massive competitive advantage for those who do.
+
+---
 
 ### 1. Product R&D Priority (Despite BFCM)
 **Status**: 🔴 Needs Systematization
@@ -82,14 +116,17 @@ External income to bridge cash flow gaps while Infinity Vault scales to profitab
 
 ---
 
-## Priority Matrix (Current)
+## Priority Matrix (Current - March 2026)
 
 | Priority | Initiative | Urgency | Impact |
 |----------|------------|---------|--------|
-| P0 | BFCM Execution (no-ads breakeven) | NOW | High |
-| P1 | Systematize R&D operations | This week | High |
-| P2 | CNY inventory planning | January | Critical |
-| P3 | Buyer remorse (website/email) | Q1 2026 | Medium |
+| P0 | TikTok Affiliate Self-Purchase (unlock Tier 2) | THIS WEEK | Critical |
+| P0 | TikTok Listing Optimization | This week | High |
+| P1 | Deploy Affiliate Outreach Automation | This month | Very High |
+| P1 | Review Seeding (20 purchases) | This month | High |
+| P2 | Hit $2K Affiliate GMV (unlock Tier 3) | 30 days | Critical |
+| P2 | Sell through 1,500 units of current inventory | Ongoing | High |
+| P3 | Systematize R&D operations | Ongoing | High |
 | P4 | Cash flow mitigation | Ongoing | High |
 
 ---
@@ -98,9 +135,9 @@ External income to bridge cash flow gaps while Infinity Vault scales to profitab
 
 | Deadline | Date | Action |
 |----------|------|--------|
-| BFCM End | Dec 2, 2025 | Return to premium pricing |
-| CNY Order Cutoff | Feb 10, 2026 | Inventory must ship before this |
-| Account Management Docs | TBD | Waiting on team |
+| Affiliate Tier 2 Unlock | ASAP (before Sunday) | Self-purchase through affiliate link |
+| Tier 3 Target | April 2026 | $2K affiliate GMV in 30 days |
+| Inventory Sell-Through | Q2 2026 | Sell 1,500 units to reinvest in lower-cost units |
 
 ---
 

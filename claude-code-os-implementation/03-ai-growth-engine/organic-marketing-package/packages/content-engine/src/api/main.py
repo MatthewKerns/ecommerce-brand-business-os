@@ -20,6 +20,7 @@ from api.routes import (
     competitor_router,
     tiktok_channels_router,
     tiktok_scheduling_router,
+    tiktok_affiliates_router,
     aeo_router,
     citation_monitoring_router,
     # seo_router,  # Temporarily disabled - missing KeywordResearchRequest
@@ -64,6 +65,7 @@ app.include_router(amazon_router, prefix="/api")
 app.include_router(competitor_router, prefix="/api")
 app.include_router(tiktok_channels_router, prefix="/api")
 app.include_router(tiktok_scheduling_router, prefix="/api")
+app.include_router(tiktok_affiliates_router, prefix="/api")
 app.include_router(aeo_router, prefix="/api")
 app.include_router(citation_monitoring_router, prefix="/api")
 # app.include_router(seo_router, prefix="/api")  # Temporarily disabled

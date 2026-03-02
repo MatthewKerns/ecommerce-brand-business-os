@@ -10,6 +10,7 @@ from .amazon_agent import AmazonAgent
 from .competitor_agent import CompetitorAgent
 from .tiktok_shop_agent import TikTokShopAgent
 from .tiktok_channel_agent import TikTokChannelAgent
+from .tiktok_affiliate_agent import TikTokAffiliateAgent
 from .reddit_agent import RedditAgent
 
 # Consolidated agents (preferred imports for new code)
@@ -30,6 +31,7 @@ __all__ = [
     'CompetitorAgent',
     'TikTokShopAgent',
     'TikTokChannelAgent',
+    'TikTokAffiliateAgent',
     'RedditAgent',
     # Consolidated agents
     'AEOOptimizationAgent',

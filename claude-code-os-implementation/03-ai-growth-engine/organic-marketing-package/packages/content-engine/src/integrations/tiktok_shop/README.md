@@ -1,6 +1,6 @@
 # TikTok Shop API Integration
 
-Complete Python integration for TikTok Shop APIs including OAuth 2.0 authentication, Shop API for product/order management, Content API for video/post management, and Data API for analytics.
+Complete Python integration for TikTok Shop APIs including OAuth 2.0 authentication, Shop API for product/order management, Content API for video/post management, Data API for analytics, and **Affiliate Seller API for mass creator outreach and collaboration management**.
 
 ## 🎯 What This Does
 
@@ -10,9 +10,124 @@ This integration provides a full-featured Python client for interacting with Tik
 - **Shop API**: Product listing, order management, inventory updates
 - **Content API**: Video uploads, post creation, content management
 - **Data API**: Performance analytics, metrics tracking
+- **Affiliate Seller API** (NEW): Creator search, outreach invitations, collaboration management, performance tracking
 - **Automatic Rate Limiting**: Built-in rate limiter prevents API quota issues
 - **Smart Error Handling**: Automatic retry with exponential backoff for transient errors
 - **Type-Safe**: Full type hints for better IDE support
+
+## 🤝 Affiliate Integration (NEW)
+
+The Affiliate Seller API enables automated creator outreach at scale - replicating what agencies charge $2K/month to do manually.
+
+### Quick Start: Affiliate Outreach
+
+```python
+from integrations.tiktok_shop.client import TikTokShopClient
+from integrations.tiktok_shop.affiliate_client import TikTokShopAffiliateClient
+
+# Initialize clients
+base_client = TikTokShopClient('app_key', 'app_secret', 'access_token')
+affiliate = TikTokShopAffiliateClient(base_client)
+
+# Search for high-performing creators
+creators = affiliate.search_creators(
+    category='toys_and_games',
+    min_gmv_30d=1000.0,    # $1K+ monthly GMV
+    min_followers=5000,
+    max_followers=20000,    # Tier 2 limit
+    page_size=20
+)
+
+# Create a target collaboration
+collab = affiliate.create_target_collaboration(
+    product_ids=['prod_123', 'prod_456'],
+    commission_rate=15.0,
+    collaboration_name='March 2026 TCG Push'
+)
+
+# Send invitations with personalized message
+result = affiliate.send_invitation(
+    collaboration_id=collab['data']['collaboration_id'],
+    creator_ids=['creator_1', 'creator_2'],
+    invitation_message='Your TCG content is amazing! Check out our binders.'
+)
+
+# Check outreach tier and remaining actions
+status = affiliate.get_outreach_status()
+print(f"Tier: {status['data']['current_tier']}")
+print(f"Remaining: {status['data']['actions_remaining']}")
+```
+
+### Outreach Tier System
+
+| Tier | Requirement | Weekly Limit | Audience |
+|------|------------|-------------|----------|
+| 1 | New shop | 1,000 (one-time) | Limited |
+| 2 | 1st affiliate sale | 2,000/week | <20K followers |
+| 3 | $2K affiliate GMV/30d | 7,000/week | Unlimited |
+
+### Batch Outreach Automation
+
+```python
+# Automated batch search + invite (agency playbook)
+result = affiliate.batch_search_and_invite(
+    collaboration_id='collab_123',
+    search_filters={
+        'category': 'toys_and_games',
+        'min_gmv_30d': 1000.0,
+        'min_followers': 5000,
+    },
+    invitation_message='Your content is fire!...',
+    max_invitations=50
+)
+print(f"Sent {result['invitations_sent']} invitations")
+```
+
+### Using the Affiliate Agent
+
+```python
+from agents.tiktok_affiliate_agent import TikTokAffiliateAgent
+
+agent = TikTokAffiliateAgent()
+
+# Create a campaign
+campaign = agent.create_outreach_campaign(
+    campaign_name='March TCG Push',
+    product_ids=['prod_123'],
+    commission_rate=15.0,
+    target_category='toys_and_games',
+    daily_outreach_target=50,
+)
+
+# Execute daily outreach
+result = agent.execute_daily_outreach('March TCG Push')
+
+# Send follow-ups (3x/week cadence)
+follow_ups = agent.execute_follow_ups('March TCG Push')
+
+# Track tier progress
+progress = agent.get_tier_progress()
+print(f"Tier {progress['current_tier']}: {progress['progress_percent']}% to next tier")
+```
+
+### API Endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/tiktok/affiliates/creators/search` | Search creators with filters |
+| GET | `/api/tiktok/affiliates/creators/{id}` | Get creator profile |
+| POST | `/api/tiktok/affiliates/campaigns` | Create outreach campaign |
+| POST | `/api/tiktok/affiliates/campaigns/{name}/execute` | Execute daily outreach |
+| POST | `/api/tiktok/affiliates/campaigns/{name}/follow-up` | Send follow-ups |
+| GET | `/api/tiktok/affiliates/campaigns/{name}/report` | Campaign report |
+| POST | `/api/tiktok/affiliates/invitations/send` | Send invitations |
+| POST | `/api/tiktok/affiliates/messages/send` | Message creators |
+| GET | `/api/tiktok/affiliates/tier-progress` | Tier progress |
+| GET | `/api/tiktok/affiliates/performance` | Affiliate metrics |
+| GET | `/api/tiktok/affiliates/affiliate-orders` | Affiliate orders |
+| GET | `/api/tiktok/affiliates/samples` | Sample requests |
+| POST | `/api/tiktok/affiliates/samples/approve` | Approve samples |
+| POST | `/api/tiktok/affiliates/scripts/generate` | Generate video scripts |
 
 ## 🚀 Quick Start
 
