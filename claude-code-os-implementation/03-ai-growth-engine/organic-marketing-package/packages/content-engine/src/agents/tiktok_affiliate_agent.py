@@ -945,6 +945,250 @@ Output ONLY the JSON object, no markdown or explanation."""
         return campaigns
 
     # ========================================================================
+    # VIDEO INTELLIGENCE & DATA-DRIVEN SCRIPTS
+    # ========================================================================
+
+    def _get_video_intelligence(self):
+        """Get or create the video intelligence client."""
+        from integrations.tiktok_shop.video_intelligence import VideoIntelligenceClient
+        from config.config import (
+            TIKTOK_RESEARCH_API_TOKEN,
+            KALODATA_API_KEY,
+            FASTMOSS_API_KEY,
+        )
+
+        return VideoIntelligenceClient(
+            tiktok_research_token=TIKTOK_RESEARCH_API_TOKEN or None,
+            kalodata_api_key=KALODATA_API_KEY or None,
+            fastmoss_api_key=FASTMOSS_API_KEY or None,
+        )
+
+    def research_competitor_videos(
+        self,
+        category: Optional[str] = None,
+        hashtags: Optional[List[str]] = None,
+        min_views: int = 100000,
+        days: int = 7,
+        limit: int = 30,
+    ) -> Dict[str, Any]:
+        """
+        Research top-performing competitor videos in your niche.
+
+        Discovers trending videos, analyzes their hooks, structures, and
+        selling techniques, and returns actionable patterns.
+
+        Args:
+            category: Product category
+            hashtags: Relevant hashtags to search
+            min_views: Minimum view count
+            days: Lookback period
+            limit: Max videos to analyze
+
+        Returns:
+            Research results with videos and pattern analysis
+        """
+        intel = self._get_video_intelligence()
+
+        # Discover trending videos
+        discovery = intel.discover_trending_videos(
+            category=category,
+            hashtags=hashtags,
+            min_views=min_views,
+            days=days,
+            limit=limit,
+        )
+
+        # Analyze videos that have transcripts
+        videos_with_transcripts = [
+            v for v in discovery["videos"] if v.get("transcript")
+        ]
+
+        analysis = None
+        if videos_with_transcripts:
+            analysis = intel.batch_analyze_videos(videos_with_transcripts)
+
+        # Save research results
+        results = {
+            "discovery": discovery,
+            "analysis": analysis,
+            "researched_at": datetime.now().isoformat(),
+        }
+
+        filepath = self.output_dir / "research" / f"competitor_research_{datetime.now().strftime('%Y%m%d_%H%M')}.json"
+        filepath.parent.mkdir(parents=True, exist_ok=True)
+        with open(filepath, "w") as f:
+            json.dump(results, f, indent=2, default=str)
+
+        return results
+
+    def research_top_products(
+        self,
+        category: Optional[str] = None,
+        days: int = 30,
+        limit: int = 20,
+    ) -> Dict[str, Any]:
+        """
+        Research top-selling products in a category on TikTok Shop.
+
+        Args:
+            category: Product category
+            days: Lookback period
+            limit: Max products
+
+        Returns:
+            Top products with sales metrics
+        """
+        intel = self._get_video_intelligence()
+        return intel.discover_top_products(
+            category=category, days=days, limit=limit
+        )
+
+    def analyze_videos_from_urls(
+        self,
+        video_data: List[Dict[str, str]],
+    ) -> Dict[str, Any]:
+        """
+        Analyze manually provided video data (URLs + transcripts).
+
+        When API sources aren't available, you can manually input
+        video URLs and their transcripts for analysis.
+
+        Args:
+            video_data: List of dicts with 'url' and 'transcript' keys
+
+        Returns:
+            Analysis results with patterns and recommendations
+        """
+        intel = self._get_video_intelligence()
+        return intel.batch_analyze_videos(video_data)
+
+    def generate_data_driven_script(
+        self,
+        product_name: str,
+        product_features: List[str],
+        research_results: Optional[Dict[str, Any]] = None,
+        target_niche: str = "TCG collectors",
+        script_style: str = "review",
+    ) -> tuple[str, Path]:
+        """
+        Generate a video script informed by competitor video analysis.
+
+        Takes research results from research_competitor_videos() and uses
+        the discovered patterns (top hooks, selling techniques, CTAs) to
+        generate a script that follows what's actually working.
+
+        Args:
+            product_name: Product to promote
+            product_features: Key features
+            research_results: Output from research_competitor_videos()
+            target_niche: Audience niche
+            script_style: Video style
+
+        Returns:
+            Tuple of (script_content, file_path)
+        """
+        features_text = "\n".join(f"- {f}" for f in product_features)
+
+        # Extract intelligence from research
+        intel_context = ""
+        if research_results and research_results.get("analysis"):
+            analysis = research_results["analysis"]
+            patterns = analysis.get("common_patterns", {})
+
+            top_techniques = patterns.get("top_techniques", [])
+            hook_types = patterns.get("hook_types", [])
+
+            if top_techniques:
+                intel_context += "\n\nTOP SELLING TECHNIQUES FROM VIRAL VIDEOS:\n"
+                for t in top_techniques[:5]:
+                    intel_context += f"- {t['technique']} (used in {t['frequency']} videos)\n"
+
+            if hook_types:
+                intel_context += "\nMOST EFFECTIVE HOOK TYPES:\n"
+                for h in hook_types[:3]:
+                    intel_context += f"- {h['type']} hooks (used {h['count']} times)\n"
+
+            # Add example hooks from top videos
+            top_videos = research_results.get("discovery", {}).get("videos", [])[:3]
+            if top_videos:
+                intel_context += "\nEXAMPLE HOOKS FROM TOP-PERFORMING VIDEOS:\n"
+                for v in top_videos:
+                    if v.get("transcript"):
+                        first_sentence = v["transcript"].split(".")[0][:100]
+                        views = v.get("views", 0)
+                        intel_context += f"- \"{first_sentence}\" ({views:,} views)\n"
+
+        prompt = f"""Create a TikTok affiliate video script for a creator promoting this product.
+
+PRODUCT: {product_name}
+BRAND: {BRAND_NAME}
+STYLE: {script_style}
+TARGET AUDIENCE: {target_niche}
+
+KEY FEATURES:
+{features_text}
+{intel_context}
+
+IMPORTANT: Use the competitor intelligence above to inform your hook style,
+selling techniques, and CTA approach. The data shows what's actually working
+in this niche right now.
+
+REQUIREMENTS:
+1. Hook in first 3 seconds using the most effective hook type from the data
+2. Show the product within first 5 seconds
+3. Use the top selling techniques identified in competitor analysis
+4. Share personal reaction/opinion (authenticity converts)
+5. End with strong CTA matching what works in this niche
+6. Keep total length 30-60 seconds
+7. Include text overlay suggestions for key moments
+
+FORMAT:
+[HOOK - 0-3s]
+Visual: [what to show]
+Script: [what to say]
+Text overlay: [on-screen text]
+
+[FEATURE SHOWCASE - 4-25s]
+Visual: [what to show]
+Script: [what to say]
+Text overlay: [on-screen text]
+
+[PERSONAL TAKE - 26-40s]
+Visual: [what to show]
+Script: [what to say]
+Text overlay: [on-screen text]
+
+[CTA - 41-50s]
+Visual: [what to show]
+Script: [what to say]
+Text overlay: [on-screen text]
+
+[CAPTION & HASHTAGS]
+Caption:
+Hashtags:"""
+
+        system_context = (
+            f"You are a TikTok affiliate marketing expert who creates scripts "
+            f"based on data from top-performing competitor videos. "
+            f"Brand: {BRAND_NAME} - \"{BRAND_TAGLINE}\". "
+            f"Your scripts feel authentic but incorporate proven patterns "
+            f"from videos that have generated millions of views."
+        )
+
+        return self.generate_and_save(
+            prompt=prompt,
+            output_dir=self.output_dir / "scripts",
+            system_context=system_context,
+            metadata={
+                "type": "data_driven_script",
+                "product": product_name,
+                "style": script_style,
+                "niche": target_niche,
+                "has_research_data": research_results is not None,
+            },
+        )
+
+    # ========================================================================
     # MESSAGE TEMPLATES
     # ========================================================================
 

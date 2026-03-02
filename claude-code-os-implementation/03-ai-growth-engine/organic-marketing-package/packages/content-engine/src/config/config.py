@@ -57,6 +57,14 @@ TIKTOK_SHOP_APP_SECRET = os.getenv("TIKTOK_SHOP_APP_SECRET", "")
 TIKTOK_SHOP_ACCESS_TOKEN = os.getenv("TIKTOK_SHOP_ACCESS_TOKEN", "")
 TIKTOK_SHOP_API_BASE_URL = os.getenv("TIKTOK_SHOP_API_BASE_URL", "https://open-api.tiktokglobalshop.com")
 
+# TikTok Video Intelligence API Keys (for competitor research)
+# TikTok Research API - apply at https://developers.tiktok.com/products/research-api/
+TIKTOK_RESEARCH_API_TOKEN = os.getenv("TIKTOK_RESEARCH_API_TOKEN", "")
+# Kalodata - TikTok Shop analytics, plans at https://kalodata.com
+KALODATA_API_KEY = os.getenv("KALODATA_API_KEY", "")
+# FastMoss - TikTok creator/product analytics, plans at https://fastmoss.com
+FASTMOSS_API_KEY = os.getenv("FASTMOSS_API_KEY", "")
+
 # Klaviyo API Configuration
 KLAVIYO_API_KEY = os.getenv("KLAVIYO_API_KEY", "")
 KLAVIYO_API_BASE_URL = os.getenv("KLAVIYO_API_BASE_URL", "https://a.klaviyo.com/api")

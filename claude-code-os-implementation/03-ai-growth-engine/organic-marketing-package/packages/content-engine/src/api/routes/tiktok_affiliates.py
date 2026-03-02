@@ -107,6 +107,34 @@ class StyleChatRequest(BaseModel):
     )
 
 
+class ResearchVideosRequest(BaseModel):
+    """Request model for researching competitor videos."""
+    category: Optional[str] = Field(None, description="Product category")
+    hashtags: Optional[List[str]] = Field(None, description="Hashtags to search")
+    min_views: int = Field(100000, description="Min view count")
+    days: int = Field(7, ge=1, le=30, description="Lookback days")
+    limit: int = Field(30, ge=1, le=100, description="Max results")
+
+
+class AnalyzeVideosRequest(BaseModel):
+    """Request model for manually analyzing video transcripts."""
+    videos: List[Dict[str, str]] = Field(
+        ..., description="List of {url, transcript} objects"
+    )
+
+
+class DataDrivenScriptRequest(BaseModel):
+    """Request model for generating scripts from competitor research."""
+    product_name: str = Field(..., description="Product name")
+    product_features: List[str] = Field(..., min_length=1, description="Key features")
+    target_niche: str = Field("TCG collectors", description="Target niche")
+    script_style: str = Field("review", description="review, unboxing, tutorial, comparison")
+    hashtags: Optional[List[str]] = Field(
+        None, description="Hashtags to research first (auto-research)"
+    )
+    category: Optional[str] = Field(None, description="Category to research")
+
+
 # ========================================================================
 # CREATOR SEARCH & DISCOVERY
 # ========================================================================
@@ -610,4 +638,154 @@ async def style_chat(request: StyleChatRequest):
 
     except Exception as e:
         logger.error(f"Style chat failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ========================================================================
+# VIDEO INTELLIGENCE & COMPETITOR RESEARCH
+# ========================================================================
+
+@router.post("/research/videos", summary="Research top-performing competitor videos")
+async def research_competitor_videos(request: ResearchVideosRequest):
+    """
+    Discover and analyze top-performing TikTok Shop videos in your niche.
+
+    Uses multiple data sources (TikTok Research API, Kalodata, FastMoss)
+    to find viral videos, extract their transcripts, and analyze their
+    hooks, selling techniques, and CTAs.
+    """
+    try:
+        from agents.tiktok_affiliate_agent import TikTokAffiliateAgent
+
+        agent = TikTokAffiliateAgent()
+        result = agent.research_competitor_videos(
+            category=request.category,
+            hashtags=request.hashtags,
+            min_views=request.min_views,
+            days=request.days,
+            limit=request.limit,
+        )
+
+        return result
+
+    except Exception as e:
+        logger.error(f"Competitor research failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/research/products", summary="Research top-selling products")
+async def research_top_products(
+    category: Optional[str] = Query(None),
+    days: int = Query(30, ge=1, le=90),
+    limit: int = Query(20, ge=1, le=50),
+):
+    """Discover top-selling products on TikTok Shop in a category."""
+    try:
+        from agents.tiktok_affiliate_agent import TikTokAffiliateAgent
+
+        agent = TikTokAffiliateAgent()
+        return agent.research_top_products(
+            category=category, days=days, limit=limit
+        )
+
+    except Exception as e:
+        logger.error(f"Product research failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/research/analyze", summary="Analyze video transcripts manually")
+async def analyze_video_transcripts(request: AnalyzeVideosRequest):
+    """
+    Analyze manually provided video transcripts.
+
+    When API sources aren't configured, paste in video URLs and their
+    transcripts to get hook analysis, selling techniques, and patterns.
+    """
+    try:
+        from agents.tiktok_affiliate_agent import TikTokAffiliateAgent
+
+        agent = TikTokAffiliateAgent()
+        return agent.analyze_videos_from_urls(video_data=request.videos)
+
+    except Exception as e:
+        logger.error(f"Video analysis failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/research/trending-hashtags", summary="Get trending hashtags")
+async def get_trending_hashtags(
+    seed_hashtags: Optional[List[str]] = Query(None),
+    region: str = Query("US"),
+    limit: int = Query(20, ge=1, le=50),
+):
+    """Get trending hashtags from TikTok Creative Center (free, always available)."""
+    try:
+        from integrations.tiktok_shop.video_intelligence import VideoIntelligenceClient
+
+        client = VideoIntelligenceClient()
+        return client.discover_trending_hashtags(
+            seed_hashtags=seed_hashtags,
+            region=region,
+            limit=limit,
+        )
+
+    except Exception as e:
+        logger.error(f"Hashtag research failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post(
+    "/scripts/generate-from-research",
+    summary="Generate script from competitor research"
+)
+async def generate_data_driven_script(request: DataDrivenScriptRequest):
+    """
+    Generate a video script informed by competitor video analysis.
+
+    Optionally auto-researches competitor videos first, then generates
+    a script that uses the proven hooks, techniques, and CTAs from
+    videos that are actually going viral in your niche.
+    """
+    try:
+        from agents.tiktok_affiliate_agent import TikTokAffiliateAgent
+
+        agent = TikTokAffiliateAgent()
+
+        # Auto-research if hashtags or category provided
+        research_results = None
+        if request.hashtags or request.category:
+            research_results = agent.research_competitor_videos(
+                category=request.category,
+                hashtags=request.hashtags,
+                min_views=50000,
+                days=7,
+                limit=20,
+            )
+
+        content, filepath = agent.generate_data_driven_script(
+            product_name=request.product_name,
+            product_features=request.product_features,
+            research_results=research_results,
+            target_niche=request.target_niche,
+            script_style=request.script_style,
+        )
+
+        return {
+            "script": content,
+            "filepath": str(filepath),
+            "research_summary": {
+                "videos_analyzed": (
+                    research_results.get("analysis", {}).get("videos_analyzed", 0)
+                    if research_results else 0
+                ),
+                "sources_used": (
+                    research_results.get("discovery", {}).get("sources_used", [])
+                    if research_results else []
+                ),
+            },
+            "generated_at": datetime.now().isoformat(),
+        }
+
+    except Exception as e:
+        logger.error(f"Data-driven script generation failed: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
