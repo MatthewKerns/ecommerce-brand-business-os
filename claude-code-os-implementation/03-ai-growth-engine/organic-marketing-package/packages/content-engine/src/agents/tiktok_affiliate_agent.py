@@ -565,6 +565,389 @@ The script should feel natural but hit all conversion points."""
     # MESSAGE TEMPLATES
     # ========================================================================
 
+    # ========================================================================
+    # DRAFT MESSAGE MANAGEMENT (Core Dashboard Workflow)
+    # ========================================================================
+
+    def _load_drafts(self) -> List[Dict[str, Any]]:
+        """Load all draft messages from disk."""
+        drafts_file = self.output_dir / "drafts.json"
+        if drafts_file.exists():
+            with open(drafts_file) as f:
+                return json.load(f)
+        return []
+
+    def _save_drafts(self, drafts: List[Dict[str, Any]]) -> None:
+        """Save draft messages to disk."""
+        drafts_file = self.output_dir / "drafts.json"
+        with open(drafts_file, "w") as f:
+            json.dump(drafts, f, indent=2)
+
+    def _load_style_config(self) -> Dict[str, Any]:
+        """Load the current message style configuration."""
+        style_file = self.output_dir / "style_config.json"
+        if style_file.exists():
+            with open(style_file) as f:
+                return json.load(f)
+        return {
+            "tone": "friendly, authentic, enthusiastic but not salesy",
+            "length": "2-4 sentences, under 500 chars",
+            "personality": "fellow creator/collector who genuinely uses the product",
+            "avoid": "corporate speak, pushy sales language, generic templates",
+            "include": "reference their specific content, show genuine interest",
+            "custom_instructions": "",
+        }
+
+    def _save_style_config(self, config: Dict[str, Any]) -> None:
+        """Save message style configuration."""
+        style_file = self.output_dir / "style_config.json"
+        with open(style_file, "w") as f:
+            json.dump(config, f, indent=2)
+
+    def generate_reply_drafts(
+        self,
+        campaign_name: Optional[str] = None,
+        style_instructions: Optional[str] = None,
+    ) -> List[Dict[str, Any]]:
+        """
+        Generate AI draft replies for every creator needing a response.
+
+        The daily workflow: this generates one draft per pending conversation
+        so you can review 50+ at once, check the good ones, and batch send.
+
+        Args:
+            campaign_name: Optional filter by campaign
+            style_instructions: Optional override for message style
+
+        Returns:
+            List of draft objects with creator info and draft message
+        """
+        client = self._get_affiliate_client()
+        style = self._load_style_config()
+
+        if style_instructions:
+            style["custom_instructions"] = style_instructions
+
+        # Get all pending invitations and active conversations that need replies
+        drafts = []
+        campaigns = self._list_campaigns(campaign_name)
+
+        for campaign in campaigns:
+            collab_id = campaign.get("collaboration_id")
+            if not collab_id:
+                continue
+
+            # Get pending invitations (creators we invited but haven't responded)
+            try:
+                pending = client.get_invitation_status(
+                    collaboration_id=collab_id,
+                    status_filter="PENDING",
+                    page_size=50,
+                )
+                pending_list = pending.get("data", {}).get("invitations", [])
+            except Exception:
+                pending_list = []
+
+            # Get accepted creators (active conversations)
+            try:
+                accepted = client.get_invitation_status(
+                    collaboration_id=collab_id,
+                    status_filter="ACCEPTED",
+                    page_size=50,
+                )
+                accepted_list = accepted.get("data", {}).get("invitations", [])
+            except Exception:
+                accepted_list = []
+
+            # Generate drafts for pending (follow-up messages)
+            for inv in pending_list:
+                creator_id = inv.get("creator_id", "")
+                nickname = inv.get("creator_nickname", "Creator")
+                days_pending = inv.get("days_since_invitation", 0)
+
+                draft_msg = self._generate_single_draft(
+                    creator_nickname=nickname,
+                    context="follow_up",
+                    days_pending=days_pending,
+                    style=style,
+                    creator_details=inv,
+                )
+
+                drafts.append({
+                    "draft_id": f"draft_{creator_id}_{int(time.time())}",
+                    "creator_id": creator_id,
+                    "creator_nickname": nickname,
+                    "creator_followers": inv.get("creator_followers"),
+                    "creator_gmv_30d": inv.get("creator_gmv_30d"),
+                    "campaign_name": campaign.get("campaign_name", ""),
+                    "collaboration_id": collab_id,
+                    "context": "follow_up",
+                    "days_pending": days_pending,
+                    "draft_message": draft_msg,
+                    "status": "pending",
+                    "generated_at": datetime.now().isoformat(),
+                })
+
+            # Generate drafts for accepted (thank you / next steps)
+            for inv in accepted_list:
+                creator_id = inv.get("creator_id", "")
+                nickname = inv.get("creator_nickname", "Creator")
+
+                draft_msg = self._generate_single_draft(
+                    creator_nickname=nickname,
+                    context="accepted",
+                    style=style,
+                    creator_details=inv,
+                )
+
+                drafts.append({
+                    "draft_id": f"draft_{creator_id}_{int(time.time())}",
+                    "creator_id": creator_id,
+                    "creator_nickname": nickname,
+                    "creator_followers": inv.get("creator_followers"),
+                    "creator_gmv_30d": inv.get("creator_gmv_30d"),
+                    "campaign_name": campaign.get("campaign_name", ""),
+                    "collaboration_id": collab_id,
+                    "context": "accepted",
+                    "draft_message": draft_msg,
+                    "status": "pending",
+                    "generated_at": datetime.now().isoformat(),
+                })
+
+        self._save_drafts(drafts)
+        return drafts
+
+    def _generate_single_draft(
+        self,
+        creator_nickname: str,
+        context: str,
+        style: Dict[str, Any],
+        creator_details: Optional[Dict] = None,
+        days_pending: int = 0,
+    ) -> str:
+        """Generate a single draft message using the style config."""
+        style_desc = (
+            f"Tone: {style['tone']}\n"
+            f"Length: {style['length']}\n"
+            f"Personality: {style['personality']}\n"
+            f"Avoid: {style['avoid']}\n"
+            f"Include: {style['include']}"
+        )
+        if style.get("custom_instructions"):
+            style_desc += f"\nCustom: {style['custom_instructions']}"
+
+        followers = creator_details.get("creator_followers", "unknown") if creator_details else "unknown"
+        gmv = creator_details.get("creator_gmv_30d", "unknown") if creator_details else "unknown"
+
+        if context == "follow_up":
+            prompt = (
+                f"Write a short follow-up message to @{creator_nickname} "
+                f"({followers} followers, ${gmv} GMV/30d). "
+                f"They were invited {days_pending} days ago and haven't responded. "
+                f"This is for {BRAND_NAME} trading card storage products.\n\n"
+                f"STYLE:\n{style_desc}\n\n"
+                f"Keep it under 500 characters. One message, no subject line."
+            )
+        elif context == "accepted":
+            prompt = (
+                f"Write a welcome/thank-you message to @{creator_nickname} "
+                f"({followers} followers) who just accepted our affiliate invite. "
+                f"Tell them we're sending a free sample and will include a script "
+                f"with the package. For {BRAND_NAME} trading card binders.\n\n"
+                f"STYLE:\n{style_desc}\n\n"
+                f"Keep it under 500 characters. One message, no subject line."
+            )
+        else:
+            prompt = (
+                f"Write a message to @{creator_nickname} for {BRAND_NAME}.\n\n"
+                f"STYLE:\n{style_desc}\n\n"
+                f"Keep it under 500 characters."
+            )
+
+        try:
+            content, _ = self.generate_and_save(
+                prompt=prompt,
+                output_dir=self.output_dir / "draft_cache",
+                system_context=f"You write TikTok affiliate messages for {BRAND_NAME}. "
+                f"Be authentic, not corporate. Max 500 chars.",
+            )
+            return content.strip()
+        except Exception as e:
+            logger.warning(f"Draft generation failed for {creator_nickname}: {e}")
+            # Fallback to template
+            if context == "follow_up":
+                return self._follow_up_message(min(days_pending // 2, 3))
+            return f"Thanks for joining us @{creator_nickname}! We're sending your free sample now."
+
+    def get_drafts(
+        self,
+        campaign_name: Optional[str] = None,
+        status_filter: Optional[str] = None,
+    ) -> List[Dict[str, Any]]:
+        """Get all current drafts, optionally filtered."""
+        drafts = self._load_drafts()
+
+        if campaign_name:
+            drafts = [d for d in drafts if d.get("campaign_name") == campaign_name]
+        if status_filter:
+            drafts = [d for d in drafts if d.get("status") == status_filter]
+
+        return drafts
+
+    def update_draft(self, draft_id: str, message: str) -> Dict[str, Any]:
+        """Update a single draft message."""
+        drafts = self._load_drafts()
+
+        for draft in drafts:
+            if draft["draft_id"] == draft_id:
+                draft["draft_message"] = message
+                draft["manually_edited"] = True
+                self._save_drafts(drafts)
+                return draft
+
+        raise ValueError(f"Draft '{draft_id}' not found")
+
+    def batch_send_drafts(self, draft_ids: List[str]) -> Dict[str, Any]:
+        """
+        Send all approved draft messages in one batch.
+
+        Args:
+            draft_ids: List of draft IDs to send
+
+        Returns:
+            Batch send results
+        """
+        client = self._get_affiliate_client()
+        drafts = self._load_drafts()
+
+        sent = 0
+        failed = 0
+        errors = []
+
+        for draft in drafts:
+            if draft["draft_id"] not in draft_ids:
+                continue
+            if draft["status"] == "sent":
+                continue
+
+            try:
+                client.send_creator_message(
+                    creator_id=draft["creator_id"],
+                    message=draft["draft_message"],
+                )
+                draft["status"] = "sent"
+                draft["sent_at"] = datetime.now().isoformat()
+                sent += 1
+            except Exception as e:
+                draft["status"] = "failed"
+                failed += 1
+                errors.append({
+                    "draft_id": draft["draft_id"],
+                    "creator": draft["creator_nickname"],
+                    "error": str(e),
+                })
+
+        self._save_drafts(drafts)
+
+        return {
+            "sent": sent,
+            "failed": failed,
+            "errors": errors,
+            "total_requested": len(draft_ids),
+        }
+
+    def process_style_chat(
+        self,
+        instruction: str,
+        example_draft_ids: Optional[List[str]] = None,
+    ) -> Dict[str, Any]:
+        """
+        Process a style chat message to refine draft message tone.
+
+        The user says something like "sound more casual" or "reference their
+        niche more" and this updates the style config and optionally regenerates
+        drafts.
+
+        Args:
+            instruction: User's style feedback
+            example_draft_ids: Optional draft IDs to reference as examples
+
+        Returns:
+            Updated style config and regenerated sample drafts
+        """
+        style = self._load_style_config()
+
+        # Get example drafts for context
+        examples = ""
+        if example_draft_ids:
+            drafts = self._load_drafts()
+            for d in drafts:
+                if d["draft_id"] in example_draft_ids:
+                    examples += f"\n- To @{d['creator_nickname']}: \"{d['draft_message']}\""
+
+        prompt = f"""You are managing the message style for TikTok affiliate outreach.
+
+CURRENT STYLE CONFIG:
+- Tone: {style['tone']}
+- Length: {style['length']}
+- Personality: {style['personality']}
+- Avoid: {style['avoid']}
+- Include: {style['include']}
+- Custom: {style.get('custom_instructions', 'none')}
+
+USER FEEDBACK: "{instruction}"
+{f'EXAMPLE DRAFTS THEY ARE REFERRING TO:{examples}' if examples else ''}
+
+Based on the user's feedback, output the UPDATED style config as JSON with these exact keys:
+tone, length, personality, avoid, include, custom_instructions
+
+Only change what the user asked to change. Keep everything else the same.
+Output ONLY the JSON object, no markdown or explanation."""
+
+        try:
+            result, _ = self.generate_and_save(
+                prompt=prompt,
+                output_dir=self.output_dir / "style_cache",
+                system_context="You update message style configurations. Output only valid JSON.",
+            )
+
+            # Parse the updated config
+            import re
+            json_match = re.search(r'\{[^{}]*\}', result, re.DOTALL)
+            if json_match:
+                updated_style = json.loads(json_match.group())
+                # Merge with existing to preserve any keys not in response
+                style.update(updated_style)
+        except Exception as e:
+            logger.warning(f"Style chat AI parsing failed: {e}")
+            # Fallback: just append the instruction
+            style["custom_instructions"] = (
+                f"{style.get('custom_instructions', '')} | {instruction}".strip(" | ")
+            )
+
+        self._save_style_config(style)
+
+        return {
+            "updated_style": style,
+            "message": f"Style updated based on: '{instruction}'",
+            "tip": "Use POST /drafts/generate to regenerate all drafts with the new style.",
+        }
+
+    def _list_campaigns(self, campaign_name: Optional[str] = None) -> List[Dict]:
+        """List all campaigns or a specific one."""
+        campaigns = []
+        for f in self.output_dir.glob("campaign_*.json"):
+            with open(f) as fh:
+                campaign = json.load(fh)
+                if campaign_name and campaign.get("campaign_name") != campaign_name:
+                    continue
+                campaigns.append(campaign)
+        return campaigns
+
+    # ========================================================================
+    # MESSAGE TEMPLATES
+    # ========================================================================
+
     def _default_invitation(self) -> str:
         """Default affiliate invitation message (500 char limit)."""
         return (

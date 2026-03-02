@@ -12,6 +12,7 @@ import {
   Video,
   Target,
   AlertTriangle,
+  Users,
 } from "lucide-react";
 import { SidebarItem } from "./SidebarItem";
 import { WorkspaceSelector } from "./WorkspaceSelector";
@@ -32,6 +33,7 @@ import { cn } from "@/lib/utils";
  * - Dashboard (/) - Main overview page
  * - AEO Optimizer (/aeo-optimizer) - Answer Engine Optimization content tools
  * - TikTok Studio (/tiktok) - TikTok content creation and scheduling
+ * - Affiliate Outreach (/tiktok/affiliates) - Affiliate campaign automation and draft management
  * - Sequences (/sequences) - Email sequences and automation
  * - System Health (/health) - Service monitoring
  * - Configuration (/config) - Settings and API keys
@@ -60,6 +62,11 @@ export function Sidebar() {
       href: "/tiktok",
       icon: Video,
       label: "TikTok Studio",
+    },
+    {
+      href: "/tiktok/affiliates",
+      icon: Users,
+      label: "Affiliate Outreach",
     },
     {
       href: "/sequences",

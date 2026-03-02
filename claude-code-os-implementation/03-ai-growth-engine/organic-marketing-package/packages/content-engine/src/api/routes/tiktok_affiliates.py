@@ -80,6 +80,33 @@ class ApproveSampleRequest(BaseModel):
     shipping_note: Optional[str] = Field(None, description="Note for creator")
 
 
+class GenerateDraftsRequest(BaseModel):
+    """Request model for generating draft replies for pending conversations."""
+    campaign_name: Optional[str] = Field(None, description="Filter by campaign")
+    style_instructions: Optional[str] = Field(
+        None, description="Custom tone/style instructions for drafts"
+    )
+
+
+class BatchSendRequest(BaseModel):
+    """Request model for batch-sending approved draft messages."""
+    draft_ids: List[str] = Field(..., min_length=1, description="IDs of drafts to send")
+
+
+class UpdateDraftRequest(BaseModel):
+    """Request model for editing a single draft before sending."""
+    draft_id: str = Field(..., description="Draft ID to update")
+    message: str = Field(..., max_length=500, description="Updated message text")
+
+
+class StyleChatRequest(BaseModel):
+    """Request model for chatting with the AI to refine message style."""
+    instruction: str = Field(..., description="Style instruction or feedback")
+    example_drafts: Optional[List[str]] = Field(
+        None, description="Example draft IDs to reference"
+    )
+
+
 # ========================================================================
 # CREATOR SEARCH & DISCOVERY
 # ========================================================================
@@ -461,4 +488,126 @@ async def generate_affiliate_script(request: GenerateScriptRequest):
 
     except Exception as e:
         logger.error(f"Script generation failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ========================================================================
+# DRAFT MESSAGES & BATCH SEND (Core Dashboard Workflow)
+# ========================================================================
+
+@router.post("/drafts/generate", summary="Generate draft replies for all pending conversations")
+async def generate_drafts(request: GenerateDraftsRequest):
+    """
+    Generate AI draft replies for every creator with a pending message.
+
+    This is the core daily workflow: pull up the dashboard, review 50 drafts,
+    check the good ones, batch send. Each draft is personalized based on
+    the creator's profile, their last message, and your style instructions.
+    """
+    try:
+        from agents.tiktok_affiliate_agent import TikTokAffiliateAgent
+
+        agent = TikTokAffiliateAgent()
+        drafts = agent.generate_reply_drafts(
+            campaign_name=request.campaign_name,
+            style_instructions=request.style_instructions,
+        )
+
+        return {
+            "drafts": drafts,
+            "total": len(drafts),
+            "generated_at": datetime.now().isoformat(),
+        }
+
+    except Exception as e:
+        logger.error(f"Draft generation failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/drafts", summary="Get all current draft messages")
+async def get_drafts(
+    campaign_name: Optional[str] = Query(None),
+    status: Optional[str] = Query(None, description="pending, approved, sent"),
+):
+    """Get all current draft messages for review."""
+    try:
+        from agents.tiktok_affiliate_agent import TikTokAffiliateAgent
+
+        agent = TikTokAffiliateAgent()
+        drafts = agent.get_drafts(
+            campaign_name=campaign_name,
+            status_filter=status,
+        )
+
+        return {"drafts": drafts, "total": len(drafts)}
+
+    except Exception as e:
+        logger.error(f"Get drafts failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.put("/drafts/{draft_id}", summary="Update a draft message")
+async def update_draft(draft_id: str, request: UpdateDraftRequest):
+    """Edit a draft message before sending."""
+    try:
+        from agents.tiktok_affiliate_agent import TikTokAffiliateAgent
+
+        agent = TikTokAffiliateAgent()
+        updated = agent.update_draft(draft_id=draft_id, message=request.message)
+
+        return {"status": "updated", "draft": updated}
+
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        logger.error(f"Update draft failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/drafts/batch-send", summary="Batch send approved drafts")
+async def batch_send_drafts(request: BatchSendRequest):
+    """
+    Send all checked/approved draft messages in one batch.
+
+    The daily workflow: review drafts, check the good ones, hit send.
+    """
+    try:
+        from agents.tiktok_affiliate_agent import TikTokAffiliateAgent
+
+        agent = TikTokAffiliateAgent()
+        result = agent.batch_send_drafts(draft_ids=request.draft_ids)
+
+        return result
+
+    except Exception as e:
+        logger.error(f"Batch send failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ========================================================================
+# STYLE CHAT AGENT (Refine Message Tone)
+# ========================================================================
+
+@router.post("/style-chat", summary="Chat with AI to refine message style")
+async def style_chat(request: StyleChatRequest):
+    """
+    Chat with the AI agent to adjust the tone and style of draft messages.
+
+    Example: "Sound more casual", "Add more urgency", "Reference their
+    specific content niche". The agent updates the style config and can
+    regenerate all pending drafts with the new style.
+    """
+    try:
+        from agents.tiktok_affiliate_agent import TikTokAffiliateAgent
+
+        agent = TikTokAffiliateAgent()
+        result = agent.process_style_chat(
+            instruction=request.instruction,
+            example_draft_ids=request.example_drafts,
+        )
+
+        return result
+
+    except Exception as e:
+        logger.error(f"Style chat failed: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
