@@ -4,14 +4,14 @@
 *How we think about growth aligned with our values and OBG*
 
 ### Growth Principles
-1. **Sustainable over explosive**: Build lasting brand value, not flash sales
+1. **Campaign-driven over transactional**: Build for the never-ending journey, not one-time sales
 2. **Profitable over vanity**: CM3% matters more than revenue alone
-3. **Identity-driven over commodity**: Growth through positioning, not price wars
+3. **Forging-driven over commodity**: Growth through the constant preparation narrative, not price wars
 4. **Multi-layered moat over single advantage**: Build defensible competitive position
-5. **Community-validated over marketing-manufactured**: Authentic growth through LGS and tournaments
+5. **Community-validated over marketing-manufactured**: Authentic growth through LGS and tournaments (the battlefield)
 
 ### Strategic Foundation
-**Primary Objective**: Transform from commodity storage provider to premium, identity-driven brand
+**Primary Objective**: Transform from commodity storage provider to the armory for the never-ending campaign — the place warriors return to as they sharpen, upgrade, and prepare
 **3-Year Revenue Target**: Scale to $5-10M annually
 **Exit Valuation Target**: $5.6M - $9.4M
 
@@ -39,10 +39,10 @@
 **Current Stage**: Product/Market Fit + Brand Positioning
 
 **Primary Focus for This Stage**:
-1. Establish "Battle-Ready Equipment" positioning in market
-2. Optimize Amazon listings for differentiation
+1. Establish "Never-Ending Campaign" positioning — the battle is certain, preparation never stops
+2. Optimize Amazon listings with forge/sharpen/upgrade messaging
 3. Generate cash flow from existing inventory
-4. Begin community/LGS partnerships
+4. Begin community/LGS partnerships (the battlefield)
 
 **Metrics That Matter Now**:
 - CTR improvement (positioning visible in search)
@@ -63,11 +63,11 @@ Growth strategy built on integrated three-pronged approach:
 │                 INFINITY VAULT GROWTH ENGINE                      │
 ├──────────────────────────────────────────────────────────────────┤
 │                                                                  │
-│   PRONG 1: "BATTLE-READY EQUIPMENT"                             │
+│   PRONG 1: "THE NEVER-ENDING CAMPAIGN"                           │
 │   Primary Positioning                                            │
-│   → Transforms storage into gaming gear                          │
-│   → Differentiates from commodity competitors                    │
-│   → Connects with gamer identity and ritual                      │
+│   → The battle is certain, preparation never stops               │
+│   → Forges equipment for ongoing adventure, strategy, tactics    │
+│   → Warriors return to the armory — sharpen, upgrade, resupply   │
 │                                                                  │
 │   PRONG 2: "TCG ARSENAL SYSTEM"                                 │
 │   Product Architecture                                           │
@@ -86,9 +86,9 @@ Growth strategy built on integrated three-pronged approach:
 
 ### Why This Strategy Works
 This integrated approach erects a multi-layered competitive moat:
-- **Brand narrative** that competitors can't authentically copy
-- **Ecosystem lock-in** that requires significant R&D to match
-- **Community integration** that takes years to build
+- **"Never-ending campaign" narrative** that competitors can't authentically copy — it requires understanding the warrior's ongoing journey
+- **Arsenal ecosystem** that turns one-time buyers into returning warriors who constantly upgrade
+- **Battlefield integration** (LGS + tournaments) that takes years to build
 
 ---
 
@@ -124,9 +124,9 @@ Where:
 ```
 
 **Key Levers**:
-1. **CTR**: "Battle-Ready" main image + warranty badge (+20-35% target)
-2. **CVR**: Identity-driven A+ content + reviews (+15-25% target)
-3. **Repeat**: TCG Arsenal System (Year 2+)
+1. **CTR**: "Never-Ending Campaign" main image + forge/upgrade messaging + warranty badge (+20-35% target)
+2. **CVR**: Campaign-driven A+ content — "the battle is certain" narrative + reviews (+15-25% target)
+3. **Repeat**: TCG Arsenal System — warriors return to the armory to sharpen and upgrade (Year 2+)
 
 ---
 
@@ -205,9 +205,9 @@ Where:
 | First Success Milestone | Cards protected | "Battle-ready" feeling |
 
 **Activation Improvements**:
-1. Premium unboxing experience (future)
-2. Brand story insert with "Show Up Battle Ready" messaging
-3. Warranty card reinforcing brand promise
+1. Premium unboxing experience — "Welcome to the armory" (future)
+2. Brand story insert: "The battle is certain. The preparation is never-ending. Your campaign starts now."
+3. Warranty card: "This gear is forged for the long campaign. Lifetime warranty."
 
 ### Lever 3: Retention
 *Keeping customers (repeat purchases)*
@@ -219,10 +219,10 @@ Where:
 | Cross-sell Success | N/A (single product) | Multi-product future |
 
 **Retention Strategies**:
-1. TCG Arsenal System creates repeat purchase path (Year 2)
-2. Quality exceeds expectations → positive word-of-mouth
-3. Lifetime warranty creates trust for future purchases
-4. Community presence keeps brand top-of-mind
+1. TCG Arsenal System — the armory warriors return to, expanding the arsenal (Year 2)
+2. Quality exceeds expectations → "this gear is forged right" word-of-mouth
+3. Lifetime warranty signals gear built for the long campaign
+4. "Never-ending campaign" positioning makes every purchase the next chapter, not the last
 
 ### Lever 4: Revenue
 *Increasing customer value*
@@ -560,4 +560,4 @@ The multi-layered competitive moat (brand, ecosystem, community) is what justifi
 
 *"Growth isn't a goal; it's a result of delivering increasing value to an expanding audience."*
 
-**For Infinity Vault: We grow by transforming the boring card storage market into an exciting extension of the gaming experience itself. That's a defensible growth strategy that compounds over time.**
+**For Infinity Vault: The battle is certain. The preparation is never-ending. We grow by being the armory warriors return to — every purchase sharpens the sword, upgrades the shield, adds munitions. That's a never-ending growth engine built on an endless campaign.**

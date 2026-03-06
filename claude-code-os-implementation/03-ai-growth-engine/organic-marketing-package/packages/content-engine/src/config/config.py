@@ -78,15 +78,16 @@ for dir_path in [BLOG_OUTPUT_DIR, SOCIAL_OUTPUT_DIR, AMAZON_OUTPUT_DIR, COMPETIT
 # Brand identity constants
 BRAND_NAME = "Infinity Vault"
 BRAND_TAGLINE = "Show Up Battle Ready"
-BRAND_PROMISE = "Show up to every game feeling confident, prepared, and respected"
-BRAND_POSITIONING = "Battle-Ready Equipment (NOT commodity storage)"
+BRAND_CORE_TRUTH = "The battle is certain. The preparation is never-ending."
+BRAND_PROMISE = "The battle never stops — we forge the gear that keeps you ready for whatever comes next"
+BRAND_POSITIONING = "Battle-Ready Equipment forged for the Never-Ending Campaign (NOT commodity storage)"
 
 # Content pillars
 CONTENT_PILLARS = [
-    "Battle-Ready Lifestyle",
-    "Gear & Equipment",
-    "Community Champion",
-    "Collector's Journey"
+    "The Never-Ending Campaign",
+    "Forge & Upgrade",
+    "Community & Battlefield",
+    "The Warrior's Journey"
 ]
 
 # Target channels
@@ -106,28 +107,28 @@ CHANNEL_THEMES = {
         "visual_style": "Fast cuts, dynamic angles, motion graphics",
         "hook_style": "Question or shocking statement",
         "video_length": "15-30 seconds",
-        "key_messages": ["Speed wins", "Be ready", "Quick tips"],
+        "key_messages": ["Sharpen the sword", "Speed wins", "Quick training for the next battle"],
         "hashtags": ["#TCGSpeed", "#QuickTips", "#TournamentReady", "#InfinityVault"]
     },
     "water": {
         "visual_style": "Smooth transitions, emotional close-ups",
         "hook_style": "Personal story or relatable moment",
         "video_length": "30-60 seconds",
-        "key_messages": ["Community first", "Share your journey", "We understand"],
+        "key_messages": ["Warriors train together", "Share your campaign", "The journey never ends"],
         "hashtags": ["#TCGCommunity", "#CollectorStory", "#CardFamily", "#InfinityVault"]
     },
     "earth": {
         "visual_style": "Clear demonstrations, product close-ups",
         "hook_style": "Problem statement or how-to",
         "video_length": "30-45 seconds",
-        "key_messages": ["Quality matters", "Built to last", "Protect your investment"],
+        "key_messages": ["Forged to last", "Upgrade the shield", "Weapons-grade protection"],
         "hashtags": ["#CardProtection", "#TCGStorage", "#QualityFirst", "#InfinityVault"]
     },
     "fire": {
         "visual_style": "Bold graphics, high contrast, intense music",
         "hook_style": "Controversial opinion or challenge",
         "video_length": "15-30 seconds",
-        "key_messages": ["Challenge accepted", "Prove them wrong", "Be legendary"],
+        "key_messages": ["The battle is certain", "Never stop forging", "Add munitions to the arsenal"],
         "hashtags": ["#HotTake", "#TCGDebate", "#Controversial", "#InfinityVault"]
     }
 }

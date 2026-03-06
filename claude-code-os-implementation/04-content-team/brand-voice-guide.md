@@ -5,23 +5,25 @@
 Before creating ANY content, remember these three principles:
 
 ### 1. Sell the Identity, Not the Box
-> Our customer buys products that reinforce their identity as a serious, dedicated player. The Vault is a symbol of prestige, readiness, and belonging.
+> Our customer buys products that reinforce their identity as a serious, dedicated player. The Vault is a symbol of prestige, readiness, and belonging. Every purchase is another step in the warrior's journey — not a transaction, but an upgrade to their arsenal.
 
 ### 2. Speak the Language of Fantasy
-> All imagery, copy, and design must be infused with fantasy genre language. We sell "battle-ready artifacts" - gear that reflects authority, enhances presence, and gains admiration.
+> All imagery, copy, and design must be infused with fantasy genre language. We sell "battle-ready artifacts" - gear that reflects authority, enhances presence, and gains admiration. Use the language of forging, sharpening, upgrading, and training — the never-ending campaign of preparation.
 
-### 3. Focus on the Pre-Game Ritual
-> The gaming journey begins in the mind long before the first card is played. Support and amplify the excitement, confidence, and anticipation of pre-game preparation.
+### 3. The Battle is Certain. The Preparation is Never-Ending.
+> The next battle is always coming. Every tournament, every game night, every trade — the fight never stops, so the preparation never stops. Infinity Vault exists at the center of this constant forging: sharpening the sword (refining strategy), upgrading the shield (better protection), and adding munitions to the arsenal (growing the collection). We don't sell a one-time purchase — we fuel an ongoing campaign.
 
 ---
 
 ## Brand Essence
 
-**In 2-3 Words**: Battle-Ready Empowerment
+**In 2-3 Words**: Never-Ending Preparation
 
-**Brand Promise**: Show up to every game feeling confident, prepared, and respected.
+**Brand Promise**: The battle is certain. The preparation is never-ending. We forge the gear that keeps you ready for whatever comes next.
 
 **Tagline**: "Show Up Battle Ready"
+
+**Core Truth**: The battle never stops — so you never stop preparing. Every card collected, every binder filled, every deck refined is another weapon forged for the fights ahead.
 
 ---
 
@@ -51,27 +53,40 @@ Authoritative ←───●─────→ Accessible: 7/10 (Authority on g
 
 ### Words We Use
 - Battle-ready, equipment, gear, arsenal
-- Ritual, preparation, empowerment
+- Forge, sharpen, upgrade, train, prepare
+- Campaign, quest, adventure, journey
 - Warrior, champion, serious player
 - Premium, professional-grade, quality
 - Community, tribe, fellow players
+- Never-ending, constant, relentless, ongoing
+- Munitions, weapons, armory, vault
 
 ### Words We Avoid
 - Storage, container, box (as primary descriptors)
 - Cheap, budget, discount
 - Basic, standard, ordinary
 - Merely, just, simple
+- "Done," "finished," "complete" (the journey is never over)
+- One-time, single-use (implies the journey ends)
 
 ### Transformations
 
 | Instead of... | Say... |
 |---------------|--------|
 | "Card storage" | "Battle-ready equipment" |
-| "Protect your cards" | "Prepare for battle" |
+| "Protect your cards" | "Forge your defenses" |
 | "Organize your collection" | "Build your arsenal" |
 | "Quality binder" | "Warrior's spellbook" |
-| "Buy now" | "Show up battle ready" |
-| "Cards will be safe" | "Feel confident and prepared" |
+| "Buy now" | "Upgrade your arsenal" |
+| "Cards will be safe" | "Your weapons stay sharp" |
+| "Add to cart" | "Add to your armory" |
+| "New product" | "New gear forged" |
+| "Restock" | "Resupply your munitions" |
+| "Browse our products" | "Survey the armory" |
+| "Buying a binder" | "Sharpening the sword" |
+| "Getting card sleeves" | "Upgrading the shield" |
+| "Expanding collection" | "Adding munitions to the arsenal" |
+| "Preparing for a tournament" | "Training for the next battle" |
 
 ---
 
@@ -80,13 +95,13 @@ Authoritative ←───●─────→ Accessible: 7/10 (Authority on g
 ### On-Brand (Use This Style)
 
 **Product Description**:
-> "Show up to your next tournament and feel the difference. Infinity Vault battle-ready equipment transforms your pre-game ritual from a chore into an empowering experience. Your deck box is your warrior's footlocker. Your binder is your spellbook. You're not just protected - you're ready to win."
+> "The next battle is always coming. Infinity Vault battle-ready equipment is forged for players who never stop preparing — sharpening their strategy, upgrading their defenses, adding firepower to their arsenal. Your deck box is your warrior's footlocker. Your binder is your spellbook. The campaign never ends, and neither does the preparation."
 
 **Social Post**:
-> "Friday Night Magic starts with the ritual. Checking your deck. Organizing your sideboard. Preparing for battle. When you show up with Infinity Vault gear, you're telling every opponent you're here to compete. #ShowUpBattleReady"
+> "Friday Night Magic isn't just a game night — it's the next battle in a never-ending campaign. Sharpening the deck. Refining the sideboard. Forging your strategy. When you show up with Infinity Vault gear, you're telling every opponent: I've been preparing for this. #ShowUpBattleReady #NeverStopForging"
 
 **Review Response**:
-> "Thank you for choosing Infinity Vault as part of your battle-ready arsenal! We're thrilled our gear is helping you show up prepared. May your draws be ever in your favor."
+> "Another warrior upgrading the arsenal! We're honored to be part of your ongoing campaign. The battle never ends — and with Infinity Vault in your kit, you'll be ready for whatever comes next. May your draws be ever in your favor."
 
 ### Off-Brand (Avoid This Style)
 
@@ -153,11 +168,12 @@ Authoritative ←───●─────→ Accessible: 7/10 (Authority on g
 
 | Driver | What It Means | How to Reference |
 |--------|--------------|------------------|
-| Mastery & Recognition | They want to be seen as skilled, dedicated | "Show up as the player you are" |
-| Story & Connection | Cards represent characters and moments | "Protect your story" |
-| Nostalgia & Escape | Gaming is an escape, wonder, excitement | "Capture the magic" |
-| Community & Belonging | Part of a tribe, gear signals belonging | "Join the ranks" |
-| Empowerment & Readiness | Confidence, preparation, psychological readiness | "Battle-ready" |
+| Mastery & Recognition | They want to be seen as skilled, dedicated | "Sharpen your edge — the grind never stops" |
+| Story & Connection | Cards represent characters and moments | "Every card is a weapon with a story" |
+| Nostalgia & Escape | Gaming is an escape, wonder, excitement | "The adventure calls again" |
+| Community & Belonging | Part of a tribe, gear signals belonging | "Join the ranks — train together" |
+| Empowerment & Readiness | Confidence, preparation, psychological readiness | "The battle is certain — stay ready" |
+| The Never-Ending Campaign | The next fight is always coming | "Never stop forging. Never stop preparing." |
 
 ---
 
@@ -170,9 +186,11 @@ Before publishing any content, ask:
 3. [ ] Does it focus on the customer becoming battle-ready?
 4. [ ] Does it avoid commodity language (storage, box, cheap)?
 5. [ ] Does it make the customer feel empowered, not inadequate?
-6. [ ] Does it reinforce the pre-game ritual?
-7. [ ] Would Blake (tournament player) resonate with this?
-8. [ ] Is it confident without being arrogant?
+6. [ ] Does it reinforce the never-ending campaign of preparation?
+7. [ ] Does it use forge/sharpen/upgrade/train language?
+8. [ ] Would Blake (tournament player) resonate with this?
+9. [ ] Is it confident without being arrogant?
+10. [ ] Does it imply an ongoing journey, not a one-time purchase?
 
 ---
 
@@ -180,16 +198,18 @@ Before publishing any content, ask:
 
 **Tagline**: Show Up Battle Ready
 
-**Positioning**: We don't sell storage. We create battle-ready equipment.
+**Core Truth**: The battle is certain. The preparation is never-ending.
 
-**Key Phrase**: "Your deck box is your warrior's footlocker. Your binder is your spellbook."
+**Positioning**: We don't sell storage. We forge battle-ready equipment for the never-ending campaign.
 
-**Brand Promise**: Feel confident, prepared, and respected.
+**Key Phrase**: "Sharpen the sword. Upgrade the shield. Add munitions to the arsenal."
 
-**Call to Action**: Show up battle ready.
+**Brand Promise**: The battle never stops — and we make sure you're always ready for the next one.
+
+**Call to Action**: Upgrade your arsenal.
 
 ---
 
 *"A brand is a promise. A good brand is a promise kept."*
 
-**Every piece of content keeps the promise: We make gamers feel battle-ready.**
+**Every piece of content keeps the promise: The battle is certain. The preparation is never-ending. We forge the gear that keeps warriors ready.**
